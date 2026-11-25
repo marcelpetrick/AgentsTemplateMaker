@@ -1,0 +1,9 @@
+Review bootstrap-5a758d1
+Revision 5a758d13e1fbd59a7cd4ff132998d0d3920eb2e2
+Requirements I14 and C19. Verify that the locked dependencies and shared local/CI script reproduce the lint, type, coverage and build gates.
+Prerequisites Git, Bash, Node 24.20.0 with npm, registry access, and Playwright browser libraries. Independent archive and --no-local clone runs used Manjaro x86-64 with the Ubuntu browser fallback; CI used Ubuntu 24.04 x86-64. No repository secrets.
+Reproduction Export this SHA into an empty directory (git archive <SHA> | tar -x), then run ./localPipeline.sh.
+Expected All gates pass and produce dist/index.html.
+Observed Prettier rejected staged eslint.config.mjs locally and on GitHub. Downstream checks were not reached. Independent reviewers reproduced the failure from clean contents.
+Disposition Corrected in 3377ffb92379bd7c4aeb7758b2d8806a18d00539. Future commits use an isolated export of the exact staged tree.
+Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45691141345

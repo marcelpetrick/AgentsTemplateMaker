@@ -1,0 +1,9 @@
+Review distribution-0a01355
+Revision 0a013556a08882ff1e14b6965ca25f8a58647b72
+Requirements I14, F01–F10, C21–C22 and the project-license requirement. Check clean-clone verification guide, UI screenshot and license distribution.
+Prerequisites Git/Bash, Node 24.20.0 and npm, Playwright Chromium, Firefox and WebKit with host libraries. Network access for Pages and GitHub Markdown. No secrets for local tests.
+Reproduction Extract git archive <SHA> into an empty directory and run ./localPipeline.sh. Run cmp LICENSE dist/LICENSE.txt. Inspect the PNG and rendered docs/architecture.md on GitHub. Compare F01–F10 and C01–C22 with the scope matrix.
+Expected 42 unit/integration tests and 10 browser journeys pass. Built license bytes equal source. Image shows the real UI, and both C4 diagrams render on GitHub.
+Observed Independent archive verified 42 Vitest and 10 browser tests with 483/489 executable lines (98.77%). Screenshot is 1440×1045 and shows v0.1.5, a 600-character setting and a visibly marked edit. LICENSE.txt SHA-256 8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903 equals tracked LICENSE. The dependency notice and both C4 SVG frames passed checks. All 32 acceptance IDs are accounted for.
+Disposition Documentation and distribution verification passed. Subsequent editor fix refreshes the screenshot to its released version.
+Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45693929572

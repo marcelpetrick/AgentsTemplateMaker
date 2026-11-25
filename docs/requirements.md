@@ -1,9 +1,44 @@
 # Requirements and verification
 
-The [vision](<../vision(20261125-195509).md>) defines the F and C identifiers. The
+The [vision](<../vision(20261125-195509).md>) defines the I, F, and C identifiers. M identifiers record later maintainer requests. The
 [decision record](decisions.md) explains the defaults and records counterexamples.
 The [implementation plan](../plan.md) follows the work from those decisions to
 release verification.
+
+## Maintainer inputs
+
+The vision's I identifiers record what the maintainer asked for. Each is
+traced to the F and C requirements that deliver it.
+
+| ID  | Input                                       | Delivered by                                                                                      | Status               |
+| --- | ------------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------- |
+| I1  | Start small, then expand                    | F01, F02, F09; released on GitHub Pages                                                           | Delivered            |
+| I2  | Compose in a real text field                | F03, F04, F05, F06                                                                                | Delivered            |
+| I3  | Accessible interface in the user's language | F07, F08                                                                                          | Delivered            |
+| I4  | Explain choices in context                  | F02 tooltips; every catalog rule has bilingual help                                               | Delivered            |
+| I5  | Decide how the agent operates               | C01–C03                                                                                           | Delivered            |
+| I6  | Describe how software is built              | C04, C05, the languages and frameworks rule, and the character set rule                           | Delivered            |
+| I7  | Make repository history useful              | C06–C09                                                                                           | Delivered            |
+| I8  | Make instructions readable                  | C10                                                                                               | Delivered            |
+| I9  | Connect goals, changes, and proof           | C06, C11                                                                                          | Delivered            |
+| I10 | Catch errors early                          | C12, including the review loop after each plan change and iteration                               | Delivered            |
+| I11 | Automate verification                       | C13–C16                                                                                           | Delivered            |
+| I12 | Learn from existing repositories later      | Deferred, see [decisions](decisions.md)                                                           | Deferred by decision |
+| I13 | Domain tools and dependencies               | C17, C18                                                                                          | Delivered            |
+| I14 | Rebuild from source                         | C19, the [local pipeline](../localPipeline.sh), [staged check](../scripts/checkStaged.sh), and CI | Delivered            |
+| I15 | Test first                                  | C20 and this project's own workflow                                                               | Delivered            |
+| I16 | Architecture diagrams                       | C21, C22 and the [C4 views](architecture.md)                                                      | Delivered            |
+
+## Later maintainer requests
+
+| ID  | Request (2026-11-25)                                                        | Verification                                               |
+| --- | --------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| M01 | Select all and Select none, globally and per category                       | [Integration tests](../test/app.test.ts)                   |
+| M02 | Document language follows the interface language until the draft is edited  | [Integration test](../test/app.test.ts)                    |
+| M03 | Word and character count below the draft                                    | [Unit](../test/stats.test.ts) and integration tests        |
+| M04 | Languages and frameworks, Unicode or ASCII, and review loops in the catalog | [Catalog](../test/catalog.test.ts) and integration tests   |
+| M05 | About section with author, contact, project, and libraries                  | [Unit](../test/about.test.ts) and integration tests        |
+| M06 | Pages deploys the tested build and smoke-checks the live site               | [Pages workflow](../.github/workflows/pages.yml) smoke job |
 
 ## Form and document
 

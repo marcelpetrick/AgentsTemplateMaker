@@ -64,7 +64,8 @@ Open the URL printed by Vite. A production build goes to `dist/`. Use
 ```
 
 The pipeline installs locked dependencies and pinned Playwright browsers, checks
-formatting, lint, CSS, HTML, unused code, duplication, shell syntax, and types, runs unit and browser integration
+formatting, lint, CSS, HTML, unused code, duplication, Mermaid diagrams, shell
+syntax, and types, runs unit and browser integration
 tests with a 95% project-wide executable-line coverage gate, runs mutation
 testing with an 85% score gate, builds the static
 site, and runs end-to-end tests against the built Pages subpath in Chromium,
@@ -80,8 +81,9 @@ need compatible Playwright browser libraries.
 - `npm run test:e2e` tests the production build. Run `npm run build` first.
   The terminal lists the browser results. Failure traces go to `test-results/`.
 - `npm run format` applies Prettier formatting.
-- `npm run lint:css`, `npm run lint:html`, `npm run knip`, and
-  `npm run duplicates` run the additional static analysis described in
+- `npm run lint:css`, `npm run lint:html`, `npm run knip`,
+  `npm run duplicates`, and `npm run diagrams` run the additional static
+  analysis described in
   [the quality gates](docs/quality.md).
 - `./scripts/checkStaged.sh` exports Git's staged tree to an isolated directory
   and runs the pipeline there. The script fails if the staged tree changes during

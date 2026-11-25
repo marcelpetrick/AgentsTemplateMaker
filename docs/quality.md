@@ -63,12 +63,13 @@ The TypeScript library target is ES2023 so code can use non-mutating
 
 ## Other static analysis
 
-| Command              | Tool                                       | Gate                                                                            |
-| -------------------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
-| `npm run lint:css`   | Stylelint with `stylelint-config-standard` | Any problem in `src/style.css`.                                                 |
-| `npm run lint:html`  | html-validate `recommended`                | Any problem in `index.html`.                                                    |
-| `npm run knip`       | Knip                                       | Any unused file, export, type, or dependency, or an unlisted dependency.        |
-| `npm run duplicates` | jscpd ([configuration](../.jscpd.json))    | More than 1% duplicated lines in `src/`, `test/`, and `e2e/` (50-token clones). |
+| Command              | Tool                                                        | Gate                                                                            |
+| -------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `npm run lint:css`   | Stylelint with `stylelint-config-standard`                  | Any problem in `src/style.css`.                                                 |
+| `npm run lint:html`  | html-validate `recommended`                                 | Any problem in `index.html`.                                                    |
+| `npm run knip`       | Knip                                                        | Any unused file, export, type, or dependency, or an unlisted dependency.        |
+| `npm run duplicates` | jscpd ([configuration](../.jscpd.json))                     | More than 1% duplicated lines in `src/`, `test/`, and `e2e/` (50-token clones). |
+| `npm run diagrams`   | Mermaid in Chromium ([script](../scripts/checkMermaid.mjs)) | Any Mermaid block in the project's Markdown that does not render.               |
 
 Exceptions:
 
@@ -98,6 +99,8 @@ modules with one responsibility each:
 | [`exportDraft.ts`](../src/exportDraft.ts)         | Clipboard copy and Markdown download.                        |
 | [`messages.ts`](../src/messages.ts)               | Localized status messages.                                   |
 | [`dom.ts`](../src/dom.ts)                         | Typed element lookup and creation.                           |
+| [`stats.ts`](../src/stats.ts)                     | Word and character count with a fallback for old browsers.   |
+| [`about.ts`](../src/about.ts)                     | Runtime libraries with versions and licenses for About.      |
 
 `src/draft.ts` keeps its public functions. Its long range-mapping callbacks
 became named steps such as `applyInsertion`, `applyReplacement`, and
@@ -116,8 +119,8 @@ Scope: the logic modules `src/draft.ts`, `src/catalog.ts`, `src/stats.ts`,
 out of scope. Their behavior is covered by the integration and end-to-end
 tests, and DOM mutants there are mostly equivalent or only visible as layout.
 
-The run fails below an 85% mutation score (`thresholds.break`). The baseline
-after adding tests for surviving mutants was 88.5%:
+The run fails below an 85% mutation score (`thresholds.break`). The score at
+release 0.3.0 is 88.6%:
 
 | File          | Score |
 | ------------- | ----- |
@@ -125,7 +128,7 @@ after adding tests for surviving mutants was 88.5%:
 | `draft.ts`    | 80.4% |
 | `editor.ts`   | 85.2% |
 | `messages.ts` | 100%  |
-| `stats.ts`    | 93.3% |
+| `stats.ts`    | 96.3% |
 
 `test/__snapshots__/catalog.md` holds the complete generated wording of every
 rule, option, and translation. Review its diff for each catalog change and

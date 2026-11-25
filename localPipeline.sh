@@ -18,6 +18,7 @@ npm run format:check
 npm run lint
 npm run lint:css
 npm run lint:html
+npm run diagrams
 npm run knip
 npm run duplicates
 npm run typecheck

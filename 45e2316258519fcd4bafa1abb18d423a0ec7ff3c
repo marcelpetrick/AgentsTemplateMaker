@@ -7,3 +7,5 @@ Expected Accessible description localizes and drops the warnings after detachmen
 Observed 31 unit/integration tests and 10 browser tests passed; 387/392 lines (98.72%). Three additional accessibility checks passed, one per browser. Light border ratios 3.655 (surface), 3.323 (hover), and 3.399 (page). Tested 62 localized discrete/default policy variants and separate free-form and percent settings. Initial hosted attempt failed to install Ubuntu prerequisites; rerun was requested.
 Disposition Accessibility findings fixed. Deployment followed a later verified main revision.
 Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45693247420
+
+Hosted rerun on a fresh Ubuntu runner passed all gates. The first attempt failed before tests while Ubuntu package indexes were unavailable.

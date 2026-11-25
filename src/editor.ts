@@ -8,11 +8,17 @@ import {
   Transaction,
   type ChangeSet,
 } from "@codemirror/state";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import {
+  defaultKeymap,
+  history,
+  historyKeymap,
+  invertedEffects,
+} from "@codemirror/commands";
 import { Decoration, EditorView, keymap } from "@codemirror/view";
 import { authoredRanges, editDraft, type Draft } from "./draft";
 
 const replaceDraft = StateEffect.define<Draft>();
+const restoreGenerated = StateEffect.define<readonly string[]>();
 const draftField = StateField.define<Draft>({
   create() {
     throw new Error("Initialize the editor with a draft");
@@ -21,7 +27,13 @@ const draftField = StateField.define<Draft>({
     const replacement = transaction.effects.find((effect) =>
       effect.is(replaceDraft),
     );
-    return replacement?.value ?? editDraft(draft, transaction.changes);
+    if (replacement) return replacement.value;
+    const restored = new Set(
+      transaction.effects.flatMap((effect) =>
+        effect.is(restoreGenerated) ? effect.value : [],
+      ),
+    );
+    return editDraft(draft, transaction.changes, restored);
   },
   provide(field) {
     return EditorView.decorations.from(field, (draft) => {
@@ -48,6 +60,21 @@ const draftField = StateField.define<Draft>({
   },
 });
 
+const authorshipHistory = invertedEffects.of((transaction) => {
+  if (!transaction.docChanged) return [];
+  const generated = new Set(
+    transaction.startState
+      .field(draftField)
+      .ranges.filter(({ edited }) => !edited)
+      .map(({ id }) => id),
+  );
+  const changed = transaction.state
+    .field(draftField)
+    .ranges.filter(({ id, edited }) => edited && generated.has(id))
+    .map(({ id }) => id);
+  return changed.length ? [restoreGenerated.of(changed)] : [];
+});
+
 export function openEditor(
   parent: HTMLElement,
   initial: Draft,
@@ -64,6 +91,7 @@ export function openEditor(
         EditorView.lineWrapping,
         keymap.of([...defaultKeymap, ...historyKeymap]),
         history(),
+        authorshipHistory,
         EditorView.updateListener.of((update) => {
           if (
             update.transactions.some(

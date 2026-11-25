@@ -89,6 +89,39 @@ describe("the Markdown draft", () => {
     expect(chunks(result.draft).join("")).toBe(copied + "\n\n\n\n" + copied);
   });
 
+  it("releases a typed prefix when the writer separates it into its own paragraph", () => {
+    const draft = base();
+    const { from, to } = draft.ranges[1];
+    const copied = draft.text.slice(from, to);
+    const written = edit(draft, from, from, copied);
+    const boundary = from + copied.length;
+    const firstEnter = edit(written, boundary, boundary, "\n");
+    const secondEnter = edit(firstEnter, boundary + 1, boundary + 1, "\n");
+
+    expect(written.ranges[1].edited).toBe(true);
+    expect(secondEnter.ranges[1].edited).toBe(false);
+    const removed = replaceRule(secondEnter, "a", undefined, order).draft;
+    expect(removed.text).toBe(
+      "# Guide\n\n" + copied + "\n\nSame opening. Second.",
+    );
+    expect(chunks(removed)).toEqual([copied + "\n\n"]);
+  });
+
+  it("releases a typed suffix after an unrelated control shifts the rule", () => {
+    const draft = base();
+    const { to } = draft.ranges[2];
+    const sentence = "Independent words";
+    const written = edit(draft, to, to, sentence);
+    const withoutFirst = replaceRule(written, "a", undefined, order).draft;
+    const boundary = withoutFirst.text.length - sentence.length;
+    const separated = edit(withoutFirst, boundary, boundary, "\n \n");
+
+    expect(separated.ranges[1].edited).toBe(false);
+    const removed = replaceRule(separated, "b", undefined, order).draft;
+    expect(removed.text).toBe("# Guide\n \n" + sentence);
+    expect(chunks(removed)).toEqual(["\n \n" + sentence]);
+  });
+
   it("preserves independently inserted content and its blank lines across settings changes", () => {
     const draft = base();
     const { from } = draft.ranges[2];
@@ -112,7 +145,7 @@ describe("the Markdown draft", () => {
     const draft = base();
     const { from, to } = draft.ranges[1];
     const edited = edit(draft, from, to, "Ich bin jetzt der Inhalt.");
-    expect(edited.ranges[1]).toEqual({
+    expect(edited.ranges[1]).toMatchObject({
       id: "a",
       from,
       to: from + "Ich bin jetzt der Inhalt.".length,
@@ -128,7 +161,12 @@ describe("the Markdown draft", () => {
     const draft = base();
     const { from, to } = draft.ranges[1];
     const edited = edit(draft, from, to, "");
-    expect(edited.ranges[1]).toEqual({ id: "a", from, to: from, edited: true });
+    expect(edited.ranges[1]).toMatchObject({
+      id: "a",
+      from,
+      to: from,
+      edited: true,
+    });
     expect(replaceRule(edited, "a", undefined, order).draft.text).toBe(
       edited.text,
     );
@@ -147,6 +185,32 @@ describe("the Markdown draft", () => {
       edited.text,
     );
   });
+
+  it.each(["a", "b"])(
+    "treats text below a single line break in rule %s as a continuation",
+    (id) => {
+      const draft = base();
+      const range = draft.ranges.find((candidate) => candidate.id === id)!;
+      const line = edit(draft, range.to, range.to, "\n");
+      const indented = edit(line, range.to + 1, range.to + 1, " ");
+      const continued = edit(
+        indented,
+        range.to + 2,
+        range.to + 2,
+        "A continuation.",
+      );
+
+      expect(
+        continued.ranges.find((candidate) => candidate.id === id)?.edited,
+      ).toBe(true);
+      expect(chunks(continued)).toEqual([
+        draft.text.slice(range.from, range.to) + "\n A continuation.",
+      ]);
+      const removed = replaceRule(continued, id, undefined, order).draft;
+      expect(removed.text).toBe(continued.text);
+      expect(chunks(removed)).toEqual(chunks(continued));
+    },
+  );
 
   it("lets writers start a new paragraph at a generated rule boundary", () => {
     const draft = base();

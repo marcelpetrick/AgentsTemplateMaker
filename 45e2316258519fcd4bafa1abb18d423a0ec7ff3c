@@ -1,0 +1,9 @@
+Review accessibility-45e2316
+Revision 45e2316258519fcd4bafa1abb18d423a0ec7ff3c
+Requirements F02, F04–F08, C01–C22. Verify an edited checkbox's accessible description, light theme contrast, and every policy variant through export and removal.
+Prerequisites Node 24.20.0, npm, Git/Bash, Playwright Chromium, Firefox and WebKit with native libraries. Local Linux Manjaro x86-64 uses the Ubuntu WebKit compatibility libraries. CI Ubuntu 24.04. No secrets.
+Reproduction Unpack git archive <SHA>, run ./localPipeline.sh. Change a generated rule and compare the checkbox accessible description with the tooltip, edited label and uncheck warning. Switch UI language, then uncheck and compare the unchanged draft. Compare control borders to each background using sRGB relative luminance.
+Expected Accessible description localizes and drops the warnings after detachment. Light borders exceed 3:1. Each variant copies accurately and unchecking removes only its generated occurrence.
+Observed 31 unit/integration tests and 10 browser tests passed; 387/392 lines (98.72%). Three additional accessibility checks passed, one per browser. Light border ratios 3.655 (surface), 3.323 (hover), and 3.399 (page). Tested 62 localized discrete/default policy variants and separate free-form and percent settings. Initial hosted attempt failed to install Ubuntu prerequisites; rerun was requested.
+Disposition Accessibility findings fixed. Deployment followed a later verified main revision.
+Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45693247420

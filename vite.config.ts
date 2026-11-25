@@ -1,12 +1,37 @@
 // SPDX-FileCopyrightText: 2026 Marcel Petrick
 // SPDX-License-Identifier: GPL-3.0-or-later
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { defineConfig } from "vitest/config";
 import { playwright } from "@vitest/browser-playwright";
 
+// The commit this build comes from, so a deployment check can name it.
+function revision(): string {
+  if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "unknown";
+  }
+}
+
 export default defineConfig({
   base: "./",
   plugins: [
+    {
+      name: "revision",
+      apply: "build",
+      transformIndexHtml: () => [
+        {
+          tag: "meta",
+          attrs: { name: "revision", content: revision() },
+          injectTo: "head",
+        },
+      ],
+    },
     {
       name: "project-license",
       apply: "build",

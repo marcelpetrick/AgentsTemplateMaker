@@ -22,15 +22,16 @@ export interface Draft {
   readonly separators: readonly Span[];
 }
 
-interface DeletedText {
+interface ReplacedText {
   readonly text: string;
+  readonly replacement: string;
   readonly ranges: readonly (Span & { id: string })[];
   readonly separators: readonly Span[];
 }
 
 export interface AuthorshipUndo {
   readonly ids: readonly string[];
-  readonly deletions: readonly DeletedText[];
+  readonly replacements: readonly ReplacedText[];
 }
 
 const separator = "\n\n";
@@ -163,9 +164,9 @@ export function captureAuthorshipUndo(
   );
   if (!newlyEdited.length) return undefined;
 
-  const deletions: DeletedText[] = [];
+  const replacements: ReplacedText[] = [];
   changes.iterChanges((from, to, _newFrom, _newTo, insert) => {
-    if (from === to || insert.length) return;
+    if (from === to) return;
     const contained = (span: Span) => span.from >= from && span.to <= to;
     const relative = (span: Span) => ({
       from: span.from - from,
@@ -175,51 +176,56 @@ export function captureAuthorshipUndo(
       .filter(contained)
       .map((range) => ({ id: range.id, ...relative(range) }));
     if (!ranges.length) return;
-    deletions.push({
+    replacements.push({
       text: before.text.slice(from, to),
+      replacement: insert.toString(),
       ranges,
       separators: before.separators.filter(contained).map(relative),
     });
   }, true);
-  return { ids: newlyEdited.map(({ id }) => id), deletions };
+  return { ids: newlyEdited.map(({ id }) => id), replacements };
 }
 
-function restoredDeletions(
+function restoredReplacements(
   draft: Draft,
   changes: ChangeSet,
-  deletions: readonly DeletedText[],
+  replacements: readonly ReplacedText[],
 ) {
   const ranges = new Map<string, Span>();
   const separators: Span[] = [];
-  const insertionStarts = new Set<number>();
-  if (!deletions.length) return { ranges, separators, insertionStarts };
+  const changeStarts = new Set<number>();
+  if (!replacements.length) return { ranges, separators, changeStarts };
 
   changes.iterChanges((from, to, newFrom, _newTo, insert) => {
-    if (from !== to) return;
     const inserted = insert.toString();
-    for (const deletion of deletions) {
-      if (deletion.text !== inserted) continue;
-      const candidates = deletion.ranges.filter((prior) =>
-        draft.ranges.some(
-          (range) =>
-            range.id === prior.id &&
-            range.from === from &&
-            range.to === from &&
-            range.generatedText === inserted.slice(prior.from, prior.to),
-        ),
-      );
+    const removed = draft.text.slice(from, to);
+    for (const replacement of replacements) {
+      if (replacement.text !== inserted || replacement.replacement !== removed)
+        continue;
+      const candidates = replacement.ranges.filter((prior) => {
+        const range = draft.ranges.find(({ id }) => id === prior.id);
+        if (!range) return false;
+        const matchesPosition =
+          range.from === range.to
+            ? range.from === from || range.from === to
+            : range.from === from && range.to === to;
+        return (
+          matchesPosition &&
+          range.generatedText === inserted.slice(prior.from, prior.to)
+        );
+      });
       if (!candidates.length) continue;
       const offset = (span: Span) => ({
         from: newFrom + span.from,
         to: newFrom + span.to,
       });
       for (const prior of candidates) ranges.set(prior.id, offset(prior));
-      separators.push(...deletion.separators.map(offset));
-      insertionStarts.add(from);
+      separators.push(...replacement.separators.map(offset));
+      changeStarts.add(from);
       break;
     }
   }, true);
-  return { ranges, separators, insertionStarts };
+  return { ranges, separators, changeStarts };
 }
 
 function manualRanges(
@@ -227,7 +233,7 @@ function manualRanges(
   changes: ChangeSet,
   text: string,
   restoreGenerated: ReadonlySet<string>,
-  restored: ReturnType<typeof restoredDeletions>,
+  restored: ReturnType<typeof restoredReplacements>,
 ): RuleRange[] {
   const mapped = draft.ranges.map((range) => mapRange(range, changes));
   const originals = draft.ranges.map((range) =>
@@ -235,13 +241,13 @@ function manualRanges(
   );
 
   changes.iterChanges((from, to, newFrom, newTo, insert) => {
+    if (restored.changeStarts.has(from)) return;
     for (const [index, original] of originals.entries()) {
       if (original && from < original.to && to > original.from) {
         originals[index] = undefined;
       }
     }
     if (from === to) {
-      if (restored.insertionStarts.has(from)) return;
       const inserted = insert.toString();
       // An inverse insertion for a deleted rule belongs to that rule even
       // when a neighboring paragraph now touches the zero-width anchor.
@@ -333,10 +339,10 @@ export function editDraft(
   if (changes.empty) return draft;
   const text = applyText(draft, changes);
   const restoreGenerated = new Set(authorshipUndo.flatMap(({ ids }) => ids));
-  const restored = restoredDeletions(
+  const restored = restoredReplacements(
     draft,
     changes,
-    authorshipUndo.flatMap(({ deletions }) => deletions),
+    authorshipUndo.flatMap(({ replacements }) => replacements),
   );
   return {
     text,

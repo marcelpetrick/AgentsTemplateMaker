@@ -98,6 +98,25 @@ describe("undo restores generated rule authorship", () => {
     expect(unchecked.draft.text).toBe("# Guide\n\n" + second + "\n\n" + first);
   });
 
+  it("restores generated rules and separators after replacing the whole draft", () => {
+    const { initial, editor } = fixture();
+    editor.view.dispatch({
+      changes: {
+        from: 0,
+        to: initial.text.length,
+        insert: "A handwritten replacement.",
+      },
+      annotations: isolateHistory.of("full"),
+    });
+
+    expect(undo(editor.view)).toBe(true);
+    expect(editor.draft.text).toBe(initial.text);
+    expect(authoredRanges(editor.draft)).toEqual([]);
+    expect(
+      replaceRule(editor.draft, "first", undefined, order).draft.text,
+    ).toBe("# Guide\n\n" + second);
+  });
+
   it("restores a deleted rule once when it touches another generated rule", () => {
     const { initial, editor } = fixture();
     const { from, to } = initial.ranges[2];

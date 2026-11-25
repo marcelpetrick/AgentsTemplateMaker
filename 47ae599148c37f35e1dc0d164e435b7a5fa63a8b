@@ -1,0 +1,10 @@
+Review workspace-47ae599
+Revision 47ae599148c37f35e1dc0d164e435b7a5fa63a8b
+Requirements F01–F10 and I14. Verify the production build at the Pages subpath, default choices, immediate toggles, confirmation and export.
+Prerequisites Git/Bash and Node 24.20.0 with npm, registry/browser downloads, pinned Chromium/Firefox/WebKit system libraries. Local Manjaro x86-64 used isolated Ubuntu WebKit compatibility libraries. CI Ubuntu 24.04 x86-64. No project secrets.
+Reproduction Export SHA with git archive, unpack into an empty directory and run ./localPipeline.sh. Hover Repository practices, set 600, type in paragraph, uncheck and compare downloaded Markdown. Try repeated Escape and Cancel on edited setting and language changes. Check generated assets under /AgentsTemplateMaker/.
+Expected All gates pass and controls preserve current editor contents. Undo of an inline edit restores an untouched rule.
+Observed Independent run passed all 30 unit and integration tests and 10 E2E across three browser engines. 384/392 executable lines (97.95%). Hosted checks passed. CSS/JS and index loaded at the Pages subpath. Pointer clicks and hover, keyboard/Touch and repeated dialog rollbacks passed. Undo reverted text but left the pristine paragraph marked edited, so unchecking left it in the draft. An edited checkbox also lacked the visible edit hint in its accessible description, and light control borders scored 2.81:1 on white.
+Disposition Editor undo provenance and accessibility findings assigned corrective changes. Hosted build and core workflows independently reproduced.
+Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45692279521
+Pages https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45692534580

@@ -24,6 +24,11 @@ export const strings = {
         "These rules contain your edits. Applying the change keeps that text as written.",
       cancel: "Cancel",
       apply: "Apply change",
+      about: "About",
+      aboutBy: "Made by",
+      aboutProject: "Project",
+      aboutLibraries: "Libraries used",
+      aboutNotices: "All bundled licenses",
     },
     keptRule: (label: string) =>
       `Kept your edited text for “${label}” as custom text.`,
@@ -73,6 +78,11 @@ export const strings = {
         "Du hast diese Regeln bearbeitet. Wenn du die Änderung anwendest, bleibt dein Text erhalten.",
       cancel: "Abbrechen",
       apply: "Änderung anwenden",
+      about: "Über",
+      aboutBy: "Erstellt von",
+      aboutProject: "Projekt",
+      aboutLibraries: "Verwendete Bibliotheken",
+      aboutNotices: "Alle enthaltenen Lizenzen",
     },
     keptRule: (label: string) =>
       `Dein bearbeiteter Text für „${label}“ bleibt als eigene Anweisung erhalten.`,

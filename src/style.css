@@ -673,6 +673,27 @@ dialog .document-actions {
   font-size: 0.82rem;
 }
 
+.about {
+  flex: 1 1 100%;
+  order: 1;
+}
+
+.about summary {
+  width: fit-content;
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.about h2 {
+  margin: 0.6rem 0 0.2rem;
+  font-size: 0.82rem;
+}
+
+.about p,
+.about ul {
+  margin: 0.35rem 0;
+}
+
 .site-footer a {
   color: inherit;
   text-underline-offset: 0.2em;

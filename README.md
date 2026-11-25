@@ -16,7 +16,7 @@ instructions intact. The draft lives in your open browser tab.
 
 **[Open Agent Maker on GitHub Pages](https://marcelpetrick.github.io/AgentsTemplateMaker/)**
 
-**Author** Marcel Petrick · **License** [GPL v3 or later](LICENSE) · Developed with AI assistance.
+**Author** Marcel Petrick ([mail@marcelpetrick.it](mailto:mail@marcelpetrick.it)) · **Runtime library** [CodeMirror 6](https://codemirror.net/) (MIT) · **License** [GPL v3 or later](LICENSE) · Developed with AI assistance.
 
 ![Agent Maker with repository rules on the left, the Markdown editor on the right, and a project-specific edit underlined in green](docs/interface.png)
 
@@ -27,14 +27,23 @@ instructions intact. The draft lives in your open browser tab.
 2. Pick your project rules. Conventional atomic commits, a strict 300-character
    commit-message limit, credential hygiene, and decision traceability are
    selected by default. The message limit also offers 600 characters.
+   **Select all** and **Select none** act on every rule; **All** and **None**
+   inside a category act on that category only. Languages and frameworks
+   offer common choices such as Python, C++, Qt, LVGL, TouchGFX, ESP-IDF,
+   FreeRTOS, TypeScript, and Rust. The character set rule chooses Unicode or
+   ASCII only.
 3. Type or paste anywhere in the Markdown editor. Your edits are underlined.
    Unchecking an edited rule keeps that text as a custom instruction. A
    setting or document language change that affects edited rules lists the
    affected paragraphs and gives you a chance to cancel.
-4. Choose English or German separately for the interface and the document.
-   English is recommended for repository instructions. The light and dark
+4. Choose English or German for the interface. While you have not edited the
+   draft, the document follows that language. After an edit, the document
+   language changes only when you pick it yourself. English is recommended
+   for repository instructions. The light and dark
    theme controls preserve the current draft and editor selection.
-5. **Copy** or **Download** the current Markdown, then place it in your project
+5. The footer below the editor shows the draft's word and character count.
+   **About** names the author, the project, and the bundled libraries.
+6. **Copy** or **Download** the current Markdown, then place it in your project
    as `AGENTS.md`. Export before closing the tab to keep a copy.
 
 ## Local development

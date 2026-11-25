@@ -301,6 +301,32 @@ describe("workspace", () => {
     );
   });
 
+  it("names the author, the project, and the bundled libraries in About", () => {
+    const about = element("about");
+    expect(about.querySelector("summary")!.textContent).toBe("About");
+    const mail = about.querySelector<HTMLAnchorElement>('a[href^="mailto:"]')!;
+    expect(mail.href).toBe("mailto:mail@marcelpetrick.it");
+    expect(about.textContent).toContain("Marcel Petrick");
+    expect(
+      about.querySelector<HTMLAnchorElement>(
+        'a[href="https://github.com/marcelpetrick/AgentsTemplateMaker"]',
+      ),
+    ).not.toBeNull();
+    const libraries = [...about.querySelectorAll("#about-libraries li")].map(
+      (item) => item.textContent,
+    );
+    expect(libraries).toEqual([
+      "@codemirror/commands 6.11.2 · MIT",
+      "@codemirror/state 6.7.6 · MIT",
+      "@codemirror/view 6.44.0 · MIT",
+    ]);
+    select("ui-language", "de");
+    expect(about.querySelector("summary")!.textContent).toBe("Über");
+    expect(element("about-libraries-heading").textContent).toBe(
+      "Verwendete Bibliotheken",
+    );
+  });
+
   it("selects all rules at once and clears them while keeping edited text", () => {
     edit(paragraph("credentials"), " eigene ");
     element("select-all").click();

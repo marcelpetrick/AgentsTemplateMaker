@@ -11,6 +11,7 @@ import {
 } from "./catalog";
 import { authoredRanges, createDraft, replaceRule } from "./draft";
 import { openEditor } from "./editor";
+import { libraries } from "./about";
 import { countText } from "./stats";
 import { strings } from "./strings";
 import { version } from "./version";
@@ -502,6 +503,8 @@ export function mount() {
     setMessage("downloaded");
   });
   element("version").textContent = `v${version}`;
+  for (const library of libraries())
+    append(element("about-libraries"), "li").textContent = library;
   renderLanguage();
   return editor.view;
 }

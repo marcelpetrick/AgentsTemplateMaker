@@ -494,8 +494,8 @@ export const rules: readonly Rule[] = [
       defaultSelected: true,
     },
     localized(
-      "Record new user inputs and decisions in version-controlled Markdown under the project’s documentation directory. Link the intended outcome and decision rationale to a stable requirement, its implementation, an acceptance check, and the evidence. Use Git for the timestamp and make the checks reproducible from a clean checkout.",
-      "Halte neue Nutzervorgaben und Entscheidungen in versioniertem Markdown im Dokumentationsverzeichnis fest. Verknüpfe das gewünschte Ergebnis und die Begründung mit einer stabilen Anforderungskennung, der Umsetzung, einer Abnahmeprüfung und ihrem Nachweis. Nutze Git für den Zeitstempel und mache die Prüfungen aus einem sauberen Checkout nachvollziehbar.",
+      "Record new user inputs and decisions in version-controlled Markdown under the project’s documentation directory. Link the intended outcome and decision rationale to a stable requirement, its implementation, an acceptance check, and the evidence. Use Git for the timestamp and make the checks reproducible from a clean checkout. Name the affected requirement ID in each commit message that implements or changes it.",
+      "Halte neue Nutzervorgaben und Entscheidungen in versioniertem Markdown im Dokumentationsverzeichnis fest. Verknüpfe das gewünschte Ergebnis und die Begründung mit einer stabilen Anforderungskennung, der Umsetzung, einer Abnahmeprüfung und ihrem Nachweis. Nutze Git für den Zeitstempel und mache die Prüfungen aus einem sauberen Checkout nachvollziehbar. Nenne in jeder Commit-Nachricht, die eine Anforderung umsetzt oder ändert, deren Kennung.",
     ),
   ),
   fixed(

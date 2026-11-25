@@ -82,7 +82,7 @@ describe("instruction catalog", () => {
       /files.*messages.*examples.*logs.*artifacts.*placeholders/,
     );
     expect(paragraph("traceability", "en")).toMatch(
-      /Markdown.*rationale.*requirement.*implementation.*acceptance.*evidence/,
+      /Markdown.*rationale.*requirement.*implementation.*acceptance.*evidence.*requirement ID.*commit message/,
     );
   });
 

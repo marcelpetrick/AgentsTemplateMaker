@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { isolateHistory, redo, undo } from "@codemirror/commands";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { authoredRanges, createDraft, replaceRule } from "../src/draft";
 import { openEditor } from "../src/editor";
 
@@ -10,14 +10,14 @@ const first = "First generated rule.";
 const second = "Second generated rule.";
 const order = ["title", "earlier", "first", "second"];
 
-function fixture() {
+function fixture(onDraftChange: () => void = () => {}) {
   const host = document.createElement("div");
   document.body.append(host);
   const initial = createDraft("# Guide", [
     { id: "first", text: first },
     { id: "second", text: second },
   ]);
-  const editor = openEditor(host, initial, () => {});
+  const editor = openEditor(host, initial, onDraftChange);
   cleanups.push(() => {
     editor.view.destroy();
     host.remove();
@@ -184,5 +184,63 @@ describe("undo restores generated rule authorship", () => {
     expect(editor.draft.text).toBe(initial.text);
     expect(editor.draft.ranges.some(({ id }) => id === "first")).toBe(false);
     expect(authoredRanges(editor.draft)).toEqual([{ from, to }]);
+  });
+});
+
+const lineTexts = (view: { dom: HTMLElement }, selector: string) =>
+  [...view.dom.querySelectorAll(selector)].map((line) => line.textContent);
+
+describe("editor presentation", () => {
+  it("underlines authored text and marks the first line of each authored paragraph", () => {
+    const { initial, editor } = fixture();
+    const end = initial.text.length;
+    editor.view.dispatch({
+      changes: [
+        { from: initial.ranges[1].from + 5, insert: "X" },
+        { from: end, insert: "\n\nMine.\nStill mine.\n \n\n  Indented." },
+      ],
+    });
+    expect(lineTexts(editor.view, ".authored-line")).toEqual([
+      "FirstX generated rule.",
+      "Mine.",
+      "  Indented.",
+    ]);
+    expect(lineTexts(editor.view, ".authored-text")).toEqual([
+      "FirstX generated rule.",
+      "Mine.",
+      "Still mine.",
+      " ",
+      "  Indented.",
+    ]);
+  });
+
+  it("marks no line for whitespace-only authored text", () => {
+    const { initial, editor } = fixture();
+    const end = initial.text.length;
+    editor.view.dispatch({ changes: { from: end, insert: "\n\n  " } });
+    expect(lineTexts(editor.view, ".authored-line")).toEqual([]);
+  });
+
+  it("labels the editable content for assistive technology", () => {
+    const { editor } = fixture();
+    editor.describe("Markdown editor", "de");
+    const content = editor.view.contentDOM;
+    expect(content.getAttribute("aria-label")).toBe("Markdown editor");
+    expect(content.getAttribute("aria-describedby")).toBe(
+      "editor-help edit-warning",
+    );
+    expect(content.getAttribute("lang")).toBe("de");
+  });
+
+  it("reports user edits but not form replacements or reconfiguration", () => {
+    const onDraftChange = vi.fn();
+    const { editor } = fixture(onDraftChange);
+    editor.describe("Label", "en");
+    expect(onDraftChange).not.toHaveBeenCalled();
+    const added = replaceRule(editor.draft, "earlier", "Earlier.", order);
+    editor.set(added.draft, added.changes);
+    expect(onDraftChange).not.toHaveBeenCalled();
+    editor.view.dispatch({ changes: { from: 0, insert: "X" } });
+    expect(onDraftChange).toHaveBeenCalledTimes(1);
   });
 });

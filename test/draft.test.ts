@@ -299,3 +299,156 @@ describe("the Markdown draft", () => {
     expect(chunks(inserted)).toEqual(["An introduction.\n\n", "Scond."]);
   });
 });
+
+describe("rule boundaries", () => {
+  it("does not claim a single line break typed after a rule", () => {
+    const draft = base();
+    const { to } = draft.ranges[2];
+    const line = edit(draft, to, to, "\n");
+    expect(line.ranges[2]).toEqual({
+      id: "b",
+      from: to - 21,
+      to,
+      edited: false,
+    });
+    expect(chunks(line)).toEqual(["\n"]);
+  });
+
+  it("continues a rule with text pasted on its next line", () => {
+    const draft = base();
+    const { from, to } = draft.ranges[2];
+    const pasted = edit(draft, to, to, "\nMore.");
+    expect(pasted.ranges[2]).toMatchObject({ from, to: to + 6, edited: true });
+    expect(chunks(pasted)).toEqual(["Same opening. Second.\nMore."]);
+  });
+
+  it("continues a rule with text typed on its next line without indentation", () => {
+    const draft = base();
+    const { from, to } = draft.ranges[2];
+    const line = edit(draft, to, to, "\n");
+    const continued = edit(line, to + 1, to + 1, "More.");
+    expect(continued.ranges[2]).toMatchObject({
+      from,
+      to: to + 6,
+      edited: true,
+    });
+  });
+
+  it("keeps only the authored words on the rule's line when a prefix has paragraphs", () => {
+    const draft = base();
+    const { from, to } = draft.ranges[1];
+    const prefix = "One.\n\n\nTwo.\n\nLead ";
+    const written = edit(draft, from, from, prefix);
+    expect(written.ranges[1]).toMatchObject({
+      from: from + prefix.length - "Lead ".length,
+      to: to + prefix.length,
+      edited: true,
+    });
+    expect(chunks(written)).toEqual([prefix + "Same opening. First."]);
+  });
+
+  it("releases the words after a blank line typed inside an authored suffix", () => {
+    const draft = base();
+    const { from, to } = draft.ranges[1];
+    const typed = edit(draft, to, to, " Tail more.");
+    const split = edit(typed, to + 5, to + 5, "\n\n");
+    expect(split.ranges[1]).toMatchObject({ from, to: to + 5, edited: true });
+    expect(chunks(split)).toEqual(["Same opening. First. Tail\n\n more."]);
+  });
+
+  it("records generated text only on edited rules", () => {
+    const draft = base();
+    const { to } = draft.ranges[1];
+    const edited = edit(draft, to, to, "!");
+    expect(edited.ranges[1].generatedText).toBe("Same opening. First.");
+    expect(edited.ranges[2]).toEqual({
+      ...draft.ranges[2],
+      from: draft.ranges[2].from + 1,
+      to: draft.ranges[2].to + 1,
+    });
+    expect(edited.ranges[0]).toEqual(draft.ranges[0]);
+  });
+});
+
+describe("form changes on edited rules", () => {
+  const editedBase = () => {
+    const draft = base();
+    const { to } = draft.ranges[1];
+    return edit(draft, to, to, " Mine.");
+  };
+
+  it("leaves the draft unchanged when the generated wording stays the same", () => {
+    const edited = editedBase();
+    const result = replaceRule(edited, "a", "Same opening. First.", order);
+    expect(result.draft).toBe(edited);
+    expect(result.changes.empty).toBe(true);
+  });
+
+  it("keeps the authored text and records the new generated wording", () => {
+    const edited = editedBase();
+    const { from, to } = edited.ranges[1];
+    const result = replaceRule(edited, "a", "Updated wording.", order);
+    expect(result.changes.empty).toBe(true);
+    expect(result.draft.text).toBe(edited.text);
+    expect(result.draft.ranges[1]).toEqual({
+      id: "a",
+      from,
+      to,
+      edited: true,
+      generatedText: "Updated wording.",
+    });
+  });
+});
+
+describe("rule insertion", () => {
+  it("appends a rule after the last paragraph with one generated separator", () => {
+    const draft = base();
+    const appended = replaceRule(draft, "c", "Third.", order).draft;
+    const end = draft.text.length;
+    expect(appended.text).toBe(draft.text + "\n\nThird.");
+    expect(appended.separators).toEqual([
+      ...draft.separators,
+      { from: end, to: end + 2 },
+    ]);
+    expect(appended.ranges.at(-1)).toEqual({
+      id: "c",
+      from: end + 2,
+      to: end + 8,
+      edited: false,
+    });
+  });
+
+  it("adds a single line break after authored text that ends with one", () => {
+    const draft = base();
+    const end = draft.text.length;
+    const line = edit(draft, end, end, "\n");
+    const appended = replaceRule(line, "c", "Third.", order).draft;
+    expect(appended.text).toBe(draft.text + "\n\nThird.");
+    expect(appended.separators.at(-1)).toEqual({ from: end + 1, to: end + 2 });
+  });
+
+  it("adds no separator after authored text that ends with a blank line", () => {
+    const draft = base();
+    const end = draft.text.length;
+    const blank = edit(draft, end, end, "\n \n");
+    const appended = replaceRule(blank, "c", "Third.", order).draft;
+    expect(appended.text).toBe(draft.text + "\n \nThird.");
+    expect(appended.separators).toEqual(draft.separators);
+  });
+
+  it("appends a rule that is missing from the catalog order", () => {
+    const draft = base();
+    const appended = replaceRule(draft, "unknown", "Extra.", order).draft;
+    expect(appended.text).toBe(draft.text + "\n\nExtra.");
+  });
+
+  it("inserts before the next rule in catalog order with a trailing separator", () => {
+    const draft = createDraft("# Guide", [{ id: "b", text: "Second." }]);
+    const inserted = replaceRule(draft, "a", "First.", order).draft;
+    expect(inserted.text).toBe("# Guide\n\nFirst.\n\nSecond.");
+    expect(inserted.separators).toEqual([
+      { from: 7, to: 9 },
+      { from: 15, to: 17 },
+    ]);
+  });
+});

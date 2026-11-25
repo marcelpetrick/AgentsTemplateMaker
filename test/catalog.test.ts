@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { describe, expect, it } from "vitest";
-import { categories, rules, type Language } from "../src/catalog";
+import { categories, rules, type Language, type Rule } from "../src/catalog";
 import { ruleValues } from "./ruleValues";
 
 function paragraph(id: string, language: Language, value = "") {
@@ -217,5 +217,48 @@ describe("instruction catalog", () => {
     expect(paragraph("mutation", "en")).toMatch(
       /surviving.*missing assertions.*equivalent/,
     );
+  });
+});
+
+function ruleText(rule: Rule) {
+  const setting = rule.setting;
+  const lines = [
+    `## ${rule.id}: ${rule.label.en} / ${rule.label.de}`,
+    `Help (en): ${rule.help.en}`,
+    `Help (de): ${rule.help.de}`,
+  ];
+  if (setting) {
+    lines.push(
+      `Setting (${setting.kind}, initial "${setting.initial}"): ${setting.label.en} / ${setting.label.de}`,
+      ...(setting.options ?? []).map(
+        ({ value, label }) => `- ${value}: ${label.en} / ${label.de}`,
+      ),
+    );
+  }
+  for (const value of ruleValues(rule)) {
+    lines.push(
+      `### Value "${value}" (en)\n\n${rule.paragraph("en", value)}`,
+      `### Value "${value}" (de)\n\n${rule.paragraph("de", value)}`,
+    );
+  }
+  return lines;
+}
+
+// The complete generated wording, reviewable in version control.
+function catalogText() {
+  const lines: string[] = [];
+  for (const category of categories) {
+    lines.push(`# ${category.id}: ${category.label.en} / ${category.label.de}`);
+    const members = rules.filter((rule) => rule.category === category.id);
+    for (const rule of members) lines.push(...ruleText(rule));
+  }
+  return lines.join("\n\n") + "\n";
+}
+
+describe("catalog wording", () => {
+  // After an intended wording change, review and update the snapshot with
+  // `npx vitest run -u`.
+  it("matches the reviewed text of every rule, option, and translation", async () => {
+    await expect(catalogText()).toMatchFileSnapshot("__snapshots__/catalog.md");
   });
 });

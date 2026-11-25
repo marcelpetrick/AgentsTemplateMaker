@@ -80,3 +80,40 @@ modules with one responsibility each:
 `src/draft.ts` keeps its public functions. Its long range-mapping callbacks
 became named steps such as `applyInsertion`, `applyReplacement`, and
 `resolveRange`, which share one `Edit` record instead of five parameters.
+
+## Mutation testing
+
+`npm run mutation` runs [StrykerJS](https://stryker-mutator.io/) with the Vitest
+runner. The [configuration](../stryker.config.mjs) reuses `vite.config.ts`, so
+the mutants run against the same Chromium browser-mode suite as `npm test`. The
+Stryker Vitest runner supports browser mode at the pinned versions, so the
+project needs no separate Node or DOM-emulation test setup.
+
+Scope: the logic modules `src/draft.ts`, `src/catalog.ts`, `src/stats.ts`,
+`src/editor.ts`, and `src/messages.ts`. The form and DOM wiring modules stay
+out of scope. Their behavior is covered by the integration and end-to-end
+tests, and DOM mutants there are mostly equivalent or only visible as layout.
+
+The run fails below an 85% mutation score (`thresholds.break`). The baseline
+after adding tests for surviving mutants was 88.5%:
+
+| File          | Score |
+| ------------- | ----- |
+| `catalog.ts`  | 99.5% |
+| `draft.ts`    | 80.4% |
+| `editor.ts`   | 85.2% |
+| `messages.ts` | 100%  |
+| `stats.ts`    | 93.3% |
+
+`test/__snapshots__/catalog.md` holds the complete generated wording of every
+rule, option, and translation. Review its diff for each catalog change and
+update it with `npx vitest run -u`. It turns each changed string into a
+reviewed text change instead of a surviving mutant.
+
+Known survivors are mostly equivalent mutants. Examples are `?? ""` fallbacks
+after `split`, which always returns an element, and range checks that
+`releaseSeparateParagraphs` resets for untouched rules. Investigate a new
+survivor before raising or lowering the threshold.
+
+A full run takes about 75 seconds on a developer machine, so the pipeline runs
+it completely on every check. Stryker writes `reports/mutation/index.html`.

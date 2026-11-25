@@ -7,3 +7,6 @@ test-results/
 vision*.md
 LICENSE
 .vitest/
+reports/
+.stryker-tmp/
+test/__snapshots__/

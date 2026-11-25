@@ -1,6 +1,6 @@
 {
   "name": "agents-template-maker",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "private": true,
   "type": "module",
   "license": "GPL-3.0-or-later",
@@ -17,7 +17,8 @@
     "typecheck": "tsc",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "mutation": "stryker run"
   },
   "dependencies": {
     "@codemirror/commands": "6.11.2",
@@ -27,6 +28,8 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.65.1",
+    "@stryker-mutator/core": "10.1.1",
+    "@stryker-mutator/vitest-runner": "10.1.1",
     "@types/node": "24.13.3",
     "@vitest/browser-playwright": "5.1.2",
     "@vitest/coverage-v8": "5.1.2",

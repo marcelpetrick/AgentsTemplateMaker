@@ -18,5 +18,6 @@ npm run format:check
 npm run lint
 npm run typecheck
 npm run coverage
+npm run mutation
 npm run build
 npm run test:e2e

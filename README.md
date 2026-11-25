@@ -65,7 +65,8 @@ Open the URL printed by Vite. A production build goes to `dist/`. Use
 
 The pipeline installs locked dependencies and pinned Playwright browsers, checks
 formatting, lint, shell syntax, and types, runs unit and browser integration
-tests with a 95% project-wide executable-line coverage gate, builds the static
+tests with a 95% project-wide executable-line coverage gate, runs mutation
+testing with an 85% score gate, builds the static
 site, and runs end-to-end tests against the built Pages subpath in Chromium,
 Firefox, and WebKit. On a fresh Ubuntu machine, use
 `PLAYWRIGHT_INSTALL_SYSTEM_DEPS=1 ./localPipeline.sh` to install Playwright's
@@ -74,6 +75,8 @@ need compatible Playwright browser libraries.
 
 - `npm test` runs unit and Chromium integration tests. `npm run coverage` adds
   the coverage gate and writes `coverage/index.html`.
+- `npm run mutation` runs mutation testing and writes
+  `reports/mutation/index.html`. See [the quality gates](docs/quality.md).
 - `npm run test:e2e` tests the production build. Run `npm run build` first.
   The terminal lists the browser results. Failure traces go to `test-results/`.
 - `npm run format` applies Prettier formatting.

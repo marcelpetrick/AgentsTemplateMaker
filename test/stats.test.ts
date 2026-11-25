@@ -29,3 +29,20 @@ describe("countText without Intl.Segmenter", () => {
     });
   });
 });
+
+describe("countText fallback edge cases", () => {
+  it("counts nothing in an empty draft", () => {
+    expect(countText("", {})).toEqual({ words: 0, characters: 0 });
+  });
+
+  it("keeps apostrophes and hyphens inside one word", () => {
+    expect(countText("don’t re-run it's", {})).toEqual({
+      words: 3,
+      characters: 17,
+    });
+  });
+
+  it("counts a line break as one character", () => {
+    expect(countText("a\nb", {})).toEqual({ words: 2, characters: 3 });
+  });
+});

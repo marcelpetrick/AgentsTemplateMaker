@@ -21,6 +21,9 @@ test("defaults, repository hover, edited rule removal and accurate Markdown down
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("./");
   await expect(page).toHaveTitle("Agent Maker");
+  const licenses = await page.request.get("dependency-licenses.md");
+  expect(licenses.ok()).toBe(true);
+  expect(await licenses.text()).toContain("@codemirror/state");
   await expect(markdown(page)).toContainText("Conventional Commits");
   await expect(markdown(page)).toContainText("300");
   await expect(markdown(page)).toContainText("credential");

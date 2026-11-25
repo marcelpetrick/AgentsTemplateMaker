@@ -5,6 +5,15 @@ import { playwright } from "@vitest/browser-playwright";
 
 export default defineConfig({
   base: "./",
+  build: {
+    license: { fileName: "dependency-licenses.md" },
+    rolldownOptions: {
+      output: {
+        postBanner:
+          "/*! Copyright (C) 2026 Marcel Petrick. Agent Maker is GPL-3.0-or-later. See dependency-licenses.md for bundled dependency notices. */",
+      },
+    },
+  },
   optimizeDeps: {
     include: ["@codemirror/state", "@codemirror/view", "@codemirror/commands"],
   },

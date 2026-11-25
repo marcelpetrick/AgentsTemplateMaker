@@ -37,6 +37,8 @@ export const strings = {
     editedRule: (label: string) => `Edited rule: ${label}`,
     ruleHelp: (label: string) => `About this rule: ${label}`,
     selected: (count: number) => `${count} selected`,
+    textCount: (words: number, characters: number) =>
+      `${words} ${words === 1 ? "word" : "words"} · ${characters} ${characters === 1 ? "character" : "characters"}`,
     documentTitle: "# Project instructions",
     changeWarning:
       "Applying the change keeps your edits as written. The new choice applies to untouched text and future insertions.",
@@ -81,6 +83,8 @@ export const strings = {
     editedRule: (label: string) => `Bearbeitete Regel: ${label}`,
     ruleHelp: (label: string) => `Über diese Regel: ${label}`,
     selected: (count: number) => `${count} ausgewählt`,
+    textCount: (words: number, characters: number) =>
+      `${words} ${words === 1 ? "Wort" : "Wörter"} · ${characters} Zeichen`,
     documentTitle: "# Projektanweisungen",
     changeWarning:
       "Deine Änderungen bleiben erhalten. Die neue Auswahl gilt für unveränderten und künftig eingefügten Text.",

@@ -217,6 +217,21 @@ describe("workspace", () => {
     expect(draft()).toBe(before);
   });
 
+  it("shows the current word and character count below the draft", () => {
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: "Eins zwei" },
+    });
+    expect(element("draft-stats").textContent).toBe("2 words · 9 characters");
+    view.dispatch({ changes: { from: 0, to: 9, insert: "Ä" } });
+    expect(element("draft-stats").textContent).toBe("1 word · 1 character");
+    select("ui-language", "de");
+    expect(element("draft-stats").textContent).toBe("1 Wort · 1 Zeichen");
+    element("select-all").click();
+    expect(element("draft-stats").textContent).toMatch(
+      /^\d{3,} Wörter · \d+ Zeichen$/,
+    );
+  });
+
   it("selects all rules at once and clears them while keeping edited text", () => {
     edit(paragraph("credentials"), " eigene ");
     element("select-all").click();

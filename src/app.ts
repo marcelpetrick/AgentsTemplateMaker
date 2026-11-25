@@ -11,6 +11,7 @@ import {
 } from "./catalog";
 import { authoredRanges, createDraft, replaceRule } from "./draft";
 import { openEditor } from "./editor";
+import { countText } from "./stats";
 import { strings } from "./strings";
 import { version } from "./version";
 
@@ -169,7 +170,16 @@ export function mount() {
     return editor.draft.ranges.some((range) => range.id === id && range.edited);
   }
 
+  function renderCount() {
+    const { words: wordCount, characters } = countText(editor.draft.text);
+    element("draft-stats").textContent = words().textCount(
+      wordCount,
+      characters,
+    );
+  }
+
   function renderRules() {
+    renderCount();
     for (const group of groups) {
       group.count.textContent = words().selected(
         group.controls.filter(({ rule }) => selected.has(rule.id)).length,

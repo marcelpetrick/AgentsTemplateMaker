@@ -370,6 +370,10 @@ main {
   margin: 0;
 }
 
+#draft-stats {
+  font-variant-numeric: tabular-nums;
+}
+
 #edit-warning,
 #status {
   color: var(--accent);

@@ -16,6 +16,10 @@ for script in scripts/*.sh; do
 done
 npm run format:check
 npm run lint
+npm run lint:css
+npm run lint:html
+npm run knip
+npm run duplicates
 npm run typecheck
 npm run coverage
 npm run mutation

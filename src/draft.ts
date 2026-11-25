@@ -8,7 +8,7 @@ interface Span {
   readonly to: number;
 }
 
-export interface RuleRange extends Span {
+interface RuleRange extends Span {
   readonly id: string;
   readonly edited: boolean;
   // Keep the original positions while authored text adjoins an untouched rule.

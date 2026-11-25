@@ -5,6 +5,7 @@
 :root {
   color-scheme: light;
   font-family: system-ui, sans-serif;
+
   --page: #f6f7f4;
   --surface: #fff;
   --subtle: #f2f5f0;
@@ -23,6 +24,7 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
+
   --page: #151b17;
   --surface: #1c2520;
   --subtle: #222e26;
@@ -206,14 +208,14 @@ select,
   width: 0.8rem;
   aspect-ratio: 1;
   border-radius: 50%;
-  box-shadow: inset 0.25rem -0.16rem 0 currentColor;
+  box-shadow: inset 0.25rem -0.16rem 0 currentcolor;
 }
 
 [data-theme="dark"] .theme-icon {
-  background: currentColor;
+  background: currentcolor;
   box-shadow:
     0 0 0 0.13rem var(--surface),
-    0 0 0 0.19rem currentColor;
+    0 0 0 0.19rem currentcolor;
   margin-inline: 0.14rem;
   width: 0.6rem;
 }
@@ -261,6 +263,10 @@ main {
 .document-header {
   padding: 1rem 1.25rem;
   min-height: 4.25rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.7rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .rules-header h2,
@@ -268,14 +274,6 @@ main {
   margin: 0;
   font-size: 1rem;
   font-weight: 750;
-}
-
-.rules-header,
-.document-header {
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.7rem;
-  border-bottom: 1px solid var(--border);
 }
 
 .document-header h2 {
@@ -407,8 +405,8 @@ main {
   inset-inline-start: 1.25rem;
   width: 0.38rem;
   height: 0.38rem;
-  border-inline-end: 0.12rem solid currentColor;
-  border-block-end: 0.12rem solid currentColor;
+  border-inline-end: 0.12rem solid currentcolor;
+  border-block-end: 0.12rem solid currentcolor;
   transform: rotate(-45deg);
 }
 

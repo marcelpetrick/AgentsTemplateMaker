@@ -61,6 +61,28 @@ and converts each change into an object for the rest of the module.
 The TypeScript library target is ES2023 so code can use non-mutating
 `Array#toSorted`. The supported browsers in the end-to-end suite all provide it.
 
+## Other static analysis
+
+| Command              | Tool                                       | Gate                                                                            |
+| -------------------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
+| `npm run lint:css`   | Stylelint with `stylelint-config-standard` | Any problem in `src/style.css`.                                                 |
+| `npm run lint:html`  | html-validate `recommended`                | Any problem in `index.html`.                                                    |
+| `npm run knip`       | Knip                                       | Any unused file, export, type, or dependency, or an unlisted dependency.        |
+| `npm run duplicates` | jscpd ([configuration](../.jscpd.json))    | More than 1% duplicated lines in `src/`, `test/`, and `e2e/` (50-token clones). |
+
+Exceptions:
+
+- Stylelint `no-descending-specificity` is off. The stylesheet orders
+  overrides by component, and reordering it to satisfy the rule would change
+  the cascade without a defect to fix.
+- Stylelint `media-feature-range-notation` keeps the `max-width` prefix form,
+  which older browsers also support.
+- html-validate `doctype-style` and `void-style` are off because Prettier owns
+  that formatting (`<!doctype html>`, `<meta />`).
+
+The 1% duplication limit allows small repeated test setup. The baseline is
+0.4%, and jscpd lists every clone it finds even when the run passes.
+
 ## Structure
 
 The refactoring for these limits split the former 350-line `mount()` into

@@ -1,0 +1,7 @@
+{
+  "path": ["src", "test", "e2e"],
+  "ignore": ["**/__snapshots__/**"],
+  "minTokens": 50,
+  "threshold": 1,
+  "reporters": ["console"]
+}

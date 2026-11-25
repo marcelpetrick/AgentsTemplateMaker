@@ -20,3 +20,12 @@ describe("countText", () => {
     expect(countText("Äußere 👍🏽")).toEqual({ words: 1, characters: 8 });
   });
 });
+
+describe("countText without Intl.Segmenter", () => {
+  it("falls back to letter runs and code points instead of failing", () => {
+    expect(countText("Eins, zwei 👍🏽 # x1", {})).toEqual({
+      words: 3,
+      characters: 18,
+    });
+  });
+});

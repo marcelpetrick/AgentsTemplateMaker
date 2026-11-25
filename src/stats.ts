@@ -6,26 +6,33 @@ export interface TextCount {
   readonly characters: number;
 }
 
-const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
-const graphemeSegmenter = new Intl.Segmenter(undefined, {
-  granularity: "grapheme",
-});
+type Segmenter = typeof Intl.Segmenter;
 
-function countSegments(
-  segments: Iterable<Intl.SegmentData>,
-  include: (segment: Intl.SegmentData) => boolean = () => true,
-) {
-  let count = 0;
-  for (const segment of segments) if (include(segment)) count++;
-  return count;
+/** The part of `Intl` the counter uses. Older browsers lack `Segmenter`. */
+interface Internationalization {
+  readonly Segmenter?: Segmenter;
 }
 
-export function countText(text: string): TextCount {
-  return {
-    words: countSegments(
-      wordSegmenter.segment(text),
-      (segment) => segment.isWordLike === true,
-    ),
-    characters: countSegments(graphemeSegmenter.segment(text)),
-  };
+function countSegmented(text: string, segmenter: Segmenter): TextCount {
+  const words = new segmenter(undefined, { granularity: "word" });
+  const graphemes = new segmenter(undefined, { granularity: "grapheme" });
+  let wordCount = 0;
+  for (const segment of words.segment(text))
+    if (segment.isWordLike) wordCount++;
+  return { words: wordCount, characters: [...graphemes.segment(text)].length };
+}
+
+function countFallback(text: string): TextCount {
+  const words = text.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) ?? [];
+  return { words: words.length, characters: text.match(/./gsu)?.length ?? 0 };
+}
+
+/** Count words and user-perceived characters in the draft. */
+export function countText(
+  text: string,
+  intl: Internationalization = Intl,
+): TextCount {
+  // The counter must never stop the editor from loading.
+  const segmenter = intl.Segmenter;
+  return segmenter ? countSegmented(text, segmenter) : countFallback(text);
 }

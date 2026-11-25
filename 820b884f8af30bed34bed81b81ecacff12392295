@@ -1,0 +1,9 @@
+Review licenses-820b884
+Revision 820b884f8af30bed34bed81b81ecacff12392295
+Requirements GPLv3 distribution and I14. Verify the browser artifact carries dependency notices and an app copyright banner.
+Prerequisites Git, Bash, Node 24.20.0 and npm, registry access, curl and a free local port. No secrets.
+Reproduction Export SHA to an empty directory; npm ci; npm run build; npm run preview -- --strictPort --port 4184 --base /AgentsTemplateMaker/. Compare dependency-licenses.md and the JS chunk under the preview URL with the dist files.
+Expected Banner in production JS, copyright and MIT text for every bundled MIT dependency at the locked versions, and byte-identical assets under the Pages path.
+Observed Two independent rebuilds. All nine bundled packages had matching versions and full notices. HTTP response bytes matched the files, so SPA fallback did not satisfy the check. The full project GPL text was initially linked from source and is copied into the artifact by a later revision.
+Disposition Dependency notices correct. CI and Pages succeeded.
+Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45692941751 and https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45693195500

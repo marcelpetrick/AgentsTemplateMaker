@@ -1,0 +1,9 @@
+Review authorship-f6d16aa
+Revision f6d16aa19a26fd280870f6e8f6a7ad707a819278
+Requirements F03–F05, F08. Verify boundary edits, blank-line separation, undo of an inline edit or whole rule deletion, and edited rule content when its setting changes.
+Prerequisites Git/Bash, Node 24.20.0 and npm, Playwright Chromium + Firefox + WebKit libraries and download access. No secrets.
+Reproduction Extract git archive <SHA> into an empty directory and run ./localPipeline.sh. In another review, delete the entire default draft, undo, and uncheck the restored commit limit.
+Expected 41 unit and integration tests and 10 production browser tests pass. Undo of an inline edit restores generated authorship while unaffected choices and detached authored text survive.
+Observed 41 tracked tests and 98.89% line coverage independently reproduced. All three local browser targets passed. Exact multi-rule undo restored the text with authored markers for all restored paragraphs, retaining them on uncheck.
+Disposition Single rule and boundary findings fixed. Exact multi-rule undo reopened for its own fix.
+Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45693428822

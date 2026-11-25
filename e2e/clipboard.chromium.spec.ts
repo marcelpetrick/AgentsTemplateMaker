@@ -20,6 +20,7 @@ test("copy uses the current draft including manual Unicode and empty lines", asy
   ).toBeVisible();
   await page.getByRole("button", { name: "Copy", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Copied");
-  const draft = (await editor.locator(".cm-line").allTextContents()).join("\n");
+  const lines = await editor.locator(".cm-line").allTextContents();
+  const draft = lines.join("\n");
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(draft);
 });

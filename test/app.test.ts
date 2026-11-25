@@ -5,7 +5,8 @@ import { redo, undo } from "@codemirror/commands";
 import type { EditorView } from "@codemirror/view";
 import shell from "../index.html?raw";
 import { mount } from "../src/app";
-import { rules } from "../src/catalog";
+import { rules, type Language, type Rule } from "../src/catalog";
+import { ruleValues } from "./ruleValues";
 
 const rule = (id: string) => rules.find((rule) => rule.id === id)!;
 const paragraph = (id: string, value = "") => rule(id).paragraph("en", value);
@@ -15,7 +16,8 @@ const element = <T extends HTMLElement>(id: string) =>
 let view: EditorView;
 
 function select(id: string, value: string) {
-  const control = element<HTMLInputElement | HTMLSelectElement>(id);
+  const control = document.getElementById(id) as
+    HTMLInputElement | HTMLSelectElement | null;
   if (control) {
     control.value = value;
     control.dispatchEvent(new Event("change"));
@@ -40,7 +42,7 @@ function draft() {
 
 beforeEach(() => {
   const template = new DOMParser().parseFromString(shell, "text/html");
-  document.body.innerHTML = template.body.innerHTML;
+  document.body.innerHTML = template.body.getHTML();
   document.documentElement.dataset.theme = "light";
   view = mount();
 });
@@ -49,6 +51,34 @@ afterEach(() => {
   view.destroy();
   vi.restoreAllMocks();
 });
+
+// Select one rule variant, export it beside a pasted copy, then uncheck it.
+function exportVariant(
+  variant: { rule: Rule; value: string; language: Language; title: string },
+  clipboard: ReturnType<typeof vi.fn>,
+) {
+  const { rule, value, language, title } = variant;
+  const checkbox = element(`rule-${rule.id}`);
+  checkbox.click();
+  if (rule.setting) select(`setting-${rule.id}`, value);
+  const expected = rule.paragraph(language, value);
+  expect(draft(), rule.id).toBe(`${title}\n\n${expected}`);
+
+  view.dispatch({
+    changes: { from: view.state.doc.length, insert: `\n\n${expected}` },
+  });
+  element("copy").click();
+  expect(clipboard).toHaveBeenLastCalledWith(
+    `${title}\n\n${expected}\n\n${expected}`,
+  );
+  checkbox.click();
+  expect(draft(), rule.id).toBe(`${title}\n\n${expected}`);
+  expect(document.querySelector(".authored-text")?.textContent).toBe(expected);
+  view.dispatch({
+    changes: { from: title.length, to: view.state.doc.length },
+  });
+  expect(draft()).toBe(title);
+}
 
 describe("workspace", () => {
   it("shows the default paragraphs and can open groups without changing them", () => {
@@ -312,9 +342,9 @@ describe("workspace", () => {
         'a[href="https://github.com/marcelpetrick/AgentsTemplateMaker"]',
       ),
     ).not.toBeNull();
-    const libraries = [...about.querySelectorAll("#about-libraries li")].map(
-      (item) => item.textContent,
-    );
+    const libraries = [
+      ...element("about-libraries").querySelectorAll(":scope > li"),
+    ].map((item) => item.textContent);
     expect(libraries).toEqual([
       "@codemirror/commands 6.11.2 · MIT",
       "@codemirror/state 6.7.6 · MIT",
@@ -359,10 +389,10 @@ describe("workspace", () => {
     });
     element("rule-credentials").click();
     expect(undo(view)).toBe(true);
-    expect(draft()).toContain(before.split("\n")[0]);
+    expect(draft()).toContain(before.split("\n", 1)[0]);
     expect(draft()).not.toContain(paragraph("credentials"));
     expect(redo(view)).toBe(true);
-    expect(draft()).toContain(before.split("\n")[0].slice(0, 4) + "x");
+    expect(draft()).toContain(before.split("\n", 1)[0].slice(0, 4) + "x");
   });
 
   it("copies and downloads the exact editor text and reports clipboard failure", async () => {
@@ -402,41 +432,15 @@ describe("workspace", () => {
     vi.spyOn(navigator, "clipboard", "get").mockReturnValue({
       writeText: clipboard,
     } as unknown as Clipboard);
-    for (const rule of rules.filter((entry) => entry.defaultSelected)) {
-      element(`rule-${rule.id}`).click();
-    }
+    const defaults = rules.filter((entry) => entry.defaultSelected);
+    for (const rule of defaults) element(`rule-${rule.id}`).click();
 
     for (const language of ["en", "de"] as const) {
       select("document-language", language);
       const title = draft();
       for (const rule of rules) {
-        const checkbox = element(`rule-${rule.id}`);
-        const setting = rule.setting;
-        const values = setting?.options?.map(({ value }) => value) ?? [
-          setting?.initial ?? "",
-        ];
-        for (const value of values) {
-          checkbox.click();
-          if (setting) select(`setting-${rule.id}`, value);
-          const expected = rule.paragraph(language, value);
-          expect(draft(), rule.id).toBe(`${title}\n\n${expected}`);
-
-          view.dispatch({
-            changes: { from: view.state.doc.length, insert: `\n\n${expected}` },
-          });
-          element("copy").click();
-          expect(clipboard).toHaveBeenLastCalledWith(
-            `${title}\n\n${expected}\n\n${expected}`,
-          );
-          checkbox.click();
-          expect(draft(), rule.id).toBe(`${title}\n\n${expected}`);
-          expect(document.querySelector(".authored-text")?.textContent).toBe(
-            expected,
-          );
-          view.dispatch({
-            changes: { from: title.length, to: view.state.doc.length },
-          });
-          expect(draft()).toBe(title);
+        for (const value of ruleValues(rule)) {
+          exportVariant({ rule, value, language, title }, clipboard);
         }
       }
       await Promise.resolve();

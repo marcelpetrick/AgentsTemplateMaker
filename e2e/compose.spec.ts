@@ -9,16 +9,17 @@ const repository = (page: Page) => page.locator("#category-repository");
 const markdown = (page: Page) => page.locator("#editor .cm-content");
 
 async function draftText(page: Page) {
-  return (await markdown(page).locator(".cm-line").allTextContents()).join(
-    "\n",
-  );
+  const lines = await markdown(page).locator(".cm-line").allTextContents();
+  return lines.join("\n");
 }
 
 test("defaults, repository hover, edited rule removal and accurate Markdown download", async ({
   page,
 }) => {
   const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("pageerror", (error) => {
+    errors.push(error.message);
+  });
   await page.goto("./");
   await expect(page).toHaveTitle("Agent Maker");
   const licenses = await page.request.get("dependency-licenses.md");
@@ -27,7 +28,7 @@ test("defaults, repository hover, edited rule removal and accurate Markdown down
   const projectLicense = await page.request.get("LICENSE.txt");
   expect(projectLicense.ok()).toBe(true);
   expect(await projectLicense.text()).toBe(
-    await readFile(new URL("../LICENSE", import.meta.url), "utf-8"),
+    await readFile(new URL("../LICENSE", import.meta.url), "utf8"),
   );
   await expect(markdown(page)).toContainText("Conventional Commits");
   await expect(markdown(page)).toContainText("300");
@@ -68,7 +69,7 @@ test("defaults, repository hover, edited rule removal and accurate Markdown down
   await page.getByRole("button", { name: "Download", exact: true }).click();
   const download = await downloadStarted;
   expect(download.suggestedFilename()).toBe("AGENTS.md");
-  expect(await readFile(await download.path(), "utf-8")).toBe(edited);
+  expect(await readFile(await download.path(), "utf8")).toBe(edited);
   expect(errors).toEqual([]);
 });
 

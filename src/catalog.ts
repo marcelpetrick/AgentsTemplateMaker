@@ -269,7 +269,7 @@ export const rules: readonly Rule[] = [
       initial: "",
     },
     paragraph: (language, value) => {
-      const technologies = value.trim().replace(/\s+/g, " ");
+      const technologies = value.trim().replaceAll(/\s+/g, " ");
       return technologies
         ? localized(
             `Use the project’s preferred technologies (${technologies}). Explain any proposed change before adding a replacement.`,

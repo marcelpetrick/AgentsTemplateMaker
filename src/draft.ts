@@ -34,8 +34,32 @@ export interface AuthorshipUndo {
   readonly replacements: readonly ReplacedText[];
 }
 
+/** One replaced span in old positions and its replacement in new positions. */
+interface Change extends Span {
+  readonly newFrom: number;
+  readonly newTo: number;
+  readonly inserted: string;
+}
+
+interface Restored {
+  readonly ranges: Map<string, Span>;
+  readonly separators: Span[];
+  readonly changeStarts: Set<number>;
+}
+
+/** Everything needed to recompute rule ranges after a user edit. */
+interface Edit {
+  readonly draft: Draft;
+  readonly changes: ChangeSet;
+  readonly text: string;
+  readonly restoreGenerated: ReadonlySet<string>;
+  readonly restored: Restored;
+}
+
 const separator = "\n\n";
 const paragraphBoundary = /\n(?:[ \t]*\n)+/;
+
+const byStart = (left: Span, right: Span) => left.from - right.from;
 
 export function createDraft(
   title: string,
@@ -53,6 +77,16 @@ export function createDraft(
     ranges.push({ from, to: text.length, id: paragraph.id, edited: false });
   }
   return { text, ranges, separators };
+}
+
+/** List each change separately, without merging adjacent ones. */
+function changeList(changes: ChangeSet): Change[] {
+  const list: Change[] = [];
+  // eslint-disable-next-line max-params -- CodeMirror's callback signature.
+  changes.iterChanges((from, to, newFrom, newTo, insert) => {
+    list.push({ from, to, newFrom, newTo, inserted: insert.toString() });
+  }, true);
+  return list;
 }
 
 function applyText(draft: Draft, changes: ChangeSet): string {
@@ -93,7 +127,7 @@ function mapSeparators(draft: Draft, changes: ChangeSet): Span[] {
 
 function boundaryInsertion(insert: string, atStart: boolean): string {
   const paragraphs = insert.split(paragraphBoundary);
-  const attached = atStart ? paragraphs[paragraphs.length - 1] : paragraphs[0];
+  const attached = (atStart ? paragraphs.at(-1) : paragraphs[0]) ?? "";
   // Let Enter start a new paragraph without claiming the line break for the rule.
   return attached.includes("\n") && !attached.trim() ? "" : attached;
 }
@@ -104,7 +138,7 @@ function continuationIndex(draft: Draft, at: number): number {
       from < to &&
       to < at &&
       /^\n[ \t]*$/.test(draft.text.slice(to, at)) &&
-      !draft.separators.some((span) => span.from < at && span.to > to),
+      draft.separators.every((span) => span.from >= at || span.to <= to),
   );
 }
 
@@ -114,21 +148,22 @@ function releaseSeparateParagraphs(
   text: string,
 ): RuleRange {
   const { id, edited } = range;
-  let { from, to } = range;
-  if (!edited || !original) return { id, from, to, edited };
+  if (!original || !edited)
+    return { id, from: range.from, to: range.to, edited };
 
   // A blank line can separate authored text from an untouched rule after
   // both were on the same line. Identify the original by position throughout.
-  const prefix = text.slice(from, original.from).split(paragraphBoundary);
-  if (prefix.length > 1)
-    from = original.from - prefix[prefix.length - 1].length;
-  const suffix = text.slice(original.to, to).search(paragraphBoundary);
-  if (suffix >= 0) to = original.to + suffix;
+  const prefix = text.slice(range.from, original.from).split(paragraphBoundary);
+  const from =
+    prefix.length > 1
+      ? original.from - (prefix.at(-1) ?? "").length
+      : range.from;
+  const suffix = text.slice(original.to, range.to).search(paragraphBoundary);
+  const to = suffix === -1 ? range.to : original.to + suffix;
 
-  if (from === original.from && to === original.to) {
-    return { id, from, to, edited: false };
-  }
-  return { id, from, to, edited: true, original };
+  return from === original.from && to === original.to
+    ? { id, from, to, edited: false }
+    : { id, from, to, edited: true, original };
 }
 
 function restoreGeneratedRule(
@@ -138,17 +173,43 @@ function restoreGeneratedRule(
   text: string,
 ): RuleRange {
   const generatedText = before.generatedText;
-  if (!before.edited || !generatedText) return range;
+  if (!generatedText || !before.edited) return range;
 
   // A deleted paragraph keeps a zero-width anchor. Undo may restore its whole
   // generated body at that anchor while retaining unrelated form changes.
   const from =
     before.from === before.to ? changes.mapPos(before.from, -1) : range.from;
   const { to } = range;
-  if (text.slice(from, to) === generatedText) {
-    return { id: range.id, from, to, edited: false };
-  }
-  return range;
+  return text.slice(from, to) === generatedText
+    ? { id: range.id, from, to, edited: false }
+    : range;
+}
+
+const contains = (outer: Span, inner: Span) =>
+  inner.from >= outer.from && inner.to <= outer.to;
+
+const relativeTo = (origin: number, span: Span) => ({
+  from: span.from - origin,
+  to: span.to - origin,
+});
+
+function replacedText(
+  before: Draft,
+  newlyEdited: readonly RuleRange[],
+  change: Change,
+): ReplacedText | undefined {
+  const ranges = newlyEdited
+    .filter((range) => contains(change, range))
+    .map((range) => ({ id: range.id, ...relativeTo(change.from, range) }));
+  if (ranges.length === 0) return undefined;
+  return {
+    text: before.text.slice(change.from, change.to),
+    replacement: change.inserted,
+    ranges,
+    separators: before.separators
+      .filter((span) => contains(change, span))
+      .map((span) => relativeTo(change.from, span)),
+  };
 }
 
 export function captureAuthorshipUndo(
@@ -162,173 +223,206 @@ export function captureAuthorshipUndo(
   const newlyEdited = before.ranges.filter(
     ({ id, edited }) => !edited && authored.has(id),
   );
-  if (!newlyEdited.length) return undefined;
+  if (newlyEdited.length === 0) return undefined;
 
-  const replacements: ReplacedText[] = [];
-  changes.iterChanges((from, to, _newFrom, _newTo, insert) => {
-    if (from === to) return;
-    const contained = (span: Span) => span.from >= from && span.to <= to;
-    const relative = (span: Span) => ({
-      from: span.from - from,
-      to: span.to - from,
-    });
-    const ranges = newlyEdited
-      .filter(contained)
-      .map((range) => ({ id: range.id, ...relative(range) }));
-    if (!ranges.length) return;
-    replacements.push({
-      text: before.text.slice(from, to),
-      replacement: insert.toString(),
-      ranges,
-      separators: before.separators.filter(contained).map(relative),
-    });
-  }, true);
+  const replacements = changeList(changes)
+    .filter((change) => change.from !== change.to)
+    .map((change) => replacedText(before, newlyEdited, change))
+    .filter((replacement) => replacement !== undefined);
   return { ids: newlyEdited.map(({ id }) => id), replacements };
+}
+
+/** Whether undo restores this rule's generated text at the changed span. */
+function restoresPrior(
+  draft: Draft,
+  change: Change,
+  prior: ReplacedText["ranges"][number],
+) {
+  const range = draft.ranges.find(({ id }) => id === prior.id);
+  if (!range) return false;
+  const matchesPosition =
+    range.from === range.to
+      ? range.from === change.from || range.from === change.to
+      : range.from === change.from && range.to === change.to;
+  return (
+    matchesPosition &&
+    range.generatedText === change.inserted.slice(prior.from, prior.to)
+  );
+}
+
+function matchReplacement(
+  draft: Draft,
+  change: Change,
+  replacements: readonly ReplacedText[],
+) {
+  const removed = draft.text.slice(change.from, change.to);
+  for (const replacement of replacements) {
+    if (
+      replacement.text !== change.inserted ||
+      replacement.replacement !== removed
+    )
+      continue;
+    const candidates = replacement.ranges.filter((prior) =>
+      restoresPrior(draft, change, prior),
+    );
+    if (candidates.length > 0) return { replacement, candidates };
+  }
+  return undefined;
 }
 
 function restoredReplacements(
   draft: Draft,
   changes: ChangeSet,
   replacements: readonly ReplacedText[],
-) {
-  const ranges = new Map<string, Span>();
-  const separators: Span[] = [];
-  const changeStarts = new Set<number>();
-  if (!replacements.length) return { ranges, separators, changeStarts };
+): Restored {
+  const restored: Restored = {
+    ranges: new Map(),
+    separators: [],
+    changeStarts: new Set(),
+  };
+  if (replacements.length === 0) return restored;
 
-  changes.iterChanges((from, to, newFrom, _newTo, insert) => {
-    const inserted = insert.toString();
-    const removed = draft.text.slice(from, to);
-    for (const replacement of replacements) {
-      if (replacement.text !== inserted || replacement.replacement !== removed)
-        continue;
-      const candidates = replacement.ranges.filter((prior) => {
-        const range = draft.ranges.find(({ id }) => id === prior.id);
-        if (!range) return false;
-        const matchesPosition =
-          range.from === range.to
-            ? range.from === from || range.from === to
-            : range.from === from && range.to === to;
-        return (
-          matchesPosition &&
-          range.generatedText === inserted.slice(prior.from, prior.to)
-        );
-      });
-      if (!candidates.length) continue;
-      const offset = (span: Span) => ({
-        from: newFrom + span.from,
-        to: newFrom + span.to,
-      });
-      for (const prior of candidates) ranges.set(prior.id, offset(prior));
-      separators.push(...replacement.separators.map(offset));
-      changeStarts.add(from);
-      break;
-    }
-  }, true);
-  return { ranges, separators, changeStarts };
+  for (const change of changeList(changes)) {
+    const match = matchReplacement(draft, change, replacements);
+    if (!match) continue;
+    const offset = (span: Span) => ({
+      from: change.newFrom + span.from,
+      to: change.newFrom + span.to,
+    });
+    for (const prior of match.candidates)
+      restored.ranges.set(prior.id, offset(prior));
+    restored.separators.push(
+      ...match.replacement.separators.map((span) => offset(span)),
+    );
+    restored.changeStarts.add(change.from);
+  }
+  return restored;
 }
 
-function manualRanges(
-  draft: Draft,
-  changes: ChangeSet,
-  text: string,
-  restoreGenerated: ReadonlySet<string>,
-  restored: ReturnType<typeof restoredReplacements>,
-): RuleRange[] {
+/** An inverse insertion for a deleted rule belongs to that rule. */
+function restoresDeletedRule(edit: Edit, change: Change) {
+  return edit.draft.ranges.some(
+    (range) =>
+      range.from === change.from &&
+      range.to === change.from &&
+      edit.restoreGenerated.has(range.id) &&
+      range.generatedText === change.inserted,
+  );
+}
+
+// If deleting a separator made two rules touch, assign the insertion once.
+function insertionOwner(draft: Draft, at: number): number {
+  const inside = draft.ranges.findIndex(
+    (range) => range.from < at && at <= range.to,
+  );
+  if (inside !== -1) return inside;
+  const start = draft.ranges.findIndex(
+    (range) => range.from === at && at < range.to,
+  );
+  return start === -1 ? continuationIndex(draft, at) : start;
+}
+
+function attachInsertion(
+  before: RuleRange,
+  after: RuleRange,
+  change: Change,
+): RuleRange {
+  const { from, newFrom, newTo, inserted } = change;
+  const atStart = from === before.from;
+  const atEnd = from >= before.to;
+  const continuation = from > before.to;
+  const attached =
+    atStart || atEnd ? boundaryInsertion(inserted, atStart) : inserted;
+  if (!attached || (continuation && !attached.trim())) return after;
+  return {
+    ...after,
+    from: atStart ? Math.min(after.from, newTo - attached.length) : after.from,
+    to: atEnd ? Math.max(after.to, newFrom + attached.length) : after.to,
+    edited: true,
+  };
+}
+
+function applyInsertion(edit: Edit, mapped: RuleRange[], change: Change) {
+  // The inverse insertion belongs to the restored rule even when a
+  // neighboring paragraph now touches the zero-width anchor.
+  if (restoresDeletedRule(edit, change)) return;
+  const index = insertionOwner(edit.draft, change.from);
+  if (index === -1) return;
+  mapped[index] = attachInsertion(
+    edit.draft.ranges[index],
+    mapped[index],
+    change,
+  );
+}
+
+const overlaps = (range: Span, change: Change) =>
+  change.from < range.to && change.to > range.from && range.from !== range.to;
+
+function applyReplacement(edit: Edit, mapped: RuleRange[], change: Change) {
+  for (const [index, before] of edit.draft.ranges.entries()) {
+    if (!overlaps(before, change)) continue;
+    const after = mapped[index];
+    const belongsToRule = contains(before, change);
+    mapped[index] = {
+      ...after,
+      from: belongsToRule ? Math.min(after.from, change.newFrom) : after.from,
+      to: belongsToRule ? Math.max(after.to, change.newTo) : after.to,
+      edited: true,
+    };
+  }
+}
+
+/** Forget an original position once an edit touches it. */
+function forgetTouched(originals: (Span | undefined)[], change: Change) {
+  for (const [index, original] of originals.entries()) {
+    if (original && change.from < original.to && change.to > original.from)
+      originals[index] = undefined;
+  }
+}
+
+function resolveRange(
+  edit: Edit,
+  range: RuleRange,
+  before: RuleRange,
+  original: Span | undefined,
+): RuleRange {
+  const restoredSpan = edit.restored.ranges.get(range.id);
+  if (restoredSpan) return { id: range.id, ...restoredSpan, edited: false };
+
+  const { changes, text } = edit;
+  const separated = releaseSeparateParagraphs(
+    range,
+    original && mapSpan(original, changes),
+    text,
+  );
+  const resolved = edit.restoreGenerated.has(range.id)
+    ? restoreGeneratedRule(separated, before, changes, text)
+    : separated;
+  if (!resolved.edited) return resolved;
+  return {
+    ...resolved,
+    generatedText:
+      before.generatedText ?? edit.draft.text.slice(before.from, before.to),
+  };
+}
+
+function manualRanges(edit: Edit): RuleRange[] {
+  const { draft, changes } = edit;
   const mapped = draft.ranges.map((range) => mapRange(range, changes));
   const originals = draft.ranges.map((range) =>
     range.edited ? range.original : { from: range.from, to: range.to },
   );
 
-  changes.iterChanges((from, to, newFrom, newTo, insert) => {
-    if (restored.changeStarts.has(from)) return;
-    for (const [index, original] of originals.entries()) {
-      if (original && from < original.to && to > original.from) {
-        originals[index] = undefined;
-      }
-    }
-    if (from === to) {
-      const inserted = insert.toString();
-      // An inverse insertion for a deleted rule belongs to that rule even
-      // when a neighboring paragraph now touches the zero-width anchor.
-      if (
-        draft.ranges.some(
-          (range) =>
-            range.from === from &&
-            range.to === from &&
-            restoreGenerated.has(range.id) &&
-            range.generatedText === inserted,
-        )
-      )
-        return;
+  for (const change of changeList(changes)) {
+    if (edit.restored.changeStarts.has(change.from)) continue;
+    forgetTouched(originals, change);
+    if (change.from === change.to) applyInsertion(edit, mapped, change);
+    else applyReplacement(edit, mapped, change);
+  }
 
-      // If deleting a separator made two rules touch, assign the insertion once.
-      let index = draft.ranges.findIndex(
-        (range) => range.from < from && from <= range.to,
-      );
-      if (index < 0) {
-        index = draft.ranges.findIndex(
-          (range) => range.from === from && from < range.to,
-        );
-      }
-      if (index < 0) index = continuationIndex(draft, from);
-      if (index < 0) return;
-
-      const before = draft.ranges[index];
-      const after = mapped[index];
-      const atStart = from === before.from;
-      const atEnd = from >= before.to;
-      const continuation = from > before.to;
-      const attached =
-        atStart || atEnd ? boundaryInsertion(inserted, atStart) : inserted;
-      if (attached && (!continuation || attached.trim())) {
-        mapped[index] = {
-          ...after,
-          from: atStart
-            ? Math.min(after.from, newTo - attached.length)
-            : after.from,
-          to: atEnd ? Math.max(after.to, newFrom + attached.length) : after.to,
-          edited: true,
-        };
-      }
-      return;
-    }
-
-    for (const [index, before] of draft.ranges.entries()) {
-      if (from >= before.to || to <= before.from || before.from === before.to)
-        continue;
-      const after = mapped[index];
-      const belongsToRule = from >= before.from && to <= before.to;
-      mapped[index] = {
-        ...after,
-        from: belongsToRule ? Math.min(after.from, newFrom) : after.from,
-        to: belongsToRule ? Math.max(after.to, newTo) : after.to,
-        edited: true,
-      };
-    }
-  }, true);
-
-  return mapped.map((range, index) => {
-    const restoredSpan = restored.ranges.get(range.id);
-    if (restoredSpan) return { id: range.id, ...restoredSpan, edited: false };
-
-    const before = draft.ranges[index];
-    const original = originals[index];
-    const separated = releaseSeparateParagraphs(
-      range,
-      original && mapSpan(original, changes),
-      text,
-    );
-    const resolved = restoreGenerated.has(range.id)
-      ? restoreGeneratedRule(separated, before, changes, text)
-      : separated;
-    if (!resolved.edited) return resolved;
-    return {
-      ...resolved,
-      generatedText:
-        before.generatedText ?? draft.text.slice(before.from, before.to),
-    };
-  });
+  return mapped.map((range, index) =>
+    resolveRange(edit, range, draft.ranges[index], originals[index]),
+  );
 }
 
 export function editDraft(
@@ -337,19 +431,25 @@ export function editDraft(
   authorshipUndo: readonly AuthorshipUndo[] = [],
 ): Draft {
   if (changes.empty) return draft;
-  const text = applyText(draft, changes);
-  const restoreGenerated = new Set(authorshipUndo.flatMap(({ ids }) => ids));
   const restored = restoredReplacements(
     draft,
     changes,
     authorshipUndo.flatMap(({ replacements }) => replacements),
   );
+  const edit: Edit = {
+    draft,
+    changes,
+    text: applyText(draft, changes),
+    restoreGenerated: new Set(authorshipUndo.flatMap(({ ids }) => ids)),
+    restored,
+  };
   return {
-    text,
-    ranges: manualRanges(draft, changes, text, restoreGenerated, restored),
-    separators: [...mapSeparators(draft, changes), ...restored.separators].sort(
-      (left, right) => left.from - right.from,
-    ),
+    text: edit.text,
+    ranges: manualRanges(edit),
+    separators: [
+      ...mapSeparators(draft, changes),
+      ...restored.separators,
+    ].toSorted(byStart),
   };
 }
 
@@ -364,16 +464,12 @@ function removalSpan(draft: Draft, range: RuleRange): Span {
   const after = draft.separators.find((span) => span.from === range.to);
   // Remove one adjoining generated separator when the other side still
   // separates surviving content, or when the removed rule is at an edge.
-  if (
-    before &&
-    (after || range.to === draft.text.length || draft.text[range.to] === "\n")
-  ) {
+  const endsBlock =
+    range.to === draft.text.length || draft.text[range.to] === "\n";
+  if (before && (after || endsBlock))
     return { from: before.from, to: range.to };
-  }
-  if (after && (range.from === 0 || draft.text[range.from - 1] === "\n")) {
-    return { from: range.from, to: after.to };
-  }
-  return range;
+  const startsBlock = range.from === 0 || draft.text[range.from - 1] === "\n";
+  return after && startsBlock ? { from: range.from, to: after.to } : range;
 }
 
 function insertionPoint(
@@ -383,11 +479,100 @@ function insertionPoint(
 ): Span {
   const index = order.indexOf(id);
   const next =
-    index < 0
+    index === -1
       ? undefined
       : draft.ranges.find((range) => order.indexOf(range.id) > index);
   const from = next?.from ?? draft.text.length;
   return { from, to: from };
+}
+
+interface Replacement {
+  readonly draft: Draft;
+  readonly changes: ChangeSet;
+}
+
+/**
+ * Leave the text alone. Forget an edited rule that is unchecked, or record
+ * the new generated wording of an edited rule.
+ */
+function keepAuthoredText(
+  draft: Draft,
+  existing: RuleRange | undefined,
+  text: string | undefined,
+): Replacement {
+  const changes = ChangeSet.empty(draft.text.length);
+  if (!existing) return { draft, changes };
+  if (text === undefined) {
+    const ranges = draft.ranges.filter((range) => range !== existing);
+    return { draft: { ...draft, ranges }, changes };
+  }
+  if (text === existing.generatedText) return { draft, changes };
+  // Keep the authored wording. Its previous generated version must stay
+  // authored if undo restores it after the setting or language changed.
+  const { id, from, to } = existing;
+  const updated = { id, from, to, edited: true, generatedText: text };
+  const ranges = draft.ranges.map((range) =>
+    range === existing ? updated : range,
+  );
+  return { draft: { ...draft, ranges }, changes };
+}
+
+function replacedSpan(
+  draft: Draft,
+  existing: RuleRange | undefined,
+  text: string | undefined,
+  insertAt: () => Span,
+): Span {
+  if (!existing) return insertAt();
+  return text === undefined ? removalSpan(draft, existing) : existing;
+}
+
+/** Add the generated range and its new separators after a replacement. */
+function addGenerated(
+  generated: { ranges: RuleRange[]; separators: Span[] },
+  id: string,
+  inserted: { at: number; prefix: string; text: string; suffix: string },
+) {
+  const { at, prefix, text, suffix } = inserted;
+  const from = at + prefix.length;
+  const to = from + text.length;
+  generated.ranges.push({ from, to, id, edited: false });
+  if (prefix) generated.separators.push({ from: at, to: from });
+  if (suffix) generated.separators.push({ from: to, to: to + suffix.length });
+}
+
+function regenerateRule(
+  draft: Draft,
+  existing: RuleRange | undefined,
+  rule: { id: string; text: string | undefined },
+  order: readonly string[],
+): Replacement {
+  const { id, text } = rule;
+  const span = replacedSpan(draft, existing, text, () =>
+    insertionPoint(draft, id, order),
+  );
+  const prefix = existing ? "" : separatorBefore(draft.text, span.from);
+  const suffix = existing || span.to === draft.text.length ? "" : separator;
+  const changes = ChangeSet.of(
+    { from: span.from, to: span.to, insert: prefix + (text ?? "") + suffix },
+    draft.text.length,
+  );
+  const generated = {
+    ranges: draft.ranges
+      .filter((range) => range !== existing)
+      .map((range) => mapRange(range, changes)),
+    separators: mapSeparators(draft, changes),
+  };
+  if (text !== undefined)
+    addGenerated(generated, id, { at: span.from, prefix, text, suffix });
+  return {
+    draft: {
+      text: applyText(draft, changes),
+      ranges: generated.ranges.toSorted(byStart),
+      separators: generated.separators.toSorted(byStart),
+    },
+    changes,
+  };
 }
 
 export function replaceRule(
@@ -395,71 +580,19 @@ export function replaceRule(
   id: string,
   text: string | undefined,
   order: readonly string[],
-): { draft: Draft; changes: ChangeSet } {
+): Replacement {
   const existing = draft.ranges.find((range) => range.id === id);
-  const remaining = draft.ranges.filter((range) => range !== existing);
-
-  if (existing?.edited || (!existing && text === undefined)) {
-    let ranges = draft.ranges;
-    if (existing?.edited && text === undefined) {
-      ranges = remaining;
-    } else if (
-      existing?.edited &&
-      text !== undefined &&
-      text !== existing.generatedText
-    ) {
-      // Keep the authored wording. Its previous generated version must stay
-      // authored if undo restores it after the setting or language changed.
-      const updated = {
-        id,
-        from: existing.from,
-        to: existing.to,
-        edited: true,
-        generatedText: text,
-      };
-      ranges = ranges.map((range) => (range === existing ? updated : range));
-    }
-    return {
-      draft: ranges === draft.ranges ? draft : { ...draft, ranges },
-      changes: ChangeSet.empty(draft.text.length),
-    };
-  }
-
-  const span = existing
-    ? text === undefined
-      ? removalSpan(draft, existing)
-      : existing
-    : insertionPoint(draft, id, order);
-  const prefix = existing ? "" : separatorBefore(draft.text, span.from);
-  const suffix = existing || span.to === draft.text.length ? "" : separator;
-  const changes = ChangeSet.of(
-    { from: span.from, to: span.to, insert: prefix + (text ?? "") + suffix },
-    draft.text.length,
-  );
-  const ranges = remaining.map((range) => mapRange(range, changes));
-  const separators = mapSeparators(draft, changes);
-  if (text !== undefined) {
-    const from = span.from + prefix.length;
-    const to = from + text.length;
-    ranges.push({ from, to, id, edited: false });
-    if (prefix) separators.push({ from: span.from, to: from });
-    if (suffix) separators.push({ from: to, to: to + suffix.length });
-  }
-  return {
-    draft: {
-      text: applyText(draft, changes),
-      ranges: ranges.sort((left, right) => left.from - right.from),
-      separators: separators.sort((left, right) => left.from - right.from),
-    },
-    changes,
-  };
+  const keepsText = existing ? existing.edited : text === undefined;
+  return keepsText
+    ? keepAuthoredText(draft, existing, text)
+    : regenerateRule(draft, existing, { id, text }, order);
 }
 
 export function authoredRanges(draft: Draft): readonly Span[] {
   const generated = [
     ...draft.separators,
     ...draft.ranges.filter((range) => !range.edited),
-  ].sort((left, right) => left.from - right.from);
+  ].toSorted(byStart);
   const authored: Span[] = [];
   let start = 0;
   for (const span of generated) {

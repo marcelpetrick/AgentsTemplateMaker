@@ -50,7 +50,11 @@ renders the Mermaid source in this file.
   edits can restore those ranges while keeping form choices and authored copies.
 - [Workspace controller](../src/app.ts) connects the form and editor. It stages
   a setting or output-language change that affects edited rules until the user
-  confirms. Copy and download read the same current draft.
+  confirms in the [confirmation dialog](../src/confirmDialog.ts).
+  [Copy and download](../src/exportDraft.ts) read the same current draft.
+- [Rule controls](../src/ruleControls.ts) and
+  [setting controls](../src/settingControls.ts) render the form.
+  [Help tooltips](../src/helpTooltips.ts) show one rule explanation at a time.
 - [Interface strings](../src/strings.ts) carry the output language along while
   the draft has no authored text. Once the user edits, UI localization leaves the
   editor text, output language, and selection in place.

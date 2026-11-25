@@ -14,7 +14,7 @@ export default defineConfig({
         this.emitFile({
           type: "asset",
           fileName: "LICENSE.txt",
-          source: readFileSync(new URL("./LICENSE", import.meta.url), "utf8"),
+          source: readFileSync(new URL("LICENSE", import.meta.url), "utf8"),
         });
       },
     },

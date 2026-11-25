@@ -3,11 +3,15 @@
 
 import { describe, expect, it } from "vitest";
 import { categories, rules, type Language } from "../src/catalog";
+import { ruleValues } from "./ruleValues";
 
 function paragraph(id: string, language: Language, value = "") {
   const rule = rules.find((candidate) => candidate.id === id);
   expect(rule, id).toBeDefined();
-  return rule!.paragraph(language, value || rule!.setting?.initial || "");
+  return rule!.paragraph(
+    language,
+    value === "" ? (rule!.setting?.initial ?? "") : value,
+  );
 }
 
 describe("instruction catalog", () => {
@@ -53,7 +57,9 @@ describe("instruction catalog", () => {
       categoryIds.indexOf(category),
     );
     expect(positions).not.toContain(-1);
-    expect(positions).toEqual(positions.sort());
+    expect(positions).toEqual(
+      positions.toSorted((left, right) => left - right),
+    );
   });
 
   it("starts with the agreed repository basics and a strict limit under 300", () => {
@@ -86,9 +92,7 @@ describe("instruction catalog", () => {
       expect(rule.help.en).not.toBe(rule.help.de);
       const setting = rule.setting;
       if (setting) expect(setting.label.en).not.toBe(setting.label.de);
-      for (const value of setting?.options?.map((option) => option.value) ?? [
-        setting?.initial ?? "",
-      ]) {
+      for (const value of ruleValues(rule)) {
         const en = rule.paragraph("en", value);
         const de = rule.paragraph("de", value);
         expect(en).not.toBe(de);

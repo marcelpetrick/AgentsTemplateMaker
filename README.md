@@ -100,3 +100,4 @@ Follow [the plan](plan.md), [the recorded decisions](docs/decisions.md), and
 [the requirements and checks](docs/requirements.md) to review a change.
 See the [C4 architecture views](docs/architecture.md) for the application
 boundaries, and [AGENTS.md](AGENTS.md) for contributor rules.
+[Code quality gates](docs/quality.md) lists the lint limits and analysis tools.

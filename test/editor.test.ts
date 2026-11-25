@@ -27,7 +27,7 @@ function fixture() {
 
 const cleanups: (() => void)[] = [];
 afterEach(() => {
-  while (cleanups.length) cleanups.pop()!();
+  while (cleanups.length > 0) cleanups.pop()!();
 });
 
 describe("undo restores generated rule authorship", () => {

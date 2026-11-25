@@ -40,29 +40,40 @@ const draftField = StateField.define<Draft>({
     return editDraft(draft, transaction.changes, restored);
   },
   provide(field) {
-    return EditorView.decorations.from(field, (draft) => {
-      const textMark = Decoration.mark({ class: "authored-text" });
-      const lineMark = Decoration.line({ class: "authored-line" });
-      const lineStarts = new Set<number>();
-      const decoration = authoredRanges(draft).flatMap(({ from, to }) => {
-        const content = draft.text.slice(from, to);
-        const first = content.search(/\S/);
-        if (first >= 0) {
-          const starts = [from + first];
-          for (const match of content.matchAll(/\n[ \t]*\n\s*(?=\S)/g)) {
-            starts.push(from + match.index + match[0].length);
-          }
-          for (const point of starts) {
-            lineStarts.add(draft.text.lastIndexOf("\n", point - 1) + 1);
-          }
-        }
-        return textMark.range(from, to);
-      });
-      for (const start of lineStarts) decoration.push(lineMark.range(start));
-      return Decoration.set(decoration, true);
-    });
+    return EditorView.decorations.from(field, authorshipDecorations);
   },
 });
+
+/** Offsets in `content` where an authored paragraph's first word starts. */
+function paragraphStarts(content: string): number[] {
+  const first = content.search(/\S/);
+  if (first === -1) return [];
+  const starts = [first];
+  for (const match of content.matchAll(/\n[ \t]*\n/g)) {
+    const end = match.index + match[0].length;
+    const next = content.slice(end).search(/\S/);
+    if (next !== -1) starts.push(end + next);
+  }
+  return starts;
+}
+
+const textMark = Decoration.mark({ class: "authored-text" });
+const lineMark = Decoration.line({ class: "authored-line" });
+
+// Underline authored text and mark the first line of each authored paragraph.
+function authorshipDecorations(draft: Draft) {
+  const lineStarts = new Set<number>();
+  const decoration = authoredRanges(draft).map(({ from, to }) => {
+    const starts = paragraphStarts(draft.text.slice(from, to));
+    for (const start of starts) {
+      const point = from + start;
+      lineStarts.add(draft.text.lastIndexOf("\n", point - 1) + 1);
+    }
+    return textMark.range(from, to);
+  });
+  for (const start of lineStarts) decoration.push(lineMark.range(start));
+  return Decoration.set(decoration, true);
+}
 
 const authorshipHistory = invertedEffects.of((transaction) => {
   if (!transaction.docChanged) return [];
@@ -74,13 +85,26 @@ const authorshipHistory = invertedEffects.of((transaction) => {
   return restore ? [restoreGenerated.of(restore)] : [];
 });
 
-export function openEditor(
+// Report typing, undo, and redo. Form changes replace the draft and render
+// the form themselves.
+function userEdits(onDraftChange: () => void) {
+  return EditorView.updateListener.of((update) => {
+    const edited = update.transactions.some(
+      (transaction) =>
+        transaction.docChanged &&
+        transaction.effects.every((effect) => !effect.is(replaceDraft)),
+    );
+    if (edited) onDraftChange();
+  });
+}
+
+function createView(
   parent: HTMLElement,
   initial: Draft,
+  accessibility: Compartment,
   onDraftChange: () => void,
 ) {
-  const accessibility = new Compartment();
-  const view = new EditorView({
+  return new EditorView({
     parent,
     state: EditorState.create({
       doc: initial.text,
@@ -91,20 +115,21 @@ export function openEditor(
         keymap.of([...defaultKeymap, ...historyKeymap]),
         history(),
         authorshipHistory,
-        EditorView.updateListener.of((update) => {
-          if (
-            update.transactions.some(
-              (transaction) =>
-                transaction.docChanged &&
-                !transaction.effects.some((effect) => effect.is(replaceDraft)),
-            )
-          ) {
-            onDraftChange();
-          }
-        }),
+        userEdits(onDraftChange),
       ],
     }),
   });
+}
+
+export type Editor = ReturnType<typeof openEditor>;
+
+export function openEditor(
+  parent: HTMLElement,
+  initial: Draft,
+  onDraftChange: () => void,
+) {
+  const accessibility = new Compartment();
+  const view = createView(parent, initial, accessibility, onDraftChange);
 
   return {
     view,

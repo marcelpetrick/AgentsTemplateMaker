@@ -1,0 +1,9 @@
+Review bulk-undo-d22e981
+Revision d22e98198c09e98379f214b853a98260935d953f
+Requirements F03–F05. Verify full-draft deletion and undo restores generated positional ranges, preserves identical authored copies and retains unrelated form selections.
+Prerequisites Node 24.20.0, npm, Git/Bash, Chromium and browser download/runtime libraries. No secrets.
+Reproduction Extract git archive <SHA> into an empty directory, run npm ci and npm run coverage. In the built app, add an identical custom copy, use Ctrl+A/Delete/Ctrl+Z, uncheck the original, and compare draft and authorship. Repeat after changing theme and UI language while deleted. Repeat with a nonempty full-draft replacement instead of Delete.
+Expected Generated contributions and separators restore in their original positions; personal copies remain authored. Switching unrelated controls should not change history.
+Observed All 42 tracked tests and 98.77% line coverage. Independent Chromium walkthrough and duplicate fixture passed the exact deletion case and preserved a 300 paragraph as authored after approving 600. Full nonempty replacement followed by Undo restored text but left originally generated paragraphs marked as authored.
+Disposition Bulk deletion finding fixed. Nonempty replacement opened a corrective revision.
+Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45693720234

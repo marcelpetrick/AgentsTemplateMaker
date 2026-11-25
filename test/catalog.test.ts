@@ -24,7 +24,9 @@ describe("instruction catalog", () => {
       "advisor",
       "autonomy",
       "technologies",
+      "languages",
       "open-source",
+      "character-set",
       "versioning",
       "lint-format",
       "dependencies",
@@ -146,6 +148,54 @@ describe("instruction catalog", () => {
     );
     expect(paragraph("dependencies", "en")).toMatch(
       /Pin.*compatible updates.*failing check/,
+    );
+  });
+
+  it("lists common languages and frameworks and allows domain-specific ones", () => {
+    const languages = rules.find(({ id }) => id === "languages")!;
+    expect(languages.setting?.kind).toBe("multi");
+    const values = languages.setting!.options!.map(({ value }) => value);
+    for (const expected of [
+      "shell",
+      "python",
+      "cpp",
+      "cmake",
+      "qt",
+      "lvgl",
+      "touchgfx",
+      "esp-idf",
+      "freertos",
+      "zephyr",
+      "typescript",
+      "rust",
+    ])
+      expect(values).toContain(expected);
+    expect(paragraph("languages", "en", "")).toMatch(
+      /languages and frameworks the project already uses.*domain-specific language.*record why/,
+    );
+    expect(paragraph("languages", "en", "python,cpp,qt")).toMatch(
+      /^Use these languages and frameworks: Python, C\+\+, Qt\. .*domain-specific/,
+    );
+    expect(paragraph("languages", "de", "cpp,python")).toMatch(
+      /^Nutze diese Sprachen und Frameworks: Python, C\+\+\. /,
+    );
+  });
+
+  it("offers Unicode-compliant code or an ASCII-only restriction", () => {
+    expect(paragraph("character-set", "en", "unicode")).toMatch(
+      /UTF-8.*code point.*grapheme.*normaliz/,
+    );
+    expect(paragraph("character-set", "en", "ascii")).toMatch(
+      /identifiers.*comments.*file names.*ASCII.*exception/,
+    );
+  });
+
+  it("asks for a review loop after each planning change and implementation iteration", () => {
+    expect(paragraph("review", "en")).toMatch(
+      /each planning change.*each implementation iteration.*still fits.*repeat/,
+    );
+    expect(paragraph("review", "de")).toMatch(
+      /Planungsänderung.*Umsetzungsschritt.*wiederhole/,
     );
   });
 

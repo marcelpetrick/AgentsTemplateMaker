@@ -8,7 +8,7 @@ export interface RuleSetting {
   readonly label: Localized;
   readonly initial: string;
   readonly options?: readonly { value: string; label: Localized }[];
-  readonly kind: "select" | "text" | "percent";
+  readonly kind: "select" | "multi" | "text" | "percent";
 }
 
 export interface Rule {
@@ -91,6 +91,55 @@ function commitLimit(limit: number): Choice {
       `Schreibe die gesamte Commit-Nachricht mit weniger als ${limit} Zeichen. Zähle Betreff, Nachrichtentext, Fußzeilen und alle inneren Zeilenumbrüche einschließlich Leerzeilen. Erlaubt sind höchstens ${limit - 1} Zeichen.`,
     ),
   };
+}
+
+const languageNames: readonly [string, string][] = [
+  ["shell", "Shell"],
+  ["python", "Python"],
+  ["c", "C"],
+  ["cpp", "C++"],
+  ["cmake", "CMake"],
+  ["qt", "Qt"],
+  ["lvgl", "LVGL"],
+  ["touchgfx", "TouchGFX"],
+  ["esp-idf", "ESP-IDF"],
+  ["freertos", "FreeRTOS"],
+  ["zephyr", "Zephyr RTOS"],
+  ["typescript", "TypeScript"],
+  ["javascript", "JavaScript"],
+  ["rust", "Rust"],
+  ["go", "Go"],
+  ["java", "Java"],
+  ["kotlin", "Kotlin"],
+  ["csharp", "C#"],
+  ["sql", "SQL"],
+];
+
+function chosenLanguages(value: string) {
+  const chosen = new Set(value.split(","));
+  return languageNames
+    .filter(([id]) => chosen.has(id))
+    .map(([, name]) => name)
+    .join(", ");
+}
+
+const domainSpecific = localized(
+  "When a task clearly needs a more domain-specific language, such as a query, shader, build, or hardware description language, use it and record why.",
+  "Wenn eine Aufgabe eindeutig eine spezifischere Sprache braucht, etwa eine Abfrage-, Shader-, Build- oder Hardwarebeschreibungssprache, nutze sie und halte fest, warum.",
+);
+
+function languagesParagraph(language: Language, value: string) {
+  const names = chosenLanguages(value);
+  const intro = names
+    ? localized(
+        `Use these languages and frameworks: ${names}.`,
+        `Nutze diese Sprachen und Frameworks: ${names}.`,
+      )
+    : localized(
+        "Use the languages and frameworks the project already uses.",
+        "Nutze die Sprachen und Frameworks, die das Projekt bereits verwendet.",
+      );
+  return `${intro[language]} ${domainSpecific[language]}`;
 }
 
 export const rules: readonly Rule[] = [
@@ -232,6 +281,27 @@ export const rules: readonly Rule[] = [
           )[language];
     },
   },
+  {
+    ...item(
+      "languages",
+      "software",
+      localized("Languages and frameworks", "Sprachen und Frameworks"),
+      localized(
+        "A fixed set of languages keeps the code base consistent and reviewable. Allowing domain-specific languages avoids forcing a general language onto a specialized task.",
+        "Eine feste Auswahl an Sprachen hält den Code einheitlich und prüfbar. Spezifische Sprachen zuzulassen vermeidet, dass eine allgemeine Sprache eine Spezialaufgabe erzwingt.",
+      ),
+    ),
+    setting: {
+      kind: "multi",
+      label: localized("Preferred languages", "Bevorzugte Sprachen"),
+      initial: "",
+      options: languageNames.map(([value, name]) => ({
+        value,
+        label: localized(name, name),
+      })),
+    },
+    paragraph: languagesParagraph,
+  },
   fixed(
     item(
       "open-source",
@@ -246,6 +316,36 @@ export const rules: readonly Rule[] = [
       "Prefer open-source tools where feasible. Honor explicit exceptions from the project or user, and record why an exception is needed.",
       "Bevorzuge nach Möglichkeit quelloffene Werkzeuge. Beachte ausdrückliche Ausnahmen des Projekts oder des Nutzers und halte fest, warum eine Ausnahme nötig ist.",
     ),
+  ),
+  choices(
+    item(
+      "character-set",
+      "software",
+      localized("Character set", "Zeichensatz"),
+      localized(
+        "Unicode supports every script and the names people actually use. An ASCII-only rule avoids encoding problems in older toolchains and embedded targets but excludes other scripts.",
+        "Unicode unterstützt alle Schriften und die Namen, die Menschen tatsächlich verwenden. Eine Beschränkung auf ASCII vermeidet Kodierungsprobleme in älteren Werkzeugketten und eingebetteten Zielen, schließt aber andere Schriften aus.",
+      ),
+    ),
+    localized("Allowed characters", "Erlaubte Zeichen"),
+    [
+      {
+        value: "unicode",
+        label: localized("Unicode (UTF-8)", "Unicode (UTF-8)"),
+        text: localized(
+          "Write Unicode-compliant code. Read and write text as UTF-8. Do not assume one byte or one code point per visible character: count, cut, and compare text by grapheme where users see it, and normalize text before comparing it. Test with accents, non-Latin scripts, and emoji.",
+          "Schreibe Unicode-konformen Code. Lies und schreibe Text als UTF-8. Gehe nicht davon aus, dass ein sichtbares Zeichen einem Byte oder einem Code Point entspricht: Zähle, kürze und vergleiche Text dort nach Graphemen, wo Nutzer ihn sehen, und normalisiere Text vor Vergleichen. Teste mit Akzenten, nicht lateinischen Schriften und Emoji.",
+        ),
+      },
+      {
+        value: "ascii",
+        label: localized("ASCII only", "Nur ASCII"),
+        text: localized(
+          "Restrict source code, identifiers, comments, file names, and generated text to ASCII characters. Replace typographic quotes, dashes, and symbols with ASCII equivalents. Record any exception an external format or user requirement needs.",
+          "Beschränke Quellcode, Bezeichner, Kommentare, Dateinamen und erzeugten Text auf ASCII-Zeichen. Ersetze typografische Anführungszeichen, Striche und Symbole durch ASCII-Entsprechungen. Halte jede Ausnahme fest, die ein externes Format oder eine Nutzeranforderung verlangt.",
+        ),
+      },
+    ],
   ),
   choices(
     item(
@@ -412,8 +512,8 @@ export const rules: readonly Rule[] = [
       ),
     ),
     localized(
-      "Challenge requirements before implementation and review every atomic commit. Look for ambiguous goals, counterexamples, missing failure cases, and unsupported claims. Record the reviewed commit SHA, findings, evidence, and how each finding was resolved outside that commit. Reproduce the checks independently from a clean checkout when possible and mark any unverified claim.",
-      "Hinterfrage Anforderungen vor der Umsetzung und prüfe jeden atomaren Commit. Suche unklare Ziele, Gegenbeispiele, fehlende Fehlerfälle und unbelegte Behauptungen. Halte Commit-SHA, Befunde, Nachweise und den Umgang mit jedem Befund außerhalb des geprüften Commits fest. Wiederhole die Prüfungen möglichst unabhängig aus einem sauberen Checkout und kennzeichne ungeprüfte Aussagen.",
+      "Challenge requirements before implementation and review every atomic commit. Look for ambiguous goals, counterexamples, missing failure cases, and unsupported claims. Record the reviewed commit SHA, findings, evidence, and how each finding was resolved outside that commit. Reproduce the checks independently from a clean checkout when possible and mark any unverified claim. After each planning change and each implementation iteration, check that the result still fits the requirements and the plan, and repeat the review until it does or a person decides.",
+      "Hinterfrage Anforderungen vor der Umsetzung und prüfe jeden atomaren Commit. Suche unklare Ziele, Gegenbeispiele, fehlende Fehlerfälle und unbelegte Behauptungen. Halte Commit-SHA, Befunde, Nachweise und den Umgang mit jedem Befund außerhalb des geprüften Commits fest. Wiederhole die Prüfungen möglichst unabhängig aus einem sauberen Checkout und kennzeichne ungeprüfte Aussagen. Prüfe nach jeder Planungsänderung und jedem Umsetzungsschritt, ob das Ergebnis noch zu den Anforderungen und zum Plan passt, und wiederhole die Prüfung, bis es passt oder ein Mensch entscheidet.",
     ),
   ),
   fixed(

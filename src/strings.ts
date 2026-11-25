@@ -37,6 +37,10 @@ export const strings = {
     editedRule: (label: string) => `Edited rule: ${label}`,
     ruleHelp: (label: string) => `About this rule: ${label}`,
     selected: (count: number) => `${count} selected`,
+    all: "All",
+    none: "None",
+    selectAllIn: (category: string) => `Select all in ${category}`,
+    selectNoneIn: (category: string) => `Select none in ${category}`,
     textCount: (words: number, characters: number) =>
       `${words} ${words === 1 ? "word" : "words"} · ${characters} ${characters === 1 ? "character" : "characters"}`,
     documentTitle: "# Project instructions",
@@ -83,6 +87,10 @@ export const strings = {
     editedRule: (label: string) => `Bearbeitete Regel: ${label}`,
     ruleHelp: (label: string) => `Über diese Regel: ${label}`,
     selected: (count: number) => `${count} ausgewählt`,
+    all: "Alle",
+    none: "Keine",
+    selectAllIn: (category: string) => `Alle in ${category} auswählen`,
+    selectNoneIn: (category: string) => `Keine in ${category} auswählen`,
     textCount: (words: number, characters: number) =>
       `${words} ${words === 1 ? "Wort" : "Wörter"} · ${characters} Zeichen`,
     documentTitle: "# Projektanweisungen",

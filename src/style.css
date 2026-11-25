@@ -157,7 +157,7 @@ select {
 }
 
 select,
-.rule-setting input {
+.rule-setting input:not([type="checkbox"]) {
   min-block-size: 2.25rem;
   max-inline-size: 100%;
   padding: 0.2rem 0.5rem;
@@ -521,8 +521,61 @@ button.rule-help[aria-expanded="true"] {
   font-weight: 650;
 }
 
+.rule-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.35rem 0.75rem;
+  padding: 0;
+  border: 0;
+}
+
+.rule-choices legend {
+  padding: 0;
+  margin-block-end: 0.35rem;
+}
+
+.setting-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.setting-choice input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
 .rule-setting input[type="number"] {
   width: 5rem;
+}
+
+.category-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: 0.35rem 1.25rem 0;
+}
+
+.text-button {
+  min-height: 2rem;
+  padding: 0.2rem 0.55rem;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  border-radius: 0.35rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.text-button:hover {
+  background: var(--subtle);
 }
 
 .rule-edited {

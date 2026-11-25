@@ -16,8 +16,16 @@ let view: EditorView;
 
 function select(id: string, value: string) {
   const control = element<HTMLInputElement | HTMLSelectElement>(id);
-  control.value = value;
-  control.dispatchEvent(new Event("change"));
+  if (control) {
+    control.value = value;
+    control.dispatchEvent(new Event("change"));
+    return;
+  }
+  const boxes = document.querySelectorAll<HTMLInputElement>(
+    `input[id^="${id}-"]`,
+  );
+  for (const box of boxes) box.checked = box.value === value;
+  boxes[0].dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 function edit(text: string, addition: string) {
@@ -229,6 +237,67 @@ describe("workspace", () => {
     element("select-all").click();
     expect(element("draft-stats").textContent).toMatch(
       /^\d{3,} Wörter · \d+ Zeichen$/,
+    );
+  });
+
+  it("chooses several languages and frameworks and keeps an edited choice on confirmation", async () => {
+    element("rule-languages").click();
+    expect(draft()).toContain(paragraph("languages", ""));
+    element("setting-languages-python").click();
+    element("setting-languages-cpp").click();
+    expect(draft()).toContain(paragraph("languages", "python,cpp"));
+    element("setting-languages-python").click();
+    expect(draft()).toContain(paragraph("languages", "cpp"));
+    edit(paragraph("languages", "cpp"), " eigene ");
+    const before = draft();
+    element("setting-languages-rust").click();
+    expect(element<HTMLInputElement>("setting-languages-rust").checked).toBe(
+      false,
+    );
+    expect(element<HTMLDialogElement>("confirm-change").open).toBe(true);
+    element("apply-change").click();
+    await vi.waitFor(() =>
+      expect(element<HTMLInputElement>("setting-languages-rust").checked).toBe(
+        true,
+      ),
+    );
+    expect(draft()).toBe(before);
+    select("ui-language", "de");
+    expect(
+      element("setting-languages-shell").closest("label")!.textContent,
+    ).toBe("Shell");
+    expect(
+      element("setting-languages-rust")
+        .closest("fieldset")!
+        .querySelector("legend")!.textContent,
+    ).toBe("Bevorzugte Sprachen");
+  });
+
+  it("selects all or none within one category only", () => {
+    const inCategory = (id: string) =>
+      rules.filter((entry) => entry.category === id);
+    edit(paragraph("credentials"), " eigene ");
+    element("select-all-software").click();
+    for (const entry of inCategory("software"))
+      expect(element<HTMLInputElement>(`rule-${entry.id}`).checked).toBe(true);
+    for (const entry of inCategory("agent"))
+      expect(element<HTMLInputElement>(`rule-${entry.id}`).checked).toBe(false);
+    expect(draft()).toContain(paragraph("open-source"));
+    element("select-none-repository").click();
+    for (const entry of inCategory("repository"))
+      expect(element<HTMLInputElement>(`rule-${entry.id}`).checked).toBe(false);
+    expect(element<HTMLInputElement>("rule-open-source").checked).toBe(true);
+    expect(draft()).toContain(" eigene ");
+    expect(element("status").textContent).toBe(
+      "Kept your edited text for 1 rule as custom text.",
+    );
+    expect(element("select-all-software").getAttribute("aria-label")).toBe(
+      "Select all in Software and technology",
+    );
+    select("ui-language", "de");
+    expect(element("select-none-software").textContent).toBe("Keine");
+    expect(element("select-none-software").getAttribute("aria-label")).toBe(
+      "Keine in Software und Technik auswählen",
     );
   });
 

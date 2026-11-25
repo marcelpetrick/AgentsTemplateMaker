@@ -36,29 +36,74 @@ function append<T extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
-function settingControl(parent: HTMLElement, id: string, setting: RuleSetting) {
-  const wrapper = append(parent, "label", "rule-setting");
-  const label = append(wrapper, "span");
+interface SettingInput {
+  id: string;
+  value: string;
+  addEventListener(type: "change", listener: () => void): void;
+}
+
+function singleInput(parent: HTMLElement, setting: RuleSetting) {
   const options = setting.options ?? [];
-  const choices =
-    options.length > 0 ? append(wrapper, "select") : append(wrapper, "input");
-  choices.id = `setting-${id}`;
-  if (choices instanceof HTMLInputElement) {
-    choices.type = setting.kind === "percent" ? "number" : "text";
+  const input =
+    options.length > 0 ? append(parent, "select") : append(parent, "input");
+  if (input instanceof HTMLInputElement) {
+    input.type = setting.kind === "percent" ? "number" : "text";
     if (setting.kind === "percent") {
-      choices.min = "0";
-      choices.max = "100";
-      choices.step = "any";
-      choices.required = true;
+      input.min = "0";
+      input.max = "100";
+      input.step = "any";
+      input.required = true;
     }
   }
   const entries = options.map(({ value, label }) => {
-    const option = append(choices, "option");
+    const option = append(input, "option");
     option.value = value;
-    return { option, label };
+    return { option: option as HTMLElement, label };
   });
-  choices.value = setting.initial;
-  return { choices, wrapper, entries, label, setting };
+  return { input: input as SettingInput, entries };
+}
+
+function multiInput(parent: HTMLElement, id: string, setting: RuleSetting) {
+  const boxes = (setting.options ?? []).map(({ value, label }) => {
+    const wrapper = append(parent, "label", "setting-choice");
+    const box = append(wrapper, "input");
+    box.type = "checkbox";
+    box.id = `setting-${id}-${value}`;
+    box.value = value;
+    return { box, entry: { option: append(wrapper, "span"), label } };
+  });
+  const input: SettingInput = {
+    id: `setting-${id}`,
+    get value() {
+      return boxes
+        .filter(({ box }) => box.checked)
+        .map(({ box }) => box.value)
+        .join(",");
+    },
+    set value(value: string) {
+      const chosen = new Set(value.split(","));
+      for (const { box } of boxes) box.checked = chosen.has(box.value);
+    },
+    addEventListener: (type, listener) =>
+      parent.addEventListener(type, listener),
+  };
+  return { input, entries: boxes.map(({ entry }) => entry) };
+}
+
+function settingControl(parent: HTMLElement, id: string, setting: RuleSetting) {
+  const multi = setting.kind === "multi";
+  const wrapper = append(
+    parent,
+    multi ? "fieldset" : "label",
+    multi ? "rule-setting rule-choices" : "rule-setting",
+  );
+  const label = append(wrapper, multi ? "legend" : "span");
+  const { input, entries } = multi
+    ? multiInput(wrapper, id, setting)
+    : singleInput(wrapper, setting);
+  input.id = `setting-${id}`;
+  input.value = setting.initial;
+  return { choices: input, wrapper, entries, label, setting };
 }
 
 function ruleControls(parent: HTMLElement, rule: Rule) {
@@ -130,11 +175,18 @@ export function mount() {
     details.addEventListener("pointerleave", () => {
       previewOpened = false;
     });
+    const actions = append(details, "div", "category-actions");
+    const all = append(actions, "button", "text-button");
+    all.type = "button";
+    all.id = `select-all-${category.id}`;
+    const none = append(actions, "button", "text-button");
+    none.type = "button";
+    none.id = `select-none-${category.id}`;
     const list = append(details, "div", "rule-list");
     const controls = rules
       .filter((rule) => rule.category === category.id)
       .map((rule) => ruleControls(list, rule));
-    return { category, label, count, controls };
+    return { category, label, count, controls, all, none };
   });
   const controls = groups.flatMap((group) => group.controls);
   const paragraph = (
@@ -220,8 +272,14 @@ export function mount() {
       document.documentElement.dataset.theme === "dark"
         ? words().switchLight
         : words().switchDark;
-    for (const group of groups)
-      group.label.textContent = group.category.label[uiLanguage];
+    for (const group of groups) {
+      const name = group.category.label[uiLanguage];
+      group.label.textContent = name;
+      group.all.textContent = words().all;
+      group.all.setAttribute("aria-label", words().selectAllIn(name));
+      group.none.textContent = words().none;
+      group.none.setAttribute("aria-label", words().selectNoneIn(name));
+    }
     for (const { help, rule, setting, title, tooltip } of controls) {
       title.textContent = rule.label[uiLanguage];
       help.setAttribute("aria-label", words().ruleHelp(rule.label[uiLanguage]));
@@ -333,21 +391,30 @@ export function mount() {
     });
   }
 
-  element("select-all").addEventListener("click", () => {
-    const added = rules.filter((rule) => !selected.has(rule.id));
+  function selectAll(scope: readonly Rule[]) {
+    const added = scope.filter((rule) => !selected.has(rule.id));
     for (const rule of added) selected.add(rule.id);
     updateParagraphs(
       added.map((rule) => ({ id: rule.id, text: paragraph(rule) })),
     );
     setMessage();
-  });
-  element("select-none").addEventListener("click", () => {
-    const removed = rules.filter((rule) => selected.has(rule.id));
+  }
+
+  function selectNone(scope: readonly Rule[]) {
+    const removed = scope.filter((rule) => selected.has(rule.id));
     const kept = removed.filter((rule) => isEdited(rule.id)).length;
-    selected.clear();
+    for (const rule of removed) selected.delete(rule.id);
     updateParagraphs(removed.map((rule) => ({ id: rule.id })));
     setMessage(kept > 0 ? { keptCount: kept } : undefined);
-  });
+  }
+
+  element("select-all").addEventListener("click", () => selectAll(rules));
+  element("select-none").addEventListener("click", () => selectNone(rules));
+  for (const group of groups) {
+    const scope = group.controls.map(({ rule }) => rule);
+    group.all.addEventListener("click", () => selectAll(scope));
+    group.none.addEventListener("click", () => selectNone(scope));
+  }
   element("workspace").addEventListener("click", (event) => {
     if (
       activeHelp &&

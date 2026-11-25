@@ -10,6 +10,23 @@
 | Defer the repository scan described in I12.                                                                                                                    | The vision places scanning in a later phase after trying the form and describes a separate scope decision.                              | Verify that adding a catalog entry needs no change to the editor.                         |
 | Use automated Chromium, Firefox, and WebKit production smoke and workflow tests.                                                                               | F02, F06, F07, F08, and F10 depend on real browser behavior. Compare the declared targets with pipeline results.                        | Browser report for all three targets and Chromium unit and integration coverage report.   |
 
+## Delivery decisions
+
+- The maintainer asked to work directly on `main`, push atomic Conventional
+  Commits, and use SemVer. The initial workspace feature moved the version to
+  0.1.0. Smaller changes increment the patch. The
+  [staged-tree check](../scripts/checkStaged.sh) and
+  [CI workflow](../.github/workflows/ci.yml) verify what is committed.
+- The maintainer asked for a README and GitHub About modeled on
+  [Boldemort](https://github.com/marcelpetrick/Boldemort). The
+  [README](../README.md) uses linked workflow badges, identifies the license
+  and toolchain, and shows a captured browser session.
+- The maintainer requested subagents, an implementation plan, and project
+  instructions. [plan.md](../plan.md) tracks delivery, [AGENTS.md](../AGENTS.md)
+  records working rules, and
+  [SHA-keyed review notes](requirements.md#review-and-deployment-evidence)
+  preserve independent reproduction and findings.
+
 ## Counterexamples
 
 - F03–F05: An identical authored paragraph can appear on either side of a generated rule, or an edit can replace a region spanning two rules. Toggle only the original contribution and check the surrounding characters.

@@ -11,9 +11,10 @@ the affected requirement IDs where applicable. Keep the full message under
 for a major feature and a patch bump for other changes.
 
 Write a failing test for new behavior or a reported defect. Run it to confirm
-the failure, then implement the change. Run `./localPipeline.sh` before each
-commit and push. Maintain at least 95% executable-line coverage and keep the
-hosted pipeline green.
+the failure, then implement the change. Run `./scripts/checkStaged.sh` before
+each commit and push. It runs `./localPipeline.sh` on an isolated export of the
+staged tree. Maintain at least 95% executable-line coverage and keep hosted
+checks green.
 
 Use the pinned Node.js release and exact dependency versions. Check updates
 against the full pipeline. Keep credentials out of project content and Git

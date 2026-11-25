@@ -24,6 +24,11 @@ test("defaults, repository hover, edited rule removal and accurate Markdown down
   const licenses = await page.request.get("dependency-licenses.md");
   expect(licenses.ok()).toBe(true);
   expect(await licenses.text()).toContain("@codemirror/state");
+  const projectLicense = await page.request.get("LICENSE.txt");
+  expect(projectLicense.ok()).toBe(true);
+  expect(await projectLicense.text()).toBe(
+    await readFile(new URL("../LICENSE", import.meta.url), "utf-8"),
+  );
   await expect(markdown(page)).toContainText("Conventional Commits");
   await expect(markdown(page)).toContainText("300");
   await expect(markdown(page)).toContainText("credential");

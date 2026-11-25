@@ -65,6 +65,12 @@ describe("workspace", () => {
       new PointerEvent("pointerenter", { pointerType: "mouse" }),
     );
     expect(category.open).toBe(true);
+    header.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true, detail: 1 }),
+    );
+    expect(category.open).toBe(true);
+    header.click();
+    expect(category.open).toBe(false);
     expect(draft()).toBe(before);
     element("rule-delegation").click();
     expect(draft()).toContain(paragraph("delegation", "prohibited"));
@@ -94,6 +100,9 @@ describe("workspace", () => {
     expect(help.hidden).toBe(true);
     trigger.click();
     expect(help.hidden).toBe(false);
+    trigger.click();
+    expect(help.hidden).toBe(true);
+    trigger.click();
     element("rules").click();
     expect(help.hidden).toBe(true);
     trigger.dispatchEvent(new FocusEvent("blur"));
@@ -105,6 +114,9 @@ describe("workspace", () => {
     expect(draft()).toContain(original);
     edit(original, " ergänzen ");
     expect(element("edit-warning").hidden).toBe(false);
+    expect(
+      element("rule-commit-limit").getAttribute("aria-describedby"),
+    ).toContain("edited-commit-limit");
     expect(document.querySelector(".authored-text")).not.toBeNull();
     const before = draft();
     element("rule-commit-limit").click();
@@ -204,7 +216,9 @@ describe("workspace", () => {
   });
 
   it("copies and downloads the exact editor text and reports clipboard failure", async () => {
-    view.dispatch({ changes: { from: 0, insert: "Äußere Worte\n\n" } });
+    const example = "Äußere Worte\n\nSERVICE_TOKEN=<synthetic-placeholder>\n\n";
+    view.dispatch({ changes: { from: 0, insert: example } });
+    expect(draft()).toContain(example);
     const clipboard = vi.fn().mockResolvedValue(undefined);
     vi.spyOn(navigator, "clipboard", "get").mockReturnValue({
       writeText: clipboard,
@@ -231,5 +245,51 @@ describe("workspace", () => {
       "AGENTS.md",
     );
     expect(await (create.mock.calls[0][0] as Blob).text()).toBe(draft());
+  });
+
+  it("exports each policy variant and removes only its generated copy in both languages", async () => {
+    const clipboard = vi.fn().mockResolvedValue(undefined);
+    vi.spyOn(navigator, "clipboard", "get").mockReturnValue({
+      writeText: clipboard,
+    } as unknown as Clipboard);
+    for (const rule of rules.filter((entry) => entry.defaultSelected)) {
+      element(`rule-${rule.id}`).click();
+    }
+
+    for (const language of ["en", "de"] as const) {
+      select("document-language", language);
+      const title = draft();
+      for (const rule of rules) {
+        const checkbox = element(`rule-${rule.id}`);
+        const setting = rule.setting;
+        const values = setting?.options?.map(({ value }) => value) ?? [
+          setting?.initial ?? "",
+        ];
+        for (const value of values) {
+          checkbox.click();
+          if (setting) select(`setting-${rule.id}`, value);
+          const expected = rule.paragraph(language, value);
+          expect(draft(), rule.id).toBe(`${title}\n\n${expected}`);
+
+          view.dispatch({
+            changes: { from: view.state.doc.length, insert: `\n\n${expected}` },
+          });
+          element("copy").click();
+          expect(clipboard).toHaveBeenLastCalledWith(
+            `${title}\n\n${expected}\n\n${expected}`,
+          );
+          checkbox.click();
+          expect(draft(), rule.id).toBe(`${title}\n\n${expected}`);
+          expect(document.querySelector(".authored-text")?.textContent).toBe(
+            expected,
+          );
+          view.dispatch({
+            changes: { from: title.length, to: view.state.doc.length },
+          });
+          expect(draft()).toBe(title);
+        }
+      }
+      await Promise.resolve();
+    }
   });
 });

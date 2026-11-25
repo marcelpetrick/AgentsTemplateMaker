@@ -73,11 +73,10 @@ function ruleControls(parent: HTMLElement, rule: Rule) {
   tooltip.hidden = true;
   help.setAttribute("aria-expanded", "false");
   help.setAttribute("aria-controls", tooltip.id);
-  // The explanation is available to screen readers with either rule control.
   help.setAttribute("aria-describedby", tooltip.id);
-  checkbox.setAttribute("aria-describedby", tooltip.id);
   const setting = rule.setting && settingControl(row, rule.id, rule.setting);
   const edited = append(row, "p", "rule-edited");
+  edited.id = `edited-${rule.id}`;
   return { checkbox, edited, help, rule, setting, title, tooltip };
 }
 
@@ -170,7 +169,7 @@ export function mount() {
       );
     }
     let hasEditedRule = false;
-    for (const { checkbox, edited, rule, setting } of controls) {
+    for (const { checkbox, edited, rule, setting, tooltip } of controls) {
       checkbox.checked = selected.has(rule.id);
       if (setting) {
         setting.wrapper.hidden = !checkbox.checked;
@@ -181,6 +180,10 @@ export function mount() {
       const wasEdited = isEdited(rule.id);
       hasEditedRule ||= wasEdited;
       edited.hidden = !wasEdited;
+      checkbox.setAttribute(
+        "aria-describedby",
+        wasEdited ? `${tooltip.id} ${edited.id} edit-warning` : tooltip.id,
+      );
       edited.textContent = wasEdited
         ? words().editedRule(rule.label[uiLanguage])
         : "";
@@ -229,7 +232,6 @@ export function mount() {
       append(list, "li").textContent = rule?.label[uiLanguage] ?? "AGENTS.md";
     }
     pendingChange = apply;
-    dialog.returnValue = "";
     dialog.showModal();
   }
 

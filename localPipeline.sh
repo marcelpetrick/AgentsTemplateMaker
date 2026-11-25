@@ -5,9 +5,18 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
 
 npm ci
-npx --no-install playwright install chromium
+if [[ ${PLAYWRIGHT_INSTALL_SYSTEM_DEPS:-0} == 1 ]]; then
+    npx --no-install playwright install --with-deps chromium firefox webkit
+else
+    npx --no-install playwright install chromium firefox webkit
+fi
+bash -n localPipeline.sh
+for script in scripts/*.sh; do
+    bash -n "$script"
+done
 npm run format:check
 npm run lint
 npm run typecheck
 npm run coverage
 npm run build
+npm run test:e2e

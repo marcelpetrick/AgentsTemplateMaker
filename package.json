@@ -1,6 +1,6 @@
 {
   "name": "agents-template-maker",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "license": "GPL-3.0-or-later",
@@ -16,7 +16,8 @@
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc",
     "test": "vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@codemirror/commands": "6.11.2",

@@ -1,13 +1,153 @@
 <!doctype html>
-<!-- SPDX-FileCopyrightText: 2026 Marcel Petrick -->
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<html lang="en">
+<!-- Copyright (C) 2026 Marcel Petrick. SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="en" data-theme="light">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AgentsTemplateMaker</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Choose project rules, edit the draft, and export AGENTS.md for your coding agent."
+    />
+    <title>Agent Maker</title>
   </head>
   <body>
-    <h1>AgentsTemplateMaker</h1>
+    <a class="skip-link" href="#workspace" data-copy="skipLink"
+      >Skip to workspace</a
+    >
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">›_</span>
+          <span>Agent Maker</span>
+        </div>
+        <div class="header-settings">
+          <label class="inline-setting">
+            <span data-copy="interfaceLanguage">Interface</span>
+            <select id="ui-language">
+              <option value="en" lang="en">English</option>
+              <option value="de" lang="de">Deutsch</option>
+            </select>
+          </label>
+          <button id="theme-toggle" class="secondary-button" type="button">
+            <span aria-hidden="true" class="theme-icon"></span>
+            <span data-copy="theme">Dark mode</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="workspace" tabindex="-1">
+      <div class="intro">
+        <h1 data-copy="heading">Build your AGENTS.md</h1>
+        <p data-copy="intro">
+          Choose how coding agents work in your project, then edit and export
+          their instructions.
+        </p>
+      </div>
+      <div class="workspace">
+        <section class="rules-panel" aria-labelledby="rules-heading">
+          <div class="rules-header">
+            <h2 id="rules-heading" data-copy="rulesHeading">Project rules</h2>
+          </div>
+          <div id="rules"></div>
+        </section>
+        <section class="document-panel" aria-labelledby="document-heading">
+          <div class="document-header">
+            <h2 id="document-heading">AGENTS.md</h2>
+            <div class="document-actions">
+              <button
+                id="copy"
+                class="secondary-button"
+                type="button"
+                data-copy="copy"
+              >
+                Copy
+              </button>
+              <button
+                id="download"
+                class="primary-button"
+                type="button"
+                data-copy="download"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+          <div class="document-settings">
+            <label class="inline-setting">
+              <span data-copy="documentLanguage">Document language</span>
+              <select
+                id="document-language"
+                aria-describedby="language-recommendation"
+              >
+                <option value="en" lang="en">English</option>
+                <option value="de" lang="de">Deutsch</option>
+              </select>
+            </label>
+            <span id="language-recommendation" data-copy="recommendation"
+              >English recommended</span
+            >
+          </div>
+          <div id="editor" aria-describedby="editor-help"></div>
+          <div class="document-footer">
+            <p id="editor-help" data-copy="editorHelp">
+              Type anywhere. Your edits are underlined.
+            </p>
+            <p id="edit-warning" hidden></p>
+            <p
+              id="status"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            ></p>
+          </div>
+        </section>
+      </div>
+      <footer class="site-footer">
+        <a
+          href="https://github.com/marcelpetrick/AgentsTemplateMaker/blob/main/LICENSE"
+          data-copy="sourceLicense"
+          >Source code · GPLv3 or later</a
+        >
+        <span id="version"></span>
+      </footer>
+    </main>
+
+    <dialog
+      id="confirm-change"
+      aria-labelledby="confirm-heading"
+      aria-describedby="confirm-detail"
+    >
+      <form method="dialog">
+        <h2 id="confirm-heading" data-copy="confirmHeading">
+          Keep your edited text?
+        </h2>
+        <p id="confirm-detail" data-copy="confirmDetail">
+          These rules contain your edits. Applying the change keeps that text as
+          written.
+        </p>
+        <ul id="confirm-rules"></ul>
+        <div class="document-actions">
+          <button
+            id="cancel-change"
+            class="secondary-button"
+            value="cancel"
+            autofocus
+            data-copy="cancel"
+          >
+            Cancel
+          </button>
+          <button
+            id="apply-change"
+            class="primary-button"
+            value="apply"
+            data-copy="apply"
+          >
+            Apply change
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -1,0 +1,391 @@
+// SPDX-FileCopyrightText: 2026 Marcel Petrick
+// SPDX-License-Identifier: GPL-3.0-or-later
+import "./style.css";
+import { ChangeSet } from "@codemirror/state";
+import {
+  categories,
+  rules,
+  type Language,
+  type Rule,
+  type RuleSetting,
+} from "./catalog";
+import { createDraft, replaceRule } from "./draft";
+import { openEditor } from "./editor";
+import { strings } from "./strings";
+import { version } from "./version";
+
+type Message = "copied" | "copyFailed" | "downloaded" | { kept: Rule };
+
+const element = <T extends HTMLElement>(id: string) =>
+  document.getElementById(id) as T;
+
+function append<T extends keyof HTMLElementTagNameMap>(
+  parent: HTMLElement,
+  tag: T,
+  className = "",
+): HTMLElementTagNameMap[T] {
+  const node = document.createElement(tag);
+  node.className = className;
+  parent.append(node);
+  return node;
+}
+
+function settingControl(parent: HTMLElement, id: string, setting: RuleSetting) {
+  const wrapper = append(parent, "label", "rule-setting");
+  const label = append(wrapper, "span");
+  const options = setting.options ?? [];
+  const choices =
+    options.length > 0 ? append(wrapper, "select") : append(wrapper, "input");
+  choices.id = `setting-${id}`;
+  if (choices instanceof HTMLInputElement) {
+    choices.type = setting.kind === "percent" ? "number" : "text";
+    if (setting.kind === "percent") {
+      choices.min = "0";
+      choices.max = "100";
+      choices.step = "any";
+      choices.required = true;
+    }
+  }
+  const entries = options.map(({ value, label }) => {
+    const option = append(choices, "option");
+    option.value = value;
+    return { option, label };
+  });
+  choices.value = setting.initial;
+  return { choices, wrapper, entries, label, setting };
+}
+
+function ruleControls(parent: HTMLElement, rule: Rule) {
+  const row = append(parent, "div", "rule");
+  const line = append(row, "div", "rule-line");
+  const label = append(line, "label", "rule-label");
+  const checkbox = append(label, "input");
+  checkbox.type = "checkbox";
+  checkbox.id = `rule-${rule.id}`;
+  checkbox.checked = Boolean(rule.defaultSelected);
+  const title = append(label, "span");
+  const help = append(line, "button", "rule-help");
+  help.type = "button";
+  help.id = `help-${rule.id}`;
+  help.textContent = "?";
+  const tooltip = append(row, "p", "rule-tooltip");
+  tooltip.id = `tooltip-${rule.id}`;
+  tooltip.hidden = true;
+  help.setAttribute("aria-expanded", "false");
+  help.setAttribute("aria-controls", tooltip.id);
+  // The explanation is available to screen readers with either rule control.
+  help.setAttribute("aria-describedby", tooltip.id);
+  checkbox.setAttribute("aria-describedby", tooltip.id);
+  const setting = rule.setting && settingControl(row, rule.id, rule.setting);
+  const edited = append(row, "p", "rule-edited");
+  return { checkbox, edited, help, rule, setting, title, tooltip };
+}
+
+export function mount() {
+  let uiLanguage: Language = "en";
+  let outputLanguage: Language = "en";
+  let message: Message | undefined;
+  let pendingChange: (() => void) | undefined;
+  let activeHelp: HTMLButtonElement | undefined;
+  let pinnedHelp: HTMLButtonElement | undefined;
+  const selected = new Set(
+    rules.filter((rule) => rule.defaultSelected).map((rule) => rule.id),
+  );
+  const settings = new Map(
+    rules.map((rule) => [rule.id, rule.setting?.initial ?? ""]),
+  );
+  const order = ["title", ...rules.map((rule) => rule.id)];
+  const rulePanel = element("rules");
+  const uiSelect = element<HTMLSelectElement>("ui-language");
+  const outputSelect = element<HTMLSelectElement>("document-language");
+  const theme = element("theme-toggle");
+  const dialog = element<HTMLDialogElement>("confirm-change");
+  const warning = element("edit-warning");
+  const status = element("status");
+  const words = () => strings[uiLanguage];
+
+  const groups = categories.map((category, index) => {
+    const details = append(rulePanel, "details", "category");
+    details.id = `category-${category.id}`;
+    details.open = index === 0;
+    const summary = append(details, "summary");
+    const label = append(summary, "span");
+    const count = append(summary, "span", "category-count");
+    let previewOpened = false;
+    summary.addEventListener("pointerenter", (event) => {
+      if (event.pointerType === "mouse" && !details.open) {
+        details.open = true;
+        previewOpened = true;
+      }
+    });
+    summary.addEventListener("click", (event) => {
+      if (previewOpened && event.detail > 0) event.preventDefault();
+      previewOpened = false;
+    });
+    details.addEventListener("pointerleave", () => {
+      previewOpened = false;
+    });
+    const list = append(details, "div", "rule-list");
+    const controls = rules
+      .filter((rule) => rule.category === category.id)
+      .map((rule) => ruleControls(list, rule));
+    return { category, label, count, controls };
+  });
+  const controls = groups.flatMap((group) => group.controls);
+  const paragraph = (
+    rule: Rule,
+    language = outputLanguage,
+    value = settings.get(rule.id)!,
+  ) => rule.paragraph(language, value);
+
+  const editor = openEditor(
+    element("editor"),
+    createDraft(
+      strings[outputLanguage].documentTitle,
+      rules
+        .filter((rule) => selected.has(rule.id))
+        .map((rule) => ({ id: rule.id, text: paragraph(rule) })),
+    ),
+    renderRules,
+  );
+
+  function setMessage(next?: Message) {
+    message = next;
+    status.textContent =
+      next && typeof next === "object"
+        ? words().keptRule(next.kept.label[uiLanguage])
+        : next
+          ? words()[next]
+          : "";
+  }
+
+  function isEdited(id: string) {
+    return editor.draft.ranges.some((range) => range.id === id && range.edited);
+  }
+
+  function renderRules() {
+    for (const group of groups) {
+      group.count.textContent = words().selected(
+        group.controls.filter(({ rule }) => selected.has(rule.id)).length,
+      );
+    }
+    let hasEditedRule = false;
+    for (const { checkbox, edited, rule, setting } of controls) {
+      checkbox.checked = selected.has(rule.id);
+      if (setting) {
+        setting.wrapper.hidden = !checkbox.checked;
+        // Assigning the same value can move the caret of a focused text input.
+        const value = settings.get(rule.id)!;
+        if (setting.choices.value !== value) setting.choices.value = value;
+      }
+      const wasEdited = isEdited(rule.id);
+      hasEditedRule ||= wasEdited;
+      edited.hidden = !wasEdited;
+      edited.textContent = wasEdited
+        ? words().editedRule(rule.label[uiLanguage])
+        : "";
+    }
+    warning.hidden = !hasEditedRule;
+    warning.textContent = words().editWarning;
+  }
+
+  function renderLanguage() {
+    document.documentElement.lang = uiLanguage;
+    for (const node of document.querySelectorAll<HTMLElement>("[data-copy]")) {
+      node.textContent =
+        words().copy[node.dataset.copy as keyof typeof strings.en.copy];
+    }
+    element("confirm-detail").textContent = words().changeWarning;
+    theme.querySelector("[data-copy=theme]")!.textContent =
+      document.documentElement.dataset.theme === "dark"
+        ? words().switchLight
+        : words().switchDark;
+    for (const group of groups)
+      group.label.textContent = group.category.label[uiLanguage];
+    for (const { help, rule, setting, title, tooltip } of controls) {
+      title.textContent = rule.label[uiLanguage];
+      help.setAttribute("aria-label", words().ruleHelp(rule.label[uiLanguage]));
+      tooltip.textContent = rule.help[uiLanguage];
+      if (setting) {
+        setting.label.textContent = setting.setting.label[uiLanguage];
+        for (const entry of setting.entries)
+          entry.option.textContent = entry.label[uiLanguage];
+      }
+    }
+    editor.describe(words().editorLabel, outputLanguage);
+    renderRules();
+    setMessage(message);
+  }
+
+  function confirm(ids: readonly string[], apply: () => void) {
+    if (ids.length === 0) {
+      apply();
+      return;
+    }
+    const list = element("confirm-rules");
+    list.replaceChildren();
+    for (const id of ids) {
+      const rule = rules.find((rule) => rule.id === id);
+      append(list, "li").textContent = rule?.label[uiLanguage] ?? "AGENTS.md";
+    }
+    pendingChange = apply;
+    dialog.returnValue = "";
+    dialog.showModal();
+  }
+
+  function updateParagraphs(updates: readonly { id: string; text?: string }[]) {
+    let draft = editor.draft;
+    let changes = ChangeSet.empty(draft.text.length);
+    for (const { id, text } of updates) {
+      const next = replaceRule(draft, id, text, order);
+      draft = next.draft;
+      changes = changes.compose(next.changes);
+    }
+    editor.set(draft, changes);
+    renderRules();
+  }
+
+  function hideHelp(button: HTMLButtonElement) {
+    element(button.getAttribute("aria-controls")!).hidden = true;
+    button.setAttribute("aria-expanded", "false");
+    if (activeHelp === button) activeHelp = undefined;
+    if (pinnedHelp === button) pinnedHelp = undefined;
+  }
+
+  for (const { checkbox, rule, setting, help, tooltip } of controls) {
+    checkbox.addEventListener("change", () => {
+      const checked = checkbox.checked;
+      if (checked) selected.add(rule.id);
+      else selected.delete(rule.id);
+      const kept = !checked && isEdited(rule.id);
+      updateParagraphs([
+        { id: rule.id, text: checked ? paragraph(rule) : undefined },
+      ]);
+      setMessage(kept ? { kept: rule } : undefined);
+    });
+    setting?.choices.addEventListener("change", () => {
+      const { choices } = setting;
+      const previous = settings.get(rule.id)!;
+      const value = choices.value;
+      choices.value = previous;
+      if (
+        previous === value ||
+        (setting.setting.kind === "percent" &&
+          (value === "" || Number(value) < 0 || Number(value) > 100))
+      )
+        return;
+      const text = paragraph(rule, outputLanguage, value);
+      const affectsEdited = isEdited(rule.id) && text !== paragraph(rule);
+      confirm(affectsEdited ? [rule.id] : [], () => {
+        settings.set(rule.id, value);
+        updateParagraphs([{ id: rule.id, text }]);
+        setMessage();
+      });
+    });
+    function showHelp() {
+      if (activeHelp && activeHelp !== help) hideHelp(activeHelp);
+      activeHelp = help;
+      tooltip.hidden = false;
+      help.setAttribute("aria-expanded", "true");
+    }
+    help.addEventListener("focus", showHelp);
+    help.addEventListener("blur", () => {
+      if (pinnedHelp !== help) hideHelp(help);
+    });
+    help.addEventListener("pointerenter", (event) => {
+      if (event.pointerType === "mouse") showHelp();
+    });
+    help.parentElement!.parentElement!.addEventListener("pointerleave", () => {
+      if (pinnedHelp !== help && document.activeElement !== help)
+        hideHelp(help);
+    });
+    help.addEventListener("click", () => {
+      if (pinnedHelp === help) {
+        hideHelp(help);
+      } else {
+        showHelp();
+        pinnedHelp = help;
+      }
+    });
+    help.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        hideHelp(help);
+      }
+    });
+  }
+
+  element("workspace").addEventListener("click", (event) => {
+    if (
+      activeHelp &&
+      event.target instanceof Node &&
+      !activeHelp.contains(event.target) &&
+      !element(activeHelp.getAttribute("aria-controls")!).contains(event.target)
+    ) {
+      hideHelp(activeHelp);
+    }
+  });
+  dialog.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const apply = pendingChange;
+    pendingChange = undefined;
+    dialog.close();
+    if (event.submitter?.id === "apply-change") apply?.();
+  });
+  dialog.addEventListener("cancel", () => {
+    pendingChange = undefined;
+  });
+  uiSelect.addEventListener("change", () => {
+    uiLanguage = uiSelect.value as Language;
+    renderLanguage();
+  });
+  outputSelect.addEventListener("change", () => {
+    const language = outputSelect.value as Language;
+    outputSelect.value = outputLanguage;
+    if (language === outputLanguage) return;
+    const updates = [
+      { id: "title", text: strings[language].documentTitle },
+      ...rules
+        .filter((rule) => selected.has(rule.id))
+        .filter((rule) => paragraph(rule, language) !== paragraph(rule))
+        .map((rule) => ({ id: rule.id, text: paragraph(rule, language) })),
+    ];
+    confirm(
+      updates.filter(({ id }) => isEdited(id)).map(({ id }) => id),
+      () => {
+        outputLanguage = language;
+        outputSelect.value = language;
+        updateParagraphs(updates);
+        editor.describe(words().editorLabel, outputLanguage);
+        setMessage();
+      },
+    );
+  });
+  theme.addEventListener("click", () => {
+    const html = document.documentElement;
+    html.dataset.theme = html.dataset.theme === "dark" ? "light" : "dark";
+    renderLanguage();
+  });
+  element("copy").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(editor.draft.text);
+      setMessage("copied");
+    } catch {
+      setMessage("copyFailed");
+    }
+  });
+  element("download").addEventListener("click", () => {
+    const file = new Blob([editor.draft.text], {
+      type: "text/markdown;charset=utf-8",
+    });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "AGENTS.md";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+    setMessage("downloaded");
+  });
+  element("version").textContent = `v${version}`;
+  renderLanguage();
+  return editor.view;
+}

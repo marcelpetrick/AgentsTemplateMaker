@@ -12,5 +12,5 @@
     "noUnusedParameters": true,
     "skipLibCheck": true
   },
-  "include": ["src", "test", "*.ts"]
+  "include": ["src", "test", "e2e", "*.ts"]
 }

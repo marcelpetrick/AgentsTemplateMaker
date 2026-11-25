@@ -19,3 +19,5 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: ./localPipeline.sh
+        env:
+          PLAYWRIGHT_INSTALL_SYSTEM_DEPS: "1"

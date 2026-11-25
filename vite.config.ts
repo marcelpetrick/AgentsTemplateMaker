@@ -5,6 +5,9 @@ import { playwright } from "@vitest/browser-playwright";
 
 export default defineConfig({
   base: "./",
+  optimizeDeps: {
+    include: ["@codemirror/state", "@codemirror/view", "@codemirror/commands"],
+  },
   test: {
     include: ["test/**/*.test.ts"],
     browser: {

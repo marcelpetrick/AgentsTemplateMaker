@@ -1,0 +1,9 @@
+Review core-131abc8
+Revision 131abc85681a07118440d8c289f2b7927380c742
+Requirements F03–F05, F08–F09, C01–C22, I14. Verify independent bilingual policies and positional edits and removal.
+Prerequisites Git/Bash, Node 24.20.0, network, Chromium system libs. Reviewed from clean clones on Manjaro x86-64 with Playwright Ubuntu fallback and hosted Ubuntu 24.04 x86-64.
+Reproduction git clone --no-local . <temp>; git -C <temp> checkout --detach <SHA>; run ./localPipeline.sh there.
+Expected 22 tracked tests pass and all gates run. In an additional fixture, make generated and authored paragraphs identical and toggle only one generated ID. In a mutation fixture, bypass the edited-range guard and rerun the exact-retention test.
+Observed 22 tests, 109/109 executable lines, build and remote CI passed. An independent fixture exercised every bilingual policy variant with duplicate authored copies and 20,000 seeded edit/control transitions, all passed. Bypassing the guard failed the exact-retention test. A second counterexample pasted an identical prefix directly against a rule and typed two Enter keys between them. Unchecking left both paragraphs, even though the generated one was now separate.
+Disposition Authored boundary classification reopened for a regression fix. Catalog and CI claims passed.
+Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45691757602

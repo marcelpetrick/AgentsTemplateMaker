@@ -22,6 +22,17 @@ export interface Draft {
   readonly separators: readonly Span[];
 }
 
+interface DeletedText {
+  readonly text: string;
+  readonly ranges: readonly (Span & { id: string })[];
+  readonly separators: readonly Span[];
+}
+
+export interface AuthorshipUndo {
+  readonly ids: readonly string[];
+  readonly deletions: readonly DeletedText[];
+}
+
 const separator = "\n\n";
 const paragraphBoundary = /\n(?:[ \t]*\n)+/;
 
@@ -139,11 +150,84 @@ function restoreGeneratedRule(
   return range;
 }
 
+export function captureAuthorshipUndo(
+  before: Draft,
+  after: Draft,
+  changes: ChangeSet,
+): AuthorshipUndo | undefined {
+  const authored = new Set(
+    after.ranges.filter(({ edited }) => edited).map(({ id }) => id),
+  );
+  const newlyEdited = before.ranges.filter(
+    ({ id, edited }) => !edited && authored.has(id),
+  );
+  if (!newlyEdited.length) return undefined;
+
+  const deletions: DeletedText[] = [];
+  changes.iterChanges((from, to, _newFrom, _newTo, insert) => {
+    if (from === to || insert.length) return;
+    const contained = (span: Span) => span.from >= from && span.to <= to;
+    const relative = (span: Span) => ({
+      from: span.from - from,
+      to: span.to - from,
+    });
+    const ranges = newlyEdited
+      .filter(contained)
+      .map((range) => ({ id: range.id, ...relative(range) }));
+    if (!ranges.length) return;
+    deletions.push({
+      text: before.text.slice(from, to),
+      ranges,
+      separators: before.separators.filter(contained).map(relative),
+    });
+  }, true);
+  return { ids: newlyEdited.map(({ id }) => id), deletions };
+}
+
+function restoredDeletions(
+  draft: Draft,
+  changes: ChangeSet,
+  deletions: readonly DeletedText[],
+) {
+  const ranges = new Map<string, Span>();
+  const separators: Span[] = [];
+  const insertionStarts = new Set<number>();
+  if (!deletions.length) return { ranges, separators, insertionStarts };
+
+  changes.iterChanges((from, to, newFrom, _newTo, insert) => {
+    if (from !== to) return;
+    const inserted = insert.toString();
+    for (const deletion of deletions) {
+      if (deletion.text !== inserted) continue;
+      const candidates = deletion.ranges.filter((prior) =>
+        draft.ranges.some(
+          (range) =>
+            range.id === prior.id &&
+            range.from === from &&
+            range.to === from &&
+            range.generatedText === inserted.slice(prior.from, prior.to),
+        ),
+      );
+      if (!candidates.length) continue;
+      const offset = (span: Span) => ({
+        from: newFrom + span.from,
+        to: newFrom + span.to,
+      });
+      for (const prior of candidates) ranges.set(prior.id, offset(prior));
+      separators.push(...deletion.separators.map(offset));
+      insertionStarts.add(from);
+      break;
+    }
+  }, true);
+  return { ranges, separators, insertionStarts };
+}
+
 function manualRanges(
   draft: Draft,
   changes: ChangeSet,
   text: string,
   restoreGenerated: ReadonlySet<string>,
+  restored: ReturnType<typeof restoredDeletions>,
 ): RuleRange[] {
   const mapped = draft.ranges.map((range) => mapRange(range, changes));
   const originals = draft.ranges.map((range) =>
@@ -157,6 +241,7 @@ function manualRanges(
       }
     }
     if (from === to) {
+      if (restored.insertionStarts.has(from)) return;
       const inserted = insert.toString();
       // An inverse insertion for a deleted rule belongs to that rule even
       // when a neighboring paragraph now touches the zero-width anchor.
@@ -218,6 +303,9 @@ function manualRanges(
   }, true);
 
   return mapped.map((range, index) => {
+    const restoredSpan = restored.ranges.get(range.id);
+    if (restoredSpan) return { id: range.id, ...restoredSpan, edited: false };
+
     const before = draft.ranges[index];
     const original = originals[index];
     const separated = releaseSeparateParagraphs(
@@ -225,12 +313,12 @@ function manualRanges(
       original && mapSpan(original, changes),
       text,
     );
-    const restored = restoreGenerated.has(range.id)
+    const resolved = restoreGenerated.has(range.id)
       ? restoreGeneratedRule(separated, before, changes, text)
       : separated;
-    if (!restored.edited) return restored;
+    if (!resolved.edited) return resolved;
     return {
-      ...restored,
+      ...resolved,
       generatedText:
         before.generatedText ?? draft.text.slice(before.from, before.to),
     };
@@ -240,14 +328,22 @@ function manualRanges(
 export function editDraft(
   draft: Draft,
   changes: ChangeSet,
-  restoreGenerated: ReadonlySet<string> = new Set(),
+  authorshipUndo: readonly AuthorshipUndo[] = [],
 ): Draft {
   if (changes.empty) return draft;
   const text = applyText(draft, changes);
+  const restoreGenerated = new Set(authorshipUndo.flatMap(({ ids }) => ids));
+  const restored = restoredDeletions(
+    draft,
+    changes,
+    authorshipUndo.flatMap(({ deletions }) => deletions),
+  );
   return {
     text,
-    ranges: manualRanges(draft, changes, text, restoreGenerated),
-    separators: mapSeparators(draft, changes),
+    ranges: manualRanges(draft, changes, text, restoreGenerated, restored),
+    separators: [...mapSeparators(draft, changes), ...restored.separators].sort(
+      (left, right) => left.from - right.from,
+    ),
   };
 }
 

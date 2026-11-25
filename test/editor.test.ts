@@ -78,6 +78,26 @@ describe("undo restores generated rule authorship", () => {
     );
   });
 
+  it("restores generated spans and separators after deleting the draft with a personal copy", () => {
+    const { initial, editor } = fixture();
+    const separate = isolateHistory.of("full");
+    editor.view.dispatch({
+      changes: { from: initial.text.length, insert: "\n\n" + first },
+      annotations: separate,
+    });
+    const before = editor.draft;
+    editor.view.dispatch({
+      changes: { from: 0, to: before.text.length },
+      annotations: separate,
+    });
+
+    expect(undo(editor.view)).toBe(true);
+    expect(editor.draft.text).toBe(before.text);
+    expect(authoredRanges(editor.draft)).toEqual(authoredRanges(before));
+    const unchecked = replaceRule(editor.draft, "first", undefined, order);
+    expect(unchecked.draft.text).toBe("# Guide\n\n" + second + "\n\n" + first);
+  });
+
   it("restores a deleted rule once when it touches another generated rule", () => {
     const { initial, editor } = fixture();
     const { from, to } = initial.ranges[2];

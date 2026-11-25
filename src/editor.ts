@@ -15,10 +15,16 @@ import {
   invertedEffects,
 } from "@codemirror/commands";
 import { Decoration, EditorView, keymap } from "@codemirror/view";
-import { authoredRanges, editDraft, type Draft } from "./draft";
+import {
+  authoredRanges,
+  captureAuthorshipUndo,
+  editDraft,
+  type AuthorshipUndo,
+  type Draft,
+} from "./draft";
 
 const replaceDraft = StateEffect.define<Draft>();
-const restoreGenerated = StateEffect.define<readonly string[]>();
+const restoreGenerated = StateEffect.define<AuthorshipUndo>();
 const draftField = StateField.define<Draft>({
   create() {
     throw new Error("Initialize the editor with a draft");
@@ -28,10 +34,8 @@ const draftField = StateField.define<Draft>({
       effect.is(replaceDraft),
     );
     if (replacement) return replacement.value;
-    const restored = new Set(
-      transaction.effects.flatMap((effect) =>
-        effect.is(restoreGenerated) ? effect.value : [],
-      ),
+    const restored = transaction.effects.flatMap((effect) =>
+      effect.is(restoreGenerated) ? [effect.value] : [],
     );
     return editDraft(draft, transaction.changes, restored);
   },
@@ -62,17 +66,12 @@ const draftField = StateField.define<Draft>({
 
 const authorshipHistory = invertedEffects.of((transaction) => {
   if (!transaction.docChanged) return [];
-  const generated = new Set(
-    transaction.startState
-      .field(draftField)
-      .ranges.filter(({ edited }) => !edited)
-      .map(({ id }) => id),
+  const restore = captureAuthorshipUndo(
+    transaction.startState.field(draftField),
+    transaction.state.field(draftField),
+    transaction.changes,
   );
-  const changed = transaction.state
-    .field(draftField)
-    .ranges.filter(({ id, edited }) => edited && generated.has(id))
-    .map(({ id }) => id);
-  return changed.length ? [restoreGenerated.of(changed)] : [];
+  return restore ? [restoreGenerated.of(restore)] : [];
 });
 
 export function openEditor(

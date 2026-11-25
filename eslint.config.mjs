@@ -1,0 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Marcel Petrick
+// SPDX-License-Identifier: GPL-3.0-or-later
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+
+export default tseslint.config(
+  { ignores: ["dist/**", "coverage/**", "test-results/**", "playwright-report/**"] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+);

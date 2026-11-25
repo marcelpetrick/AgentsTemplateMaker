@@ -8,3 +8,6 @@ Observed Independent run passed all 30 unit and integration tests and 10 E2E acr
 Disposition Editor undo provenance and accessibility findings assigned corrective changes. Hosted build and core workflows independently reproduced.
 Evidence https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45692279521
 Pages https://github.com/marcelpetrick/AgentsTemplateMaker/actions/runs/45692534580
+
+Independent F09 catalog expansion fixture
+In a clean archive add rule fixture-release-note under the existing repository category with English label "Record a release note", German label "Versionshinweis festhalten", bilingual benefit/cost and a localized paragraph about user-visible changes. Build and run the same app, exercising help on focus, language independence, untouched uncheck, direct Unicode edit, edited uncheck, clipboard and download. Existing rule IDs, categories, localized labels/help/paragraphs and defaults were byte-identical to the baseline in a catalog snapshot. Chromium passed, including exact exports. No application edits were needed.

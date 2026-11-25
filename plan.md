@@ -15,7 +15,7 @@
 - [x] Languages and frameworks rule, Character set rule, and a review loop after each plan change and iteration.
 - [x] Quality tooling: complexity and function-size limits, stricter static analysis, Mermaid render checks, and mutation testing in the pipeline.
 - [x] Close the gaps from the vision audit: requirement rows for I1–I16, wording snapshot, C06 commit traceability, and deployment of the tested build.
-- [ ] Review the whole project, then publish a public GitHub release and deploy it.
+- [x] Review the whole project, then publish a public GitHub release and deploy it.
 
 The [original handoff](<vision(20261125-195509).md>) defines the F and C requirement
 IDs. The [baseline](docs/decisions.md) records the decisions that resolve its open

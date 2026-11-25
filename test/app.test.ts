@@ -201,6 +201,22 @@ describe("workspace", () => {
     expect(draft()).toContain("Rust, SQLite");
   });
 
+  it("follows the interface language in the document until the draft is edited", () => {
+    select("ui-language", "de");
+    expect(element<HTMLSelectElement>("document-language").value).toBe("de");
+    expect(draft()).toContain("# Projektanweisungen");
+    expect(draft()).toContain(rule("commits").paragraph("de", ""));
+    expect(element<HTMLDialogElement>("confirm-change").open).toBe(false);
+    select("ui-language", "en");
+    expect(element<HTMLSelectElement>("document-language").value).toBe("en");
+    expect(draft()).toContain("# Project instructions");
+    edit(paragraph("commits"), " eigene ");
+    const before = draft();
+    select("ui-language", "de");
+    expect(element<HTMLSelectElement>("document-language").value).toBe("en");
+    expect(draft()).toBe(before);
+  });
+
   it("selects all rules at once and clears them while keeping edited text", () => {
     edit(paragraph("credentials"), " eigene ");
     element("select-all").click();

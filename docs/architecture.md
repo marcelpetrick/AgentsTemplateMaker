@@ -51,5 +51,6 @@ renders the Mermaid source in this file.
 - [Workspace controller](../src/app.ts) connects the form and editor. It stages
   a setting or output-language change that affects edited rules until the user
   confirms. Copy and download read the same current draft.
-- [Interface strings](../src/strings.ts) can switch independently of the catalog's
-  output language. UI localization leaves the editor text and selection in place.
+- [Interface strings](../src/strings.ts) carry the output language along while
+  the draft has no authored text. Once the user edits, UI localization leaves the
+  editor text, output language, and selection in place.

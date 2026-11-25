@@ -72,7 +72,7 @@ test("defaults, repository hover, edited rule removal and accurate Markdown down
   expect(errors).toEqual([]);
 });
 
-test("language changes are independent and can be cancelled without altering authorship", async ({
+test("edited drafts keep their language and changes can be cancelled without altering authorship", async ({
   page,
 }) => {
   await page.goto("./");

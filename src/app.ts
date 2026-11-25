@@ -9,7 +9,7 @@ import {
   type Rule,
   type RuleSetting,
 } from "./catalog";
-import { createDraft, replaceRule } from "./draft";
+import { authoredRanges, createDraft, replaceRule } from "./draft";
 import { openEditor } from "./editor";
 import { strings } from "./strings";
 import { version } from "./version";
@@ -358,30 +358,45 @@ export function mount() {
   dialog.addEventListener("cancel", () => {
     pendingChange = undefined;
   });
-  uiSelect.addEventListener("change", () => {
-    uiLanguage = uiSelect.value as Language;
-    renderLanguage();
-  });
-  outputSelect.addEventListener("change", () => {
-    const language = outputSelect.value as Language;
-    outputSelect.value = outputLanguage;
-    if (language === outputLanguage) return;
-    const updates = [
+  function languageUpdates(language: Language) {
+    return [
       { id: "title", text: strings[language].documentTitle },
       ...rules
         .filter((rule) => selected.has(rule.id))
         .filter((rule) => paragraph(rule, language) !== paragraph(rule))
         .map((rule) => ({ id: rule.id, text: paragraph(rule, language) })),
     ];
+  }
+
+  function applyOutputLanguage(
+    language: Language,
+    updates: ReturnType<typeof languageUpdates>,
+  ) {
+    outputLanguage = language;
+    outputSelect.value = language;
+    updateParagraphs(updates);
+    editor.describe(words().editorLabel, outputLanguage);
+    setMessage();
+  }
+
+  function isUnedited() {
+    return authoredRanges(editor.draft).length === 0;
+  }
+
+  uiSelect.addEventListener("change", () => {
+    uiLanguage = uiSelect.value as Language;
+    if (uiLanguage !== outputLanguage && isUnedited())
+      applyOutputLanguage(uiLanguage, languageUpdates(uiLanguage));
+    renderLanguage();
+  });
+  outputSelect.addEventListener("change", () => {
+    const language = outputSelect.value as Language;
+    outputSelect.value = outputLanguage;
+    if (language === outputLanguage) return;
+    const updates = languageUpdates(language);
     confirm(
       updates.filter(({ id }) => isEdited(id)).map(({ id }) => id),
-      () => {
-        outputLanguage = language;
-        outputSelect.value = language;
-        updateParagraphs(updates);
-        editor.describe(words().editorLabel, outputLanguage);
-        setMessage();
-      },
+      () => applyOutputLanguage(language, updates),
     );
   });
   theme.addEventListener("click", () => {

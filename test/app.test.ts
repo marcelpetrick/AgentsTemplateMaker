@@ -201,6 +201,30 @@ describe("workspace", () => {
     expect(draft()).toContain("Rust, SQLite");
   });
 
+  it("selects all rules at once and clears them while keeping edited text", () => {
+    edit(paragraph("credentials"), " eigene ");
+    element("select-all").click();
+    for (const entry of rules) {
+      expect(element<HTMLInputElement>(`rule-${entry.id}`).checked).toBe(true);
+    }
+    expect(draft()).toContain(paragraph("delegation", "prohibited"));
+    expect(draft()).toContain(" eigene ");
+    element("select-none").click();
+    for (const entry of rules) {
+      expect(element<HTMLInputElement>(`rule-${entry.id}`).checked).toBe(false);
+    }
+    expect(draft()).toContain(" eigene ");
+    expect(draft()).not.toContain(paragraph("commits"));
+    expect(element("status").textContent).toBe(
+      "Kept your edited text for 1 rule as custom text.",
+    );
+    element("select-none").click();
+    expect(element("status").textContent).toBe("");
+    select("ui-language", "de");
+    expect(element("select-all").textContent).toBe("Alle auswählen");
+    expect(element("select-none").textContent).toBe("Keine auswählen");
+  });
+
   it("keeps user edits undoable without undoing form changes", () => {
     const before = draft();
     view.dispatch({

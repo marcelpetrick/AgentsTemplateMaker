@@ -14,7 +14,12 @@ import { openEditor } from "./editor";
 import { strings } from "./strings";
 import { version } from "./version";
 
-type Message = "copied" | "copyFailed" | "downloaded" | { kept: Rule };
+type Message =
+  | "copied"
+  | "copyFailed"
+  | "downloaded"
+  | { kept: Rule }
+  | { keptCount: number };
 
 const element = <T extends HTMLElement>(id: string) =>
   document.getElementById(id) as T;
@@ -151,11 +156,13 @@ export function mount() {
   function setMessage(next?: Message) {
     message = next;
     status.textContent =
-      next && typeof next === "object"
-        ? words().keptRule(next.kept.label[uiLanguage])
-        : next
+      next === undefined
+        ? ""
+        : typeof next === "string"
           ? words()[next]
-          : "";
+          : "kept" in next
+            ? words().keptRule(next.kept.label[uiLanguage])
+            : words().keptRules(next.keptCount);
   }
 
   function isEdited(id: string) {
@@ -316,6 +323,21 @@ export function mount() {
     });
   }
 
+  element("select-all").addEventListener("click", () => {
+    const added = rules.filter((rule) => !selected.has(rule.id));
+    for (const rule of added) selected.add(rule.id);
+    updateParagraphs(
+      added.map((rule) => ({ id: rule.id, text: paragraph(rule) })),
+    );
+    setMessage();
+  });
+  element("select-none").addEventListener("click", () => {
+    const removed = rules.filter((rule) => selected.has(rule.id));
+    const kept = removed.filter((rule) => isEdited(rule.id)).length;
+    selected.clear();
+    updateParagraphs(removed.map((rule) => ({ id: rule.id })));
+    setMessage(kept > 0 ? { keptCount: kept } : undefined);
+  });
   element("workspace").addEventListener("click", (event) => {
     if (
       activeHelp &&

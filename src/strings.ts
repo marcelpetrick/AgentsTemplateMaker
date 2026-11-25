@@ -11,6 +11,8 @@ export const strings = {
       intro:
         "Choose how coding agents work in your project, then edit and export their instructions.",
       rulesHeading: "Project rules",
+      selectAll: "Select all",
+      selectNone: "Select none",
       sourceLicense: "Source code · GPLv3 or later",
       copy: "Copy",
       download: "Download",
@@ -25,6 +27,8 @@ export const strings = {
     },
     keptRule: (label: string) =>
       `Kept your edited text for “${label}” as custom text.`,
+    keptRules: (count: number) =>
+      `Kept your edited text for ${count} ${count === 1 ? "rule" : "rules"} as custom text.`,
     editWarning:
       "Unchecking an edited rule keeps your text as a custom instruction.",
     copied: "Copied AGENTS.md to the clipboard.",
@@ -49,6 +53,8 @@ export const strings = {
       intro:
         "Lege fest, wie Programmieragenten in deinem Projekt arbeiten. Bearbeite und exportiere dann ihre Anweisungen.",
       rulesHeading: "Projektregeln",
+      selectAll: "Alle auswählen",
+      selectNone: "Keine auswählen",
       sourceLicense: "Quellcode · GPLv3 oder neuer",
       copy: "Kopieren",
       download: "Herunterladen",
@@ -64,6 +70,8 @@ export const strings = {
     },
     keptRule: (label: string) =>
       `Dein bearbeiteter Text für „${label}“ bleibt als eigene Anweisung erhalten.`,
+    keptRules: (count: number) =>
+      `Dein bearbeiteter Text für ${count} ${count === 1 ? "Regel" : "Regeln"} bleibt als eigene Anweisung erhalten.`,
     editWarning:
       "Wenn du eine bearbeitete Regel abwählst, bleibt dein Text als eigene Anweisung erhalten.",
     copied: "AGENTS.md wurde in die Zwischenablage kopiert.",

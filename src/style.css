@@ -87,6 +87,8 @@ main {
 
 .header-inner,
 .header-settings,
+.rules-header,
+.rules-actions,
 .document-header,
 .document-actions,
 .document-settings,
@@ -127,6 +129,7 @@ main {
 }
 
 .header-settings,
+.rules-actions,
 .document-actions {
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -267,6 +270,7 @@ main {
   font-weight: 750;
 }
 
+.rules-header,
 .document-header {
   flex-wrap: wrap;
   justify-content: space-between;

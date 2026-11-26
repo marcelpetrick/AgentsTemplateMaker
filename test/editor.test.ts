@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { isolateHistory, redo, undo } from "@codemirror/commands";
+import { EditorView } from "@codemirror/view";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { userEvent } from "vitest/browser";
 import { authoredRanges, createDraft, replaceRule } from "../src/draft";
 import { openEditor } from "../src/editor";
 
@@ -212,6 +214,36 @@ describe("editor presentation", () => {
       " ",
       "  Indented.",
     ]);
+  });
+
+  it("finds paragraphs after plain blank lines, indentation, and one-letter lines", () => {
+    const { initial, editor } = fixture();
+    const end = initial.text.length;
+    editor.view.dispatch({
+      changes: { from: end, insert: "\n\nA\n\n  B\n\nc\n\n" },
+    });
+    expect(lineTexts(editor.view, ".authored-line")).toEqual(["A", "  B", "c"]);
+  });
+
+  it("tracks a user edit that carries another effect", () => {
+    const onDraftChange = vi.fn();
+    const { initial, editor } = fixture(onDraftChange);
+    const end = initial.text.length;
+    editor.view.dispatch({
+      changes: { from: end, insert: "\n\nMine." },
+      effects: EditorView.scrollIntoView(0),
+    });
+    expect(onDraftChange).toHaveBeenCalledTimes(1);
+    expect(authoredRanges(editor.draft)).toEqual([{ from: end, to: end + 7 }]);
+  });
+
+  // The browser handles Ctrl+Z natively, so use a command that only the
+  // CodeMirror keymap provides.
+  it("binds the default editing keys", async () => {
+    const { initial, editor } = fixture();
+    editor.view.focus();
+    await userEvent.keyboard("{Control>}]{/Control}");
+    expect(editor.draft.text).toBe("  " + initial.text);
   });
 
   it("marks no line for whitespace-only authored text", () => {

@@ -127,6 +127,7 @@ function mapSeparators(draft: Draft, changes: ChangeSet): Span[] {
 
 function boundaryInsertion(insert: string, atStart: boolean): string {
   const paragraphs = insert.split(paragraphBoundary);
+  // Stryker disable next-line StringLiteral: split always returns an element.
   const attached = (atStart ? paragraphs.at(-1) : paragraphs[0]) ?? "";
   // Let Enter start a new paragraph without claiming the line break for the rule.
   return attached.includes("\n") && !attached.trim() ? "" : attached;
@@ -136,7 +137,7 @@ function continuationIndex(draft: Draft, at: number): number {
   return draft.ranges.findIndex(
     ({ from, to }) =>
       from < to &&
-      to < at &&
+      // The slice is empty, and fails the test, unless the rule ends before `at`.
       /^\n[ \t]*$/.test(draft.text.slice(to, at)) &&
       draft.separators.every((span) => span.from >= at || span.to <= to),
   );
@@ -153,11 +154,11 @@ function releaseSeparateParagraphs(
 
   // A blank line can separate authored text from an untouched rule after
   // both were on the same line. Identify the original by position throughout.
+  // Without a blank line the whole prefix is the last paragraph, so `from`
+  // stays at `range.from`.
   const prefix = text.slice(range.from, original.from).split(paragraphBoundary);
-  const from =
-    prefix.length > 1
-      ? original.from - (prefix.at(-1) ?? "").length
-      : range.from;
+  // Stryker disable next-line StringLiteral: split always returns an element.
+  const from = original.from - (prefix.at(-1) ?? "").length;
   const suffix = text.slice(original.to, range.to).search(paragraphBoundary);
   const to = suffix === -1 ? range.to : original.to + suffix;
 
@@ -166,22 +167,17 @@ function releaseSeparateParagraphs(
     : { id, from, to, edited: true, original };
 }
 
+// Only edited rules record generated text, so an untouched rule never matches.
+// A rule whose deleted body undo brings back is restored by
+// `restoredReplacements` before this check.
 function restoreGeneratedRule(
   range: RuleRange,
   before: RuleRange,
-  changes: ChangeSet,
   text: string,
 ): RuleRange {
-  const generatedText = before.generatedText;
-  if (!generatedText || !before.edited) return range;
-
-  // A deleted paragraph keeps a zero-width anchor. Undo may restore its whole
-  // generated body at that anchor while retaining unrelated form changes.
-  const from =
-    before.from === before.to ? changes.mapPos(before.from, -1) : range.from;
-  const { to } = range;
-  return text.slice(from, to) === generatedText
-    ? { id: range.id, from, to, edited: false }
+  const { id, from, to } = range;
+  return text.slice(from, to) === before.generatedText
+    ? { id, from, to, edited: false }
     : range;
 }
 
@@ -299,17 +295,6 @@ function restoredReplacements(
   return restored;
 }
 
-/** An inverse insertion for a deleted rule belongs to that rule. */
-function restoresDeletedRule(edit: Edit, change: Change) {
-  return edit.draft.ranges.some(
-    (range) =>
-      range.from === change.from &&
-      range.to === change.from &&
-      edit.restoreGenerated.has(range.id) &&
-      range.generatedText === change.inserted,
-  );
-}
-
 // If deleting a separator made two rules touch, assign the insertion once.
 function insertionOwner(draft: Draft, at: number): number {
   const inside = draft.ranges.findIndex(
@@ -343,9 +328,6 @@ function attachInsertion(
 }
 
 function applyInsertion(edit: Edit, mapped: RuleRange[], change: Change) {
-  // The inverse insertion belongs to the restored rule even when a
-  // neighboring paragraph now touches the zero-width anchor.
-  if (restoresDeletedRule(edit, change)) return;
   const index = insertionOwner(edit.draft, change.from);
   if (index === -1) return;
   mapped[index] = attachInsertion(
@@ -355,12 +337,10 @@ function applyInsertion(edit: Edit, mapped: RuleRange[], change: Change) {
   );
 }
 
-const overlaps = (range: Span, change: Change) =>
-  change.from < range.to && change.to > range.from && range.from !== range.to;
-
+// Mark every rule as edited. `releaseSeparateParagraphs` clears the mark again
+// for each rule whose original span the replacement did not touch.
 function applyReplacement(edit: Edit, mapped: RuleRange[], change: Change) {
   for (const [index, before] of edit.draft.ranges.entries()) {
-    if (!overlaps(before, change)) continue;
     const after = mapped[index];
     const belongsToRule = contains(before, change);
     mapped[index] = {
@@ -396,7 +376,7 @@ function resolveRange(
     text,
   );
   const resolved = edit.restoreGenerated.has(range.id)
-    ? restoreGeneratedRule(separated, before, changes, text)
+    ? restoreGeneratedRule(separated, before, text)
     : separated;
   if (!resolved.edited) return resolved;
   return {

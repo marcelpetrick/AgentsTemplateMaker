@@ -27,7 +27,7 @@
 - [x] Local pipeline script rule with an optional guarded deploy step.
 - [x] Container image release option; record that Agent Maker, a static site, needs none.
 - [x] Requirements engineering rule; automated acceptance checks; coverage as a floor.
-- [ ] Raise the mutation score and gate to at least 95%.
+- [x] Raise the mutation score and gate to at least 95%.
 
 The [original handoff](<vision(20261125-195509).md>) defines the F and C requirement
 IDs. The [baseline](docs/decisions.md) records the decisions that resolve its open

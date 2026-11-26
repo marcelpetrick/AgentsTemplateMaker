@@ -75,8 +75,8 @@ function authorshipDecorations(draft: Draft) {
   return Decoration.set(decoration, true);
 }
 
+// A transaction without document changes keeps the draft, so it captures nothing.
 const authorshipHistory = invertedEffects.of((transaction) => {
-  if (!transaction.docChanged) return [];
   const restore = captureAuthorshipUndo(
     transaction.startState.field(draftField),
     transaction.state.field(draftField),

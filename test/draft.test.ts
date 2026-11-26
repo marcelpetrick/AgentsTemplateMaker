@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Marcel Petrick
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { ChangeSet } from "@codemirror/state";
+import { ChangeSet, Text } from "@codemirror/state";
 import { describe, expect, it } from "vitest";
 import {
   authoredRanges,
+  captureAuthorshipUndo,
   createDraft,
   editDraft,
   replaceRule,
+  type AuthorshipUndo,
   type Draft,
 } from "../src/draft";
 
@@ -450,5 +452,316 @@ describe("rule insertion", () => {
       { from: 7, to: 9 },
       { from: 15, to: 17 },
     ]);
+  });
+});
+
+// Two-step sequences that a differential fuzzer found while hunting
+// surviving mutants. Each pins the owner of text typed near a rule boundary.
+const three = () =>
+  createDraft("# T", [
+    { id: "a", text: "Aa b." },
+    { id: "b", text: "Bb c." },
+    { id: "c", text: "Cc d." },
+  ]);
+
+describe("edits near rule boundaries after an earlier edit", () => {
+  const range = (draft: Draft, id: string) =>
+    draft.ranges.find((candidate) => candidate.id === id);
+
+  it("keeps the title generated when paragraphs are typed below it", () => {
+    const inside = edit(three(), 8, 8, "\n x");
+    const typed = edit(inside, 4, 4, "y\n\nz");
+    expect(range(typed, "title")).toEqual({
+      id: "title",
+      from: 0,
+      to: 3,
+      edited: false,
+    });
+    expect(chunks(typed)).toEqual(["y\n\nz", "Aa \n xb."]);
+  });
+
+  it("does not give a line typed after a deleted rule to that rule", () => {
+    const deleted = edit(three(), 5, 11, "\n");
+    const inside = edit(deleted, 11, 11, "\n x");
+    const typed = edit(inside, 6, 6, "\n x");
+    expect(range(typed, "a")).toMatchObject({ from: 5, to: 5, edited: true });
+    expect(range(typed, "b")).toMatchObject({ from: 10, to: 18, edited: true });
+    expect(chunks(typed)).toEqual(["\n\n x", "Bb c\n x."]);
+  });
+
+  it("does not extend a rule over a blank line with spaces", () => {
+    const draft = three();
+    const spaced = editDraft(
+      draft,
+      ChangeSet.of(
+        [
+          { from: 20, insert: "\n \n" },
+          { from: 24, insert: "\n \n" },
+        ],
+        draft.text.length,
+      ),
+    );
+    const typed = edit(spaced, 30, 30, "y\n\nz");
+    expect(range(typed, "c")).toMatchObject({ from: 19, to: 27, edited: true });
+  });
+
+  it("does not claim spaces typed on a blank line after a rule", () => {
+    const blank = edit(three(), 10, 10, "\n \n");
+    const spaced = edit(blank, 11, 11, " ");
+    expect(range(spaced, "a")).toEqual({
+      id: "a",
+      from: 5,
+      to: 10,
+      edited: false,
+    });
+  });
+
+  it("keeps only the last of several typed prefix paragraphs on the rule's line", () => {
+    const prefixed = edit(three(), 12, 12, "p q r ");
+    const changes = ChangeSet.of(
+      [
+        { from: 13, insert: "\n\n" },
+        { from: 15, insert: "\n\n" },
+      ],
+      prefixed.text.length,
+    );
+    const split = editDraft(prefixed, changes);
+    expect(split.text.slice(12, 27)).toBe("p\n\n q\n\n r Bb c.");
+    expect(range(split, "b")).toMatchObject({ from: 19, to: 27, edited: true });
+  });
+
+  it("adds a rule without a separator to an emptied draft", () => {
+    const draft = three();
+    const emptied = edit(draft, 0, draft.text.length, "");
+    const added = replaceRule(emptied, "d", "Dd e.", [
+      "title",
+      "a",
+      "b",
+      "c",
+      "d",
+    ]);
+    expect(added.draft.text).toBe("Dd e.");
+  });
+
+  it("removes a rule at the start of the draft with its following separator", () => {
+    const untitled = edit(three(), 0, 5, "");
+    const removed = replaceRule(untitled, "a", undefined, [
+      "title",
+      "a",
+      "b",
+      "c",
+    ]);
+    expect(removed.draft.text).toBe("Bb c.\n\nCc d.");
+  });
+
+  it("keeps the title generated when blank lines are typed after it", () => {
+    const replaced = edit(three(), 3, 9, "\n \n");
+    const typed = edit(replaced, 4, 4, "\n \n");
+    expect(range(typed, "title")).toMatchObject({ to: 3, edited: false });
+    expect(chunks(typed)).toEqual(["\n\n \n \n."]);
+  });
+
+  it("keeps a deleted rule authored when undo brings back other wording", () => {
+    const draft = three();
+    const step = historyStep(
+      draft,
+      ChangeSet.of([{ from: 3, to: 10, insert: "\n x" }], draft.text.length),
+    );
+    const changed = replaceRule(step.edited, "a", "Cc d.", [
+      "title",
+      "a",
+      "b",
+      "c",
+    ]).draft;
+    const undone = step.undo(changed);
+    expect(undone.text).toBe(draft.text);
+    expect(range(undone, "a")).toMatchObject({
+      from: 10,
+      to: 10,
+      edited: true,
+    });
+  });
+});
+
+/**
+ * Apply `changes` like an editor transaction and return what the history
+ * needs: the edited draft, its undo, and the effects a redo would carry.
+ */
+function historyStep(
+  draft: Draft,
+  changes: ChangeSet,
+  restore: readonly AuthorshipUndo[] = [],
+) {
+  const edited = editDraft(draft, changes, restore);
+  const capture = captureAuthorshipUndo(draft, edited, changes);
+  const inverse = changes.invert(Text.of(draft.text.split("\n")));
+  const effects = (undo: AuthorshipUndo | undefined) => (undo ? [undo] : []);
+  const undo = (current: Draft) =>
+    editDraft(current, inverse, effects(capture));
+  const redoOf = (undone: Draft) =>
+    effects(captureAuthorshipUndo(edited, undone, inverse));
+  return { edited, undo, redoOf };
+}
+
+// Every single edit of a small draft, with the undo and redo that the editor
+// history applies and the form toggles that follow. The reviewed file
+// snapshot records the complete resulting ranges, so a change to any of them
+// becomes a visible text change instead of a surviving mutant.
+describe("edit matrix", () => {
+  const matrixOrder = ["title", "a", "b", "c", "d"];
+  const start = three;
+
+  const describeRange = (range: Draft["ranges"][number]) => {
+    const flag = range.edited ? "*" : "";
+    const original = range.original
+      ? ` o=${String(range.original.from)}-${String(range.original.to)}`
+      : "";
+    const generated =
+      range.generatedText === undefined
+        ? ""
+        : ` g=${JSON.stringify(range.generatedText)}`;
+    return `${range.id}${flag}@${String(range.from)}-${String(range.to)}${original}${generated}`;
+  };
+
+  const describeDraft = (draft: Draft) => {
+    const ranges = draft.ranges.map((range) => describeRange(range)).join(" ");
+    const separators = draft.separators
+      .map(({ from, to }) => `${String(from)}-${String(to)}`)
+      .join(" ");
+    return `${JSON.stringify(draft.text)} | ${ranges} | sep ${separators} | authored ${JSON.stringify(chunks(draft))}`;
+  };
+
+  const toggles = (edited: Draft) => {
+    const removed = replaceRule(edited, "b", undefined, matrixOrder).draft;
+    const changed = replaceRule(edited, "b", "New b.", matrixOrder).draft;
+    return [
+      `uncheck b: ${describeDraft(removed)}`,
+      `change b: ${describeDraft(changed)}`,
+    ];
+  };
+
+  function scenario(name: string, changes: ChangeSet): string[] {
+    const draft = start();
+    const step = historyStep(draft, changes);
+    const { edited } = step;
+    const undone = step.undo(edited);
+    const redone = historyStep(undone, changes, step.redoOf(undone)).edited;
+    const same = (left: Draft, right: Draft) =>
+      describeDraft(left) === describeDraft(right);
+    return [
+      `## ${name}`,
+      `edit: ${describeDraft(edited)}`,
+      same(undone, draft) ? "undo: original" : `undo: ${describeDraft(undone)}`,
+      same(redone, edited) ? "redo: edit" : `redo: ${describeDraft(redone)}`,
+      ...toggles(edited),
+    ];
+  }
+
+  type Spec = { from: number; to?: number; insert?: string }[];
+
+  function editSpecs(length: number): [string, Spec][] {
+    const specs: [string, Spec][] = [];
+    for (const insert of ["x", " ", "\n", "\n\n", "x\n\ny", "x\n\n\ny", "\n x"])
+      for (let at = 0; at <= length; at++)
+        specs.push([
+          `insert ${JSON.stringify(insert)} at ${String(at)}`,
+          [{ from: at, insert }],
+        ]);
+    for (let at = 1; at < length; at++)
+      specs.push([
+        `delete ${String(at - 1)}-${String(at)} and insert at ${String(at)}`,
+        [
+          { from: at - 1, to: at },
+          { from: at, insert: "x" },
+        ],
+      ]);
+    for (const size of [1, 2, 3, 5, 7])
+      for (let from = 0; from + size <= length; from++) {
+        const to = from + size;
+        const span = `${String(from)}-${String(to)}`;
+        specs.push(
+          [`delete ${span}`, [{ from, to }]],
+          [`replace ${span}`, [{ from, to, insert: "z" }]],
+        );
+      }
+    for (let at = 0; at + 3 <= length; at++)
+      specs.push([
+        `insert around ${String(at)}-${String(at + 3)}`,
+        [
+          { from: at, insert: "x" },
+          { from: at + 3, insert: "y" },
+        ],
+      ]);
+    return specs;
+  }
+
+  // Second edits on drafts that already carry authored text, a deleted rule,
+  // touching rules, or a full replacement, each undone in history order.
+  const seeds: [string, Spec][] = [
+    ["suffix on a", [{ from: 10, insert: " x" }]],
+    ["prefix on b", [{ from: 12, insert: "y " }]],
+    ["b deleted with its separator", [{ from: 10, to: 17 }]],
+    ["b text deleted", [{ from: 12, to: 17 }]],
+    ["a and b touching", [{ from: 10, to: 12 }]],
+    ["draft replaced", [{ from: 0, to: 24, insert: "w" }]],
+  ];
+
+  function secondSpecs(length: number): [string, Spec][] {
+    const specs: [string, Spec][] = [];
+    for (let at = 0; at <= length; at++)
+      for (const insert of ["x", "\n\n"])
+        specs.push([
+          `insert ${JSON.stringify(insert)} at ${String(at)}`,
+          [{ from: at, insert }],
+        ]);
+    for (const size of [1, 2])
+      for (let from = 0; from + size <= length; from++)
+        specs.push([
+          `delete ${String(from)}-${String(from + size)}`,
+          [{ from, to: from + size }],
+        ]);
+    return specs;
+  }
+
+  const shortDraft = (draft: Draft) =>
+    describeDraft(draft).split(" | ").slice(1, 3).join(" | ");
+
+  function twoStep(seed: Spec, second: Spec): string {
+    const draft = start();
+    const first = historyStep(draft, ChangeSet.of(seed, draft.text.length));
+    const both = historyStep(
+      first.edited,
+      ChangeSet.of(second, first.edited.text.length),
+    );
+    const undoSecond = both.undo(both.edited);
+    const undoFirst = first.undo(undoSecond);
+    const outcome = (left: Draft, right: Draft) =>
+      shortDraft(left) === shortDraft(right) ? "ok" : shortDraft(left);
+    return `${shortDraft(both.edited)} || undo ${outcome(undoSecond, first.edited)} || undo ${outcome(undoFirst, draft)}`;
+  }
+
+  it("records ranges and undo for a second edit on edited drafts", async () => {
+    const lines = seeds.flatMap(([seedName, seed]) => {
+      const length = editDraft(start(), ChangeSet.of(seed, 24)).text.length;
+      return [
+        `## ${seedName}`,
+        ...secondSpecs(length).map(
+          ([name, spec]) => `${name}: ${twoStep(seed, spec)}`,
+        ),
+      ];
+    });
+    await expect(lines.join("\n") + "\n").toMatchFileSnapshot(
+      "__snapshots__/draft-history.md",
+    );
+  });
+
+  it("records ranges, undo, redo, and form toggles for every single edit", async () => {
+    const length = start().text.length;
+    const lines = editSpecs(length).flatMap(([name, spec]) =>
+      scenario(name, ChangeSet.of(spec, length)),
+    );
+    await expect(lines.join("\n") + "\n").toMatchFileSnapshot(
+      "__snapshots__/draft.md",
+    );
   });
 });

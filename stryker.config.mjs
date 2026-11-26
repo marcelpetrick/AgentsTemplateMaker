@@ -14,10 +14,11 @@ export default {
     "src/messages.ts",
   ],
   coverageAnalysis: "perTest",
-  reporters: ["clear-text", "progress-append-only", "html"],
+  reporters: ["clear-text", "progress-append-only", "html", "json"],
   clearTextReporter: { reportMutants: false },
   htmlReporter: { fileName: "reports/mutation/index.html" },
-  thresholds: { high: 90, low: 85, break: 85 },
+  jsonReporter: { fileName: "reports/mutation/mutation.json" },
+  thresholds: { high: 95, low: 90, break: 95 },
   tempDirName: ".stryker-tmp",
   cleanTempDir: "always",
 };

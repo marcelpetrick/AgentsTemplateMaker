@@ -119,26 +119,47 @@ Scope: the logic modules `src/draft.ts`, `src/catalog.ts`, `src/stats.ts`,
 out of scope. Their behavior is covered by the integration and end-to-end
 tests, and DOM mutants there are mostly equivalent or only visible as layout.
 
-The run fails below an 85% mutation score (`thresholds.break`). The score at
-release 0.4.0 is 89.8%:
+The run fails below a 95% mutation score (`thresholds.break`). The score is
+97.3%, and every file is at least 95%:
 
 | File          | Score |
 | ------------- | ----- |
-| `catalog.ts`  | 99.1% |
-| `draft.ts`    | 80.4% |
-| `editor.ts`   | 85.2% |
+| `catalog.ts`  | 99.2% |
+| `draft.ts`    | 95.0% |
+| `editor.ts`   | 96.1% |
 | `messages.ts` | 100%  |
-| `stats.ts`    | 96.3% |
+| `stats.ts`    | 100%  |
 
-`test/__snapshots__/catalog.md` holds the complete generated wording of every
-rule, option, and translation. Review its diff for each catalog change and
-update it with `npx vitest run -u`. It turns each changed string into a
-reviewed text change instead of a surviving mutant.
+Three reviewed file snapshots turn behavior changes into text diffs instead of
+surviving mutants. Review their diffs and update them with `npx vitest run -u`:
 
-Known survivors are mostly equivalent mutants. Examples are `?? ""` fallbacks
-after `split`, which always returns an element, and range checks that
-`releaseSeparateParagraphs` resets for untouched rules. Investigate a new
-survivor before raising or lowering the threshold.
+- `test/__snapshots__/catalog.md` holds the generated wording of every rule,
+  option, and translation.
+- `test/__snapshots__/draft.md` records every single insertion, deletion,
+  and replacement of a three-rule draft with the resulting ranges and
+  separators, the undo and redo the editor history applies, and the
+  following uncheck and setting change.
+- `test/__snapshots__/draft-history.md` records a second edit on drafts that
+  already carry authored text, a deleted rule, touching rules, or a full
+  replacement, each undone in history order.
 
-A full run takes about 75 seconds on a developer machine, so the pipeline runs
+Surviving mutants were checked with a differential fuzzer: each mutant and the
+original module ran the same 20,000 random sequences of edits, undo, redo,
+and form toggles. Sequences with a difference became focused tests in
+`test/draft.test.ts`. Code that no sequence could tell apart was removed when
+it was redundant. A few equivalent mutants remain:
+
+- `?? ""` after `split`, which always returns an element. An inline
+  `Stryker disable` comment states this for each one.
+- Comparisons that cannot differ for reachable drafts, such as `>` against
+  `>=` on a catalog index of a rule that is not in the draft.
+- The initial array of `changeList`, whose extra entry every caller ignores.
+- `restoresPrior` and `matchReplacement` checks in undo. Their mutants
+  sometimes restore a separator or rule that the current code leaves
+  authored. That is a possible undo improvement to decide on, not a missing
+  test.
+
+Investigate a new survivor before raising or lowering the threshold.
+
+A full run takes about two minutes on a developer machine, so the pipeline runs
 it completely on every check. Stryker writes `reports/mutation/index.html`.

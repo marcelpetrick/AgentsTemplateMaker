@@ -15,7 +15,8 @@ interface Internationalization {
 
 function countSegmented(text: string, segmenter: Segmenter): TextCount {
   const words = new segmenter(undefined, { granularity: "word" });
-  const graphemes = new segmenter(undefined, { granularity: "grapheme" });
+  // Grapheme is the default granularity.
+  const graphemes = new segmenter();
   let wordCount = 0;
   for (const segment of words.segment(text))
     if (segment.isWordLike) wordCount++;

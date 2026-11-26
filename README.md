@@ -33,7 +33,10 @@ instructions intact. The draft lives in your open browser tab.
    FreeRTOS, TypeScript, and Rust. The character set rule chooses Unicode or
    ASCII only. Repository rules cover the README (screenshots, at least three
    badges), the license, what each release attaches (artifacts, checksums,
-   SBOM, changelog), and a build and lint pipeline for every language.
+   SBOM, changelog, container image), and a build and lint pipeline for every
+   language. Verification rules add requirements engineering and a
+   `localPipeline.sh` that builds and tests from a fresh clone, optionally
+   followed by a deploy step.
 3. Type or paste anywhere in the Markdown editor. Your edits are underlined.
    Unchecking an edited rule keeps that text as a custom instruction. A
    setting or document language change that affects edited rules lists the

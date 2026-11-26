@@ -644,7 +644,7 @@ Help (en): Releases built by the pipeline are reproducible and traceable. Checks
 
 Help (de): Releases aus der Pipeline sind reproduzierbar und nachvollziehbar. Prüfsummen, SBOM und Changelog helfen Nutzern, ein Update zu prüfen und einzuschätzen, kosten aber zusätzliche Pipeline-Schritte.
 
-Setting (multi, initial "artifacts,checksums,sbom,changelog"): Attach to each release / An jedes Release anhängen
+Setting (multi, initial "artifacts,checksums,sbom,changelog,container"): Attach to each release / An jedes Release anhängen
 
 - artifacts: Build artifacts / Build-Artefakte
 
@@ -653,6 +653,8 @@ Setting (multi, initial "artifacts,checksums,sbom,changelog"): Attach to each re
 - sbom: SBOM / SBOM
 
 - changelog: Changelog / Changelog
+
+- container: Container image / Container-Image
 
 ### Value "artifacts" (en)
 
@@ -686,7 +688,29 @@ Release from a version tag through the pipeline, not from a developer machine. B
 
 Veröffentliche aus einem Versions-Tag über die Pipeline, nicht von einem Entwicklerrechner. Baue aus dem getaggten Commit und hänge an: einen Changelog, erzeugt aus den Conventional Commits seit dem vorigen Release.
 
+### Value "container" (en)
+
+Release from a version tag through the pipeline, not from a developer machine. Build from the tagged commit and attach: a container image when users run the project as a service or tool, and a recorded decision when they do not; build it from the tagged commit on a base image pinned by digest, run it as a non-root user, and tag it with the version.
+
+### Value "container" (de)
+
+Veröffentliche aus einem Versions-Tag über die Pipeline, nicht von einem Entwicklerrechner. Baue aus dem getaggten Commit und hänge an: ein Container-Image, wenn Nutzer das Projekt als Dienst oder Werkzeug ausführen, und andernfalls eine festgehaltene Entscheidung dagegen; baue es aus dem getaggten Commit auf einem per Digest fixierten Basis-Image, führe es ohne Root-Rechte aus und versieh es mit der Version als Tag.
+
 # verification: Verification and architecture / Prüfung und Architektur
+
+## requirements: Requirements engineering / Anforderungsmanagement
+
+Help (en): Written, testable requirements make scope and acceptance explicit before code exists. Keeping them current costs time whenever the scope changes.
+
+Help (de): Schriftliche, prüfbare Anforderungen machen Umfang und Abnahme klar, bevor Code entsteht. Sie aktuell zu halten kostet bei jeder Änderung des Umfangs Zeit.
+
+### Value "" (en)
+
+Keep the requirements in version-controlled Markdown. Give each one a unique ID, its source, a priority, and a testable acceptance criterion. Resolve ambiguous or conflicting requirements before implementing them and record each assumption. Map every requirement to the unit, integration, end-to-end, or acceptance tests that verify it, and review the list whenever the scope changes.
+
+### Value "" (de)
+
+Halte die Anforderungen in versioniertem Markdown fest. Gib jeder eine eindeutige ID, ihre Quelle, eine Priorität und ein prüfbares Abnahmekriterium. Kläre mehrdeutige oder widersprüchliche Anforderungen vor der Umsetzung und halte jede Annahme fest. Ordne jeder Anforderung die Unit-, Integrations-, End-to-End- oder Abnahmetests zu, die sie prüfen, und überprüfe die Liste bei jeder Änderung des Umfangs.
 
 ## unit-tests: Unit tests / Unit-Tests
 
@@ -738,11 +762,11 @@ Help (de): Abnahmetests verbinden beobachtbares Verhalten mit dem gewünschten E
 
 ### Value "" (en)
 
-Agree on an observable acceptance check for each user outcome. Run it under the stated conditions and link the result to its requirement.
+Agree on an observable acceptance check for each user outcome. Run it under the stated conditions and link the result to its requirement. Automate each check and run it in the pipeline; for any check that stays manual, record why.
 
 ### Value "" (de)
 
-Vereinbare für jedes gewünschte Nutzerergebnis eine beobachtbare Abnahmeprüfung. Führe sie unter den vereinbarten Bedingungen aus und verknüpfe das Ergebnis mit der Anforderung.
+Vereinbare für jedes gewünschte Nutzerergebnis eine beobachtbare Abnahmeprüfung. Führe sie unter den vereinbarten Bedingungen aus und verknüpfe das Ergebnis mit der Anforderung. Automatisiere jede Prüfung und führe sie in der Pipeline aus. Halte bei jeder Prüfung, die manuell bleibt, den Grund fest.
 
 ## automation: Automate checks on all targets / Prüfungen für alle Ziele automatisieren
 
@@ -810,11 +834,11 @@ Setting (percent, initial "99"): Minimum percentage / Mindestwert in Prozent
 
 ### Value "99" (en)
 
-Require at least 99% executable-line coverage of project-owned production source. Exclude tests, dependencies, and generated outputs. Document and justify any further exclusions before enabling the gate. Join coverage from the required suites and compare executed lines divided by eligible lines without rounding. Fail below the minimum and pass at or above it.
+Require at least 99% executable-line coverage of project-owned production source. Exclude tests, dependencies, and generated outputs. Document and justify any further exclusions before enabling the gate. Join coverage from the required suites and compare executed lines divided by eligible lines without rounding. Fail below the minimum and pass at or above it. Treat the minimum as a floor: cover new code as completely as practical and justify each line left untested.
 
 ### Value "99" (de)
 
-Fordere mindestens 99 % Abdeckung der ausführbaren Zeilen im eigenen Produktionscode. Schließe Tests, Abhängigkeiten und generierte Ausgaben aus. Dokumentiere und begründe weitere Ausnahmen, bevor du den Mindestwert verbindlich prüfst. Führe die Ergebnisse der erforderlichen Testsuiten zusammen und vergleiche den Anteil ausgeführter Zeilen ohne Rundung. Der Wert muss mindestens dem Grenzwert entsprechen.
+Fordere mindestens 99 % Abdeckung der ausführbaren Zeilen im eigenen Produktionscode. Schließe Tests, Abhängigkeiten und generierte Ausgaben aus. Dokumentiere und begründe weitere Ausnahmen, bevor du den Mindestwert verbindlich prüfst. Führe die Ergebnisse der erforderlichen Testsuiten zusammen und vergleiche den Anteil ausgeführter Zeilen ohne Rundung. Der Wert muss mindestens dem Grenzwert entsprechen. Betrachte den Mindestwert als Untergrenze: Decke neuen Code so vollständig wie praktikabel ab und begründe jede ungetestete Zeile.
 
 ## clean-pipeline: Rebuild from a clean clone / Aus einem sauberen Klon bauen
 
@@ -829,6 +853,34 @@ Start from a clean clone. Obtain pinned dependencies, configure the environment,
 ### Value "" (de)
 
 Beginne mit einem sauberen Klon. Installiere fixierte Abhängigkeiten, richte die Umgebung ein, baue aus den versionierten Quellen, führe alle zutreffenden Pipeline-Jobs aus und prüfe die Ergebnisse für jedes angegebene Ziel. Dokumentiere externe Voraussetzungen und die Namen benötigter Geheimnisse. Verlasse dich weder auf einen Entwicklerrechner noch auf unversionierte Dateien.
+
+## local-pipeline: Local pipeline script / Lokales Pipeline-Skript
+
+Help (en): One script that rebuilds and checks everything from a fresh clone makes local and CI results comparable. A deploy step saves manual work but must never run by accident.
+
+Help (de): Ein Skript, das aus einem frischen Klon alles baut und prüft, macht lokale und CI-Ergebnisse vergleichbar. Ein Deploy-Schritt spart Handarbeit, darf aber nie versehentlich laufen.
+
+Setting (select, initial "verify"): Scope / Umfang
+
+- verify: Build and test / Bauen und testen
+
+- deploy: Build, test, and deploy / Bauen, testen und ausliefern
+
+### Value "verify" (en)
+
+Provide localPipeline.sh in the repository root. From a fresh clone it installs the pinned dependencies, configures and builds the project, and runs every test, lint, and analysis step. It stops with a nonzero exit code at the first failure. CI calls the same script, so a local pass predicts the CI result.
+
+### Value "verify" (de)
+
+Stelle localPipeline.sh im Wurzelverzeichnis bereit. Aus einem frischen Klon installiert es die fixierten Abhängigkeiten, konfiguriert und baut das Projekt und führt jeden Test-, Lint- und Analyseschritt aus. Beim ersten Fehler bricht es mit einem Exit-Code ungleich null ab. Die CI ruft dasselbe Skript auf, damit ein lokaler Erfolg das CI-Ergebnis vorhersagt.
+
+### Value "deploy" (en)
+
+Provide localPipeline.sh in the repository root. From a fresh clone it installs the pinned dependencies, configures and builds the project, and runs every test, lint, and analysis step. It stops with a nonzero exit code at the first failure. CI calls the same script. With --deploy it then deploys the verified build, only after every step has passed; it never deploys by default.
+
+### Value "deploy" (de)
+
+Stelle localPipeline.sh im Wurzelverzeichnis bereit. Aus einem frischen Klon installiert es die fixierten Abhängigkeiten, konfiguriert und baut das Projekt und führt jeden Test-, Lint- und Analyseschritt aus. Beim ersten Fehler bricht es mit einem Exit-Code ungleich null ab. Die CI ruft dasselbe Skript auf. Mit --deploy liefert es danach den geprüften Build aus, erst wenn jeder Schritt bestanden ist; ohne diese Option liefert es nie aus.
 
 ## tdd: Test-driven development / Testgetriebene Entwicklung
 

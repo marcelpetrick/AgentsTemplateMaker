@@ -43,6 +43,7 @@ describe("instruction catalog", () => {
       "readme",
       "license",
       "release",
+      "requirements",
       "unit-tests",
       "integration-tests",
       "e2e-tests",
@@ -52,6 +53,7 @@ describe("instruction catalog", () => {
       "mutation",
       "coverage",
       "clean-pipeline",
+      "local-pipeline",
       "tdd",
       "c4",
       "mermaid",
@@ -202,7 +204,12 @@ describe("instruction catalog", () => {
   it("chooses what the release pipeline publishes", () => {
     const release = rules.find(({ id }) => id === "release")!;
     expect(release.setting?.kind).toBe("multi");
-    expect(release.setting?.initial).toBe("artifacts,checksums,sbom,changelog");
+    expect(release.setting?.initial).toBe(
+      "artifacts,checksums,sbom,changelog,container",
+    );
+    expect(paragraph("release", "en", "container")).toMatch(
+      /container image.*service.*tool.*record.*tagged commit.*digest.*non-root.*version/,
+    );
     expect(paragraph("release", "en")).toMatch(
       /version tag.*pipeline.*not.*developer machine.*artifacts.*SHA-256.*SBOM.*SPDX or CycloneDX.*changelog.*Conventional Commits/,
     );
@@ -279,6 +286,22 @@ describe("instruction catalog", () => {
     );
     expect(paragraph("clean-pipeline", "en")).toMatch(
       /clean clone.*pinned.*configure.*build.*pipeline.*results/,
+    );
+    expect(paragraph("coverage", "en")).toMatch(
+      /floor.*as completely as practical.*justify/,
+    );
+    expect(paragraph("acceptance-tests", "en")).toMatch(
+      /Automate.*pipeline.*manual.*why/,
+    );
+    expect(paragraph("local-pipeline", "en", "verify")).toMatch(
+      /localPipeline\.sh.*fresh clone.*install.*configure.*build.*every test.*lint.*nonzero.*CI.*same script/,
+    );
+    expect(paragraph("local-pipeline", "en", "verify")).not.toMatch(/deploy/);
+    expect(paragraph("local-pipeline", "en", "deploy")).toMatch(
+      /--deploy.*only after.*passed.*never.*default/,
+    );
+    expect(paragraph("requirements", "en")).toMatch(
+      /unique ID.*source.*priority.*testable acceptance criterion.*ambigu.*conflict.*before implement.*assumption.*unit.*integration.*end-to-end.*acceptance.*scope changes/,
     );
     expect(paragraph("mutation", "en")).toMatch(
       /surviving.*missing assertions.*equivalent/,

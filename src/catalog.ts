@@ -142,6 +142,162 @@ function languagesParagraph(language: Language, value: string) {
   return `${intro[language]} ${domainSpecific[language]}`;
 }
 
+interface Checklist {
+  readonly label: Localized;
+  readonly initial: string;
+  readonly options: readonly Choice[];
+  readonly compose: (language: Language, parts: readonly string[]) => string;
+}
+
+/** A rule whose setting is a group of checkboxes, one sentence per choice. */
+function checklist(description: RuleDescription, list: Checklist): Rule {
+  return {
+    ...description,
+    setting: {
+      kind: "multi",
+      label: list.label,
+      initial: list.initial,
+      options: list.options,
+    },
+    paragraph: (language, value) => {
+      const chosen = new Set(value.split(","));
+      const parts = list.options
+        .filter((option) => chosen.has(option.value))
+        .map((option) => option.text[language]);
+      return list.compose(language, parts);
+    },
+  };
+}
+
+function sentences(...parts: readonly string[]) {
+  return parts.filter(Boolean).join(" ");
+}
+
+const readmeBase = localized(
+  "Keep a README.md in the repository root. Describe its purpose, installation, usage, how to build and test it, and its license.",
+  "Pflege eine README.md im Wurzelverzeichnis. Beschreibe Zweck, Installation, Nutzung, wie das Projekt gebaut und getestet wird und seine Lizenz.",
+);
+
+const readmeParts: readonly Choice[] = [
+  {
+    value: "screenshots",
+    label: localized("Screenshots", "Screenshots"),
+    text: localized(
+      "Show the user interface or output in screenshots, and replace them when it changes so they match the current release.",
+      "Zeige Oberfläche oder Ausgabe in Screenshots und ersetze sie bei Änderungen, damit sie zum aktuellen Release passen.",
+    ),
+  },
+  {
+    value: "badges",
+    label: localized("At least three badges", "Mindestens drei Badges"),
+    text: localized(
+      "Put at least three badges at the top: pipeline status, license, and latest release. Add coverage or other badges only when a check keeps them current.",
+      "Setze oben mindestens drei Badges: Pipeline-Status, Lizenz und neuestes Release. Ergänze Abdeckung oder weitere Badges nur, wenn eine Prüfung sie aktuell hält.",
+    ),
+  },
+];
+
+type License = readonly [id: string, en: string, de?: string];
+
+const licenses: readonly [License, ...License[]] = [
+  ["GPL-3.0-or-later", "GNU GPL v3 or later", "GNU GPL v3 oder neuer"],
+  ["LGPL-3.0-or-later", "GNU LGPL v3 or later", "GNU LGPL v3 oder neuer"],
+  ["AGPL-3.0-or-later", "GNU AGPL v3 or later", "GNU AGPL v3 oder neuer"],
+  ["MPL-2.0", "Mozilla Public License 2.0"],
+  ["Apache-2.0", "Apache License 2.0"],
+  ["MIT", "MIT License"],
+  ["BSD-3-Clause", "BSD 3-Clause License"],
+];
+
+function licenseChoice([id, name, german = name]: License): Choice {
+  return {
+    value: id,
+    label: localized(name, german),
+    text: localized(
+      `License the project under ${name} (${id}). Keep the full license text in LICENSE, start each source file with SPDX-License-Identifier: ${id}, and check that every dependency license is compatible before adding it.`,
+      `Lizenziere das Projekt unter ${german} (${id}). Lege den vollständigen Lizenztext in LICENSE ab, beginne jede Quelldatei mit SPDX-License-Identifier: ${id} und prüfe vor dem Hinzufügen, ob jede Lizenz einer Abhängigkeit kompatibel ist.`,
+    ),
+  };
+}
+
+const proprietary: Choice = {
+  value: "proprietary",
+  label: localized("Proprietary", "Proprietär"),
+  text: localized(
+    "Keep the project proprietary: state the copyright holder and all rights reserved in LICENSE, and add only dependencies whose licenses permit closed distribution.",
+    "Halte das Projekt proprietär: Nenne in LICENSE den Rechteinhaber und dass alle Rechte vorbehalten sind. Füge nur Abhängigkeiten hinzu, deren Lizenzen eine geschlossene Weitergabe erlauben.",
+  ),
+};
+
+const releaseParts: readonly Choice[] = [
+  {
+    value: "artifacts",
+    label: localized("Build artifacts", "Build-Artefakte"),
+    text: localized(
+      "the build artifacts for every supported target",
+      "die Build-Artefakte für jedes unterstützte Ziel",
+    ),
+  },
+  {
+    value: "checksums",
+    label: localized("Checksums", "Prüfsummen"),
+    text: localized(
+      "a SHA-256 checksum file for those artifacts",
+      "eine SHA-256-Prüfsummendatei für diese Artefakte",
+    ),
+  },
+  {
+    value: "sbom",
+    label: localized("SBOM", "SBOM"),
+    text: localized(
+      "a software bill of materials (SBOM) in SPDX or CycloneDX format",
+      "eine Software-Stückliste (SBOM) im Format SPDX oder CycloneDX",
+    ),
+  },
+  {
+    value: "changelog",
+    label: localized("Changelog", "Changelog"),
+    text: localized(
+      "a changelog generated from the Conventional Commits since the previous release",
+      "einen Changelog, erzeugt aus den Conventional Commits seit dem vorigen Release",
+    ),
+  },
+];
+
+function releaseParagraph(language: Language, parts: readonly string[]) {
+  const start = localized(
+    "Release from a version tag through the pipeline, not from a developer machine.",
+    "Veröffentliche aus einem Versions-Tag über die Pipeline, nicht von einem Entwicklerrechner.",
+  )[language];
+  if (parts.length === 0)
+    return sentences(
+      start,
+      localized(
+        "Publish a release note that names the version and its changes.",
+        "Veröffentliche eine Release-Notiz mit Version und Änderungen.",
+      )[language],
+    );
+  const list = parts.join("; ");
+  return sentences(
+    start,
+    localized(
+      `Build from the tagged commit and attach: ${list}.`,
+      `Baue aus dem getaggten Commit und hänge an: ${list}.`,
+    )[language],
+  );
+}
+
+function ciChoice(value: string, name: string, file: string): Choice {
+  return {
+    value,
+    label: localized(name, name),
+    text: localized(
+      `Run a ${name} pipeline (${file}) on every push and pull request. Build the project and run lint and format checks for every language in the repository, including Markdown, shell scripts, YAML, and the workflow files themselves. Fail the pipeline on any finding.`,
+      `Lass bei jedem Push und Pull Request eine ${name}-Pipeline (${file}) laufen. Baue das Projekt und prüfe Linting und Formatierung für jede Sprache im Repository, auch Markdown, Shell-Skripte, YAML und die Workflow-Dateien selbst. Lass die Pipeline bei jedem Befund fehlschlagen.`,
+    ),
+  };
+}
+
 export const rules: readonly Rule[] = [
   choices(
     item(
@@ -392,7 +548,7 @@ export const rules: readonly Rule[] = [
       "Nutze etablierte Werkzeuge für die Projektsprache. Setze bei Python Ruff für Linting und Black für Formatierung ein. Wähle pro Sprache einen Formatierer, damit sich Änderungen nicht widersprechen. Prüfe Linting und Formatierung in der Pipeline.",
     ),
   ),
-  fixed(
+  choices(
     item(
       "dependencies",
       "software",
@@ -401,14 +557,29 @@ export const rules: readonly Rule[] = [
         "Abhängigkeiten fixieren und prüfen",
       ),
       localized(
-        "Pinned versions make builds repeatable. Regular update checks take time and prevent pins from silently growing stale.",
-        "Fixierte Versionen machen Builds reproduzierbar. Regelmäßige Prüfungen kosten Zeit und verhindern, dass festgelegte Versionen unbemerkt veralten.",
+        "Pinned versions make builds repeatable. Regular update checks take time and prevent pins from silently growing stale. The latest releases bring fixes sooner but can need code changes.",
+        "Fixierte Versionen machen Builds reproduzierbar. Regelmäßige Prüfungen kosten Zeit und verhindern, dass festgelegte Versionen unbemerkt veralten. Die neuesten Releases bringen Korrekturen früher, können aber Codeänderungen erfordern.",
       ),
     ),
-    localized(
-      "Pin exact resolved dependency versions in version-controlled files. Review them regularly and take compatible updates after verification. For each deferred update, record the requirement or failing check that blocks it.",
-      "Fixiere die aufgelösten Versionen der Abhängigkeiten in versionierten Dateien. Prüfe sie regelmäßig und übernimm kompatible Updates nach erfolgreicher Prüfung. Halte bei jedem verschobenen Update fest, welche Anforderung oder fehlgeschlagene Prüfung es blockiert.",
-    ),
+    localized("Update policy", "Update-Regel"),
+    [
+      {
+        value: "latest",
+        label: localized("Latest stable releases", "Neueste stabile Releases"),
+        text: localized(
+          "Pin exact resolved dependency versions in version-controlled files. Use the most recent stable release of each library, framework, and toolchain, looked up in its registry, never a pre-release. Update regularly and keep each update only when the full pipeline passes. For each deferred update, record the requirement or failing check that blocks it.",
+          "Fixiere die aufgelösten Versionen der Abhängigkeiten in versionierten Dateien. Nutze das neueste stabile Release jeder Bibliothek, jedes Frameworks und jeder Werkzeugkette, nachgeschlagen in ihrer Registry, nie eine Vorabversion. Aktualisiere regelmäßig und behalte ein Update nur, wenn die gesamte Pipeline besteht. Halte bei jedem verschobenen Update fest, welche Anforderung oder fehlgeschlagene Prüfung es blockiert.",
+        ),
+      },
+      {
+        value: "compatible",
+        label: localized("Compatible updates", "Kompatible Updates"),
+        text: localized(
+          "Pin exact resolved dependency versions in version-controlled files. Review them regularly and take compatible updates after verification. For each deferred update, record the requirement or failing check that blocks it.",
+          "Fixiere die aufgelösten Versionen der Abhängigkeiten in versionierten Dateien. Prüfe sie regelmäßig und übernimm kompatible Updates nach erfolgreicher Prüfung. Halte bei jedem verschobenen Update fest, welche Anforderung oder fehlgeschlagene Prüfung es blockiert.",
+        ),
+      },
+    ],
   ),
   fixed(
     {
@@ -516,6 +687,57 @@ export const rules: readonly Rule[] = [
       "Hinterfrage Anforderungen vor der Umsetzung und prüfe jeden atomaren Commit. Suche unklare Ziele, Gegenbeispiele, fehlende Fehlerfälle und unbelegte Behauptungen. Halte Commit-SHA, Befunde, Nachweise und den Umgang mit jedem Befund außerhalb des geprüften Commits fest. Wiederhole die Prüfungen möglichst unabhängig aus einem sauberen Checkout und kennzeichne ungeprüfte Aussagen. Prüfe nach jeder Planungsänderung und jedem Umsetzungsschritt, ob das Ergebnis noch zu den Anforderungen und zum Plan passt, und wiederhole die Prüfung, bis es passt oder ein Mensch entscheidet.",
     ),
   ),
+  checklist(
+    item(
+      "readme",
+      "repository",
+      localized("README file", "README-Datei"),
+      localized(
+        "A README is the first page visitors and new contributors read. Screenshots and badges show the state at a glance but need updates with each release.",
+        "Die README ist die erste Seite für Besucher und neue Mitwirkende. Screenshots und Badges zeigen den Stand auf einen Blick, müssen aber mit jedem Release aktualisiert werden.",
+      ),
+    ),
+    {
+      label: localized("README contents", "Inhalt der README"),
+      initial: "screenshots,badges",
+      options: readmeParts,
+      compose: (language, parts) => sentences(readmeBase[language], ...parts),
+    },
+  ),
+  choices(
+    item(
+      "license",
+      "repository",
+      localized("License", "Lizenz"),
+      localized(
+        "A license states what others may do with the code. Copyleft licenses keep derived work open; permissive licenses allow closed reuse.",
+        "Eine Lizenz legt fest, was andere mit dem Code tun dürfen. Copyleft-Lizenzen halten abgeleitete Werke offen, freizügige Lizenzen erlauben geschlossene Weiterverwendung.",
+      ),
+    ),
+    localized("Project license", "Projektlizenz"),
+    [
+      licenseChoice(licenses[0]),
+      ...licenses.slice(1).map((license) => licenseChoice(license)),
+      proprietary,
+    ],
+  ),
+  checklist(
+    item(
+      "release",
+      "repository",
+      localized("Release outputs", "Release-Ergebnisse"),
+      localized(
+        "Releases built by the pipeline are reproducible and traceable. Checksums, an SBOM, and a changelog help users verify and assess an update but add pipeline steps.",
+        "Releases aus der Pipeline sind reproduzierbar und nachvollziehbar. Prüfsummen, SBOM und Changelog helfen Nutzern, ein Update zu prüfen und einzuschätzen, kosten aber zusätzliche Pipeline-Schritte.",
+      ),
+    ),
+    {
+      label: localized("Attach to each release", "An jedes Release anhängen"),
+      initial: "artifacts,checksums,sbom,changelog",
+      options: releaseParts,
+      compose: releaseParagraph,
+    },
+  ),
   fixed(
     item(
       "unit-tests",
@@ -593,6 +815,22 @@ export const rules: readonly Rule[] = [
       "Prefer repeatable automated checks. Start with the project’s declared list of supported build targets, then compare it with CI jobs and their results. Build and test each supported target, flag missing or skipped results, and document any manual checks and why they remain.",
       "Bevorzuge wiederholbare automatisierte Prüfungen. Gleiche die dokumentierte Liste unterstützter Build-Ziele mit den CI-Jobs und ihren Ergebnissen ab. Baue und teste jedes unterstützte Ziel, kennzeichne fehlende oder übersprungene Ergebnisse und begründe verbleibende manuelle Prüfungen.",
     ),
+  ),
+  choices(
+    item(
+      "ci-pipeline",
+      "verification",
+      localized("Build and lint pipeline", "Pipeline für Build und Linting"),
+      localized(
+        "A hosted pipeline checks every change the same way. Linting every language, including documentation, catches problems a local run may skip.",
+        "Eine gehostete Pipeline prüft jede Änderung gleich. Linting für jede Sprache, auch für die Dokumentation, findet Fehler, die ein lokaler Lauf auslassen kann.",
+      ),
+    ),
+    localized("CI service", "CI-Dienst"),
+    [
+      ciChoice("github", "GitHub Actions", ".github/workflows/"),
+      ciChoice("gitlab", "GitLab CI", ".gitlab-ci.yml"),
+    ],
   ),
   fixed(
     item(

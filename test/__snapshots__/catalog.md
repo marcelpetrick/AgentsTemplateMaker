@@ -396,15 +396,29 @@ Nutze etablierte Werkzeuge für die Projektsprache. Setze bei Python Ruff für L
 
 ## dependencies: Pin and review dependencies / Abhängigkeiten fixieren und prüfen
 
-Help (en): Pinned versions make builds repeatable. Regular update checks take time and prevent pins from silently growing stale.
+Help (en): Pinned versions make builds repeatable. Regular update checks take time and prevent pins from silently growing stale. The latest releases bring fixes sooner but can need code changes.
 
-Help (de): Fixierte Versionen machen Builds reproduzierbar. Regelmäßige Prüfungen kosten Zeit und verhindern, dass festgelegte Versionen unbemerkt veralten.
+Help (de): Fixierte Versionen machen Builds reproduzierbar. Regelmäßige Prüfungen kosten Zeit und verhindern, dass festgelegte Versionen unbemerkt veralten. Die neuesten Releases bringen Korrekturen früher, können aber Codeänderungen erfordern.
 
-### Value "" (en)
+Setting (select, initial "latest"): Update policy / Update-Regel
+
+- latest: Latest stable releases / Neueste stabile Releases
+
+- compatible: Compatible updates / Kompatible Updates
+
+### Value "latest" (en)
+
+Pin exact resolved dependency versions in version-controlled files. Use the most recent stable release of each library, framework, and toolchain, looked up in its registry, never a pre-release. Update regularly and keep each update only when the full pipeline passes. For each deferred update, record the requirement or failing check that blocks it.
+
+### Value "latest" (de)
+
+Fixiere die aufgelösten Versionen der Abhängigkeiten in versionierten Dateien. Nutze das neueste stabile Release jeder Bibliothek, jedes Frameworks und jeder Werkzeugkette, nachgeschlagen in ihrer Registry, nie eine Vorabversion. Aktualisiere regelmäßig und behalte ein Update nur, wenn die gesamte Pipeline besteht. Halte bei jedem verschobenen Update fest, welche Anforderung oder fehlgeschlagene Prüfung es blockiert.
+
+### Value "compatible" (en)
 
 Pin exact resolved dependency versions in version-controlled files. Review them regularly and take compatible updates after verification. For each deferred update, record the requirement or failing check that blocks it.
 
-### Value "" (de)
+### Value "compatible" (de)
 
 Fixiere die aufgelösten Versionen der Abhängigkeiten in versionierten Dateien. Prüfe sie regelmäßig und übernimm kompatible Updates nach erfolgreicher Prüfung. Halte bei jedem verschobenen Update fest, welche Anforderung oder fehlgeschlagene Prüfung es blockiert.
 
@@ -508,6 +522,170 @@ Challenge requirements before implementation and review every atomic commit. Loo
 
 Hinterfrage Anforderungen vor der Umsetzung und prüfe jeden atomaren Commit. Suche unklare Ziele, Gegenbeispiele, fehlende Fehlerfälle und unbelegte Behauptungen. Halte Commit-SHA, Befunde, Nachweise und den Umgang mit jedem Befund außerhalb des geprüften Commits fest. Wiederhole die Prüfungen möglichst unabhängig aus einem sauberen Checkout und kennzeichne ungeprüfte Aussagen. Prüfe nach jeder Planungsänderung und jedem Umsetzungsschritt, ob das Ergebnis noch zu den Anforderungen und zum Plan passt, und wiederhole die Prüfung, bis es passt oder ein Mensch entscheidet.
 
+## readme: README file / README-Datei
+
+Help (en): A README is the first page visitors and new contributors read. Screenshots and badges show the state at a glance but need updates with each release.
+
+Help (de): Die README ist die erste Seite für Besucher und neue Mitwirkende. Screenshots und Badges zeigen den Stand auf einen Blick, müssen aber mit jedem Release aktualisiert werden.
+
+Setting (multi, initial "screenshots,badges"): README contents / Inhalt der README
+
+- screenshots: Screenshots / Screenshots
+
+- badges: At least three badges / Mindestens drei Badges
+
+### Value "screenshots" (en)
+
+Keep a README.md in the repository root. Describe its purpose, installation, usage, how to build and test it, and its license. Show the user interface or output in screenshots, and replace them when it changes so they match the current release.
+
+### Value "screenshots" (de)
+
+Pflege eine README.md im Wurzelverzeichnis. Beschreibe Zweck, Installation, Nutzung, wie das Projekt gebaut und getestet wird und seine Lizenz. Zeige Oberfläche oder Ausgabe in Screenshots und ersetze sie bei Änderungen, damit sie zum aktuellen Release passen.
+
+### Value "badges" (en)
+
+Keep a README.md in the repository root. Describe its purpose, installation, usage, how to build and test it, and its license. Put at least three badges at the top: pipeline status, license, and latest release. Add coverage or other badges only when a check keeps them current.
+
+### Value "badges" (de)
+
+Pflege eine README.md im Wurzelverzeichnis. Beschreibe Zweck, Installation, Nutzung, wie das Projekt gebaut und getestet wird und seine Lizenz. Setze oben mindestens drei Badges: Pipeline-Status, Lizenz und neuestes Release. Ergänze Abdeckung oder weitere Badges nur, wenn eine Prüfung sie aktuell hält.
+
+## license: License / Lizenz
+
+Help (en): A license states what others may do with the code. Copyleft licenses keep derived work open; permissive licenses allow closed reuse.
+
+Help (de): Eine Lizenz legt fest, was andere mit dem Code tun dürfen. Copyleft-Lizenzen halten abgeleitete Werke offen, freizügige Lizenzen erlauben geschlossene Weiterverwendung.
+
+Setting (select, initial "GPL-3.0-or-later"): Project license / Projektlizenz
+
+- GPL-3.0-or-later: GNU GPL v3 or later / GNU GPL v3 oder neuer
+
+- LGPL-3.0-or-later: GNU LGPL v3 or later / GNU LGPL v3 oder neuer
+
+- AGPL-3.0-or-later: GNU AGPL v3 or later / GNU AGPL v3 oder neuer
+
+- MPL-2.0: Mozilla Public License 2.0 / Mozilla Public License 2.0
+
+- Apache-2.0: Apache License 2.0 / Apache License 2.0
+
+- MIT: MIT License / MIT License
+
+- BSD-3-Clause: BSD 3-Clause License / BSD 3-Clause License
+
+- proprietary: Proprietary / Proprietär
+
+### Value "GPL-3.0-or-later" (en)
+
+License the project under GNU GPL v3 or later (GPL-3.0-or-later). Keep the full license text in LICENSE, start each source file with SPDX-License-Identifier: GPL-3.0-or-later, and check that every dependency license is compatible before adding it.
+
+### Value "GPL-3.0-or-later" (de)
+
+Lizenziere das Projekt unter GNU GPL v3 oder neuer (GPL-3.0-or-later). Lege den vollständigen Lizenztext in LICENSE ab, beginne jede Quelldatei mit SPDX-License-Identifier: GPL-3.0-or-later und prüfe vor dem Hinzufügen, ob jede Lizenz einer Abhängigkeit kompatibel ist.
+
+### Value "LGPL-3.0-or-later" (en)
+
+License the project under GNU LGPL v3 or later (LGPL-3.0-or-later). Keep the full license text in LICENSE, start each source file with SPDX-License-Identifier: LGPL-3.0-or-later, and check that every dependency license is compatible before adding it.
+
+### Value "LGPL-3.0-or-later" (de)
+
+Lizenziere das Projekt unter GNU LGPL v3 oder neuer (LGPL-3.0-or-later). Lege den vollständigen Lizenztext in LICENSE ab, beginne jede Quelldatei mit SPDX-License-Identifier: LGPL-3.0-or-later und prüfe vor dem Hinzufügen, ob jede Lizenz einer Abhängigkeit kompatibel ist.
+
+### Value "AGPL-3.0-or-later" (en)
+
+License the project under GNU AGPL v3 or later (AGPL-3.0-or-later). Keep the full license text in LICENSE, start each source file with SPDX-License-Identifier: AGPL-3.0-or-later, and check that every dependency license is compatible before adding it.
+
+### Value "AGPL-3.0-or-later" (de)
+
+Lizenziere das Projekt unter GNU AGPL v3 oder neuer (AGPL-3.0-or-later). Lege den vollständigen Lizenztext in LICENSE ab, beginne jede Quelldatei mit SPDX-License-Identifier: AGPL-3.0-or-later und prüfe vor dem Hinzufügen, ob jede Lizenz einer Abhängigkeit kompatibel ist.
+
+### Value "MPL-2.0" (en)
+
+License the project under Mozilla Public License 2.0 (MPL-2.0). Keep the full license text in LICENSE, start each source file with SPDX-License-Identifier: MPL-2.0, and check that every dependency license is compatible before adding it.
+
+### Value "MPL-2.0" (de)
+
+Lizenziere das Projekt unter Mozilla Public License 2.0 (MPL-2.0). Lege den vollständigen Lizenztext in LICENSE ab, beginne jede Quelldatei mit SPDX-License-Identifier: MPL-2.0 und prüfe vor dem Hinzufügen, ob jede Lizenz einer Abhängigkeit kompatibel ist.
+
+### Value "Apache-2.0" (en)
+
+License the project under Apache License 2.0 (Apache-2.0). Keep the full license text in LICENSE, start each source file with SPDX-License-Identifier: Apache-2.0, and check that every dependency license is compatible before adding it.
+
+### Value "Apache-2.0" (de)
+
+Lizenziere das Projekt unter Apache License 2.0 (Apache-2.0). Lege den vollständigen Lizenztext in LICENSE ab, beginne jede Quelldatei mit SPDX-License-Identifier: Apache-2.0 und prüfe vor dem Hinzufügen, ob jede Lizenz einer Abhängigkeit kompatibel ist.
+
+### Value "MIT" (en)
+
+License the project under MIT License (MIT). Keep the full license text in LICENSE, start each source file with SPDX-License-Identifier: MIT, and check that every dependency license is compatible before adding it.
+
+### Value "MIT" (de)
+
+Lizenziere das Projekt unter MIT License (MIT). Lege den vollständigen Lizenztext in LICENSE ab, beginne jede Quelldatei mit SPDX-License-Identifier: MIT und prüfe vor dem Hinzufügen, ob jede Lizenz einer Abhängigkeit kompatibel ist.
+
+### Value "BSD-3-Clause" (en)
+
+License the project under BSD 3-Clause License (BSD-3-Clause). Keep the full license text in LICENSE, start each source file with SPDX-License-Identifier: BSD-3-Clause, and check that every dependency license is compatible before adding it.
+
+### Value "BSD-3-Clause" (de)
+
+Lizenziere das Projekt unter BSD 3-Clause License (BSD-3-Clause). Lege den vollständigen Lizenztext in LICENSE ab, beginne jede Quelldatei mit SPDX-License-Identifier: BSD-3-Clause und prüfe vor dem Hinzufügen, ob jede Lizenz einer Abhängigkeit kompatibel ist.
+
+### Value "proprietary" (en)
+
+Keep the project proprietary: state the copyright holder and all rights reserved in LICENSE, and add only dependencies whose licenses permit closed distribution.
+
+### Value "proprietary" (de)
+
+Halte das Projekt proprietär: Nenne in LICENSE den Rechteinhaber und dass alle Rechte vorbehalten sind. Füge nur Abhängigkeiten hinzu, deren Lizenzen eine geschlossene Weitergabe erlauben.
+
+## release: Release outputs / Release-Ergebnisse
+
+Help (en): Releases built by the pipeline are reproducible and traceable. Checksums, an SBOM, and a changelog help users verify and assess an update but add pipeline steps.
+
+Help (de): Releases aus der Pipeline sind reproduzierbar und nachvollziehbar. Prüfsummen, SBOM und Changelog helfen Nutzern, ein Update zu prüfen und einzuschätzen, kosten aber zusätzliche Pipeline-Schritte.
+
+Setting (multi, initial "artifacts,checksums,sbom,changelog"): Attach to each release / An jedes Release anhängen
+
+- artifacts: Build artifacts / Build-Artefakte
+
+- checksums: Checksums / Prüfsummen
+
+- sbom: SBOM / SBOM
+
+- changelog: Changelog / Changelog
+
+### Value "artifacts" (en)
+
+Release from a version tag through the pipeline, not from a developer machine. Build from the tagged commit and attach: the build artifacts for every supported target.
+
+### Value "artifacts" (de)
+
+Veröffentliche aus einem Versions-Tag über die Pipeline, nicht von einem Entwicklerrechner. Baue aus dem getaggten Commit und hänge an: die Build-Artefakte für jedes unterstützte Ziel.
+
+### Value "checksums" (en)
+
+Release from a version tag through the pipeline, not from a developer machine. Build from the tagged commit and attach: a SHA-256 checksum file for those artifacts.
+
+### Value "checksums" (de)
+
+Veröffentliche aus einem Versions-Tag über die Pipeline, nicht von einem Entwicklerrechner. Baue aus dem getaggten Commit und hänge an: eine SHA-256-Prüfsummendatei für diese Artefakte.
+
+### Value "sbom" (en)
+
+Release from a version tag through the pipeline, not from a developer machine. Build from the tagged commit and attach: a software bill of materials (SBOM) in SPDX or CycloneDX format.
+
+### Value "sbom" (de)
+
+Veröffentliche aus einem Versions-Tag über die Pipeline, nicht von einem Entwicklerrechner. Baue aus dem getaggten Commit und hänge an: eine Software-Stückliste (SBOM) im Format SPDX oder CycloneDX.
+
+### Value "changelog" (en)
+
+Release from a version tag through the pipeline, not from a developer machine. Build from the tagged commit and attach: a changelog generated from the Conventional Commits since the previous release.
+
+### Value "changelog" (de)
+
+Veröffentliche aus einem Versions-Tag über die Pipeline, nicht von einem Entwicklerrechner. Baue aus dem getaggten Commit und hänge an: einen Changelog, erzeugt aus den Conventional Commits seit dem vorigen Release.
+
 # verification: Verification and architecture / Prüfung und Architektur
 
 ## unit-tests: Unit tests / Unit-Tests
@@ -579,6 +757,34 @@ Prefer repeatable automated checks. Start with the project’s declared list of 
 ### Value "" (de)
 
 Bevorzuge wiederholbare automatisierte Prüfungen. Gleiche die dokumentierte Liste unterstützter Build-Ziele mit den CI-Jobs und ihren Ergebnissen ab. Baue und teste jedes unterstützte Ziel, kennzeichne fehlende oder übersprungene Ergebnisse und begründe verbleibende manuelle Prüfungen.
+
+## ci-pipeline: Build and lint pipeline / Pipeline für Build und Linting
+
+Help (en): A hosted pipeline checks every change the same way. Linting every language, including documentation, catches problems a local run may skip.
+
+Help (de): Eine gehostete Pipeline prüft jede Änderung gleich. Linting für jede Sprache, auch für die Dokumentation, findet Fehler, die ein lokaler Lauf auslassen kann.
+
+Setting (select, initial "github"): CI service / CI-Dienst
+
+- github: GitHub Actions / GitHub Actions
+
+- gitlab: GitLab CI / GitLab CI
+
+### Value "github" (en)
+
+Run a GitHub Actions pipeline (.github/workflows/) on every push and pull request. Build the project and run lint and format checks for every language in the repository, including Markdown, shell scripts, YAML, and the workflow files themselves. Fail the pipeline on any finding.
+
+### Value "github" (de)
+
+Lass bei jedem Push und Pull Request eine GitHub Actions-Pipeline (.github/workflows/) laufen. Baue das Projekt und prüfe Linting und Formatierung für jede Sprache im Repository, auch Markdown, Shell-Skripte, YAML und die Workflow-Dateien selbst. Lass die Pipeline bei jedem Befund fehlschlagen.
+
+### Value "gitlab" (en)
+
+Run a GitLab CI pipeline (.gitlab-ci.yml) on every push and pull request. Build the project and run lint and format checks for every language in the repository, including Markdown, shell scripts, YAML, and the workflow files themselves. Fail the pipeline on any finding.
+
+### Value "gitlab" (de)
+
+Lass bei jedem Push und Pull Request eine GitLab CI-Pipeline (.gitlab-ci.yml) laufen. Baue das Projekt und prüfe Linting und Formatierung für jede Sprache im Repository, auch Markdown, Shell-Skripte, YAML und die Workflow-Dateien selbst. Lass die Pipeline bei jedem Befund fehlschlagen.
 
 ## mutation: Mutation testing / Mutationstests
 

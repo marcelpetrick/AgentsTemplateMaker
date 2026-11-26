@@ -40,11 +40,15 @@ describe("instruction catalog", () => {
       "plain-language",
       "traceability",
       "review",
+      "readme",
+      "license",
+      "release",
       "unit-tests",
       "integration-tests",
       "e2e-tests",
       "acceptance-tests",
       "automation",
+      "ci-pipeline",
       "mutation",
       "coverage",
       "clean-pipeline",
@@ -151,8 +155,70 @@ describe("instruction catalog", () => {
       /Ruff.*Black.*one formatter/,
     );
     expect(paragraph("dependencies", "en")).toMatch(
+      /Pin.*most recent stable release.*librar.*framework.*toolchain.*pre-release.*full pipeline.*failing check/,
+    );
+    expect(paragraph("dependencies", "en", "compatible")).toMatch(
       /Pin.*compatible updates.*failing check/,
     );
+  });
+
+  it("asks for a README with optional screenshots and at least three badges", () => {
+    const readme = rules.find(({ id }) => id === "readme")!;
+    expect(readme.setting?.kind).toBe("multi");
+    expect(readme.setting?.initial).toBe("screenshots,badges");
+    expect(paragraph("readme", "en", "none")).toMatch(
+      /README\.md.*purpose.*install.*usage.*build.*test.*license/,
+    );
+    expect(paragraph("readme", "en", "none")).not.toMatch(/screenshot|badge/);
+    expect(paragraph("readme", "en", "screenshots,badges")).toMatch(
+      /screenshot.*current.*at least three badges.*pipeline status.*license.*release/,
+    );
+    expect(paragraph("readme", "de", "badges")).toMatch(
+      /mindestens drei Badges/,
+    );
+  });
+
+  it("lets the user choose the project license", () => {
+    const license = rules.find(({ id }) => id === "license")!;
+    const values = license.setting!.options!.map(({ value }) => value);
+    expect(values).toEqual([
+      "GPL-3.0-or-later",
+      "LGPL-3.0-or-later",
+      "AGPL-3.0-or-later",
+      "MPL-2.0",
+      "Apache-2.0",
+      "MIT",
+      "BSD-3-Clause",
+      "proprietary",
+    ]);
+    expect(paragraph("license", "en", "MIT")).toMatch(
+      /MIT.*LICENSE.*SPDX-License-Identifier: MIT.*dependenc.*compatible/,
+    );
+    expect(paragraph("license", "en", "proprietary")).toMatch(
+      /proprietary.*all rights reserved.*dependenc.*permit/i,
+    );
+  });
+
+  it("chooses what the release pipeline publishes", () => {
+    const release = rules.find(({ id }) => id === "release")!;
+    expect(release.setting?.kind).toBe("multi");
+    expect(release.setting?.initial).toBe("artifacts,checksums,sbom,changelog");
+    expect(paragraph("release", "en")).toMatch(
+      /version tag.*pipeline.*not.*developer machine.*artifacts.*SHA-256.*SBOM.*SPDX or CycloneDX.*changelog.*Conventional Commits/,
+    );
+    expect(paragraph("release", "en", "artifacts")).not.toMatch(
+      /SBOM|changelog/,
+    );
+    expect(paragraph("release", "en", "none")).toMatch(
+      /version tag.*release note/,
+    );
+  });
+
+  it("requires a CI pipeline that builds and lints every language", () => {
+    expect(paragraph("ci-pipeline", "en", "github")).toMatch(
+      /GitHub Actions.*push.*pull request.*build.*lint.*format.*every language.*Markdown.*shell.*YAML.*workflow/i,
+    );
+    expect(paragraph("ci-pipeline", "en", "gitlab")).toMatch(/GitLab CI/);
   });
 
   it("lists common languages and frameworks and allows domain-specific ones", () => {

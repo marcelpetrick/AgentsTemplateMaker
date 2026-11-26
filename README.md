@@ -31,7 +31,9 @@ instructions intact. The draft lives in your open browser tab.
    inside a category act on that category only. Languages and frameworks
    offer common choices such as Python, C++, Qt, LVGL, TouchGFX, ESP-IDF,
    FreeRTOS, TypeScript, and Rust. The character set rule chooses Unicode or
-   ASCII only.
+   ASCII only. Repository rules cover the README (screenshots, at least three
+   badges), the license, what each release attaches (artifacts, checksums,
+   SBOM, changelog), and a build and lint pipeline for every language.
 3. Type or paste anywhere in the Markdown editor. Your edits are underlined.
    Unchecking an edited rule keeps that text as a custom instruction. A
    setting or document language change that affects edited rules lists the
@@ -99,6 +101,11 @@ The [Pages workflow](.github/workflows/pages.yml) publishes the verified tip of
 `main` when CI succeeds. Enable **GitHub Actions** as the Pages source on a new
 repository. The workflow uses GitHub's built-in token and OIDC permissions. It
 needs no repository secrets.
+
+Pushing a `vX.Y.Z` tag runs the [Release workflow](.github/workflows/release.yml).
+It reruns the pipeline on the tagged commit and publishes a GitHub release with
+the site archive, `SHA256SUMS`, a CycloneDX SBOM, and a changelog of the
+commits since the previous tag.
 
 The hosted build includes the full project license and the bundled dependency
 notices. [GPLv3](https://marcelpetrick.github.io/AgentsTemplateMaker/LICENSE.txt)

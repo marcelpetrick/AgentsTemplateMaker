@@ -17,6 +17,14 @@
 - [x] Close the gaps from the vision audit: requirement rows for I1–I16, wording snapshot, C06 commit traceability, and deployment of the tested build.
 - [x] Review the whole project, then publish a public GitHub release and deploy it.
 
+## Maintainer requests of 2026-11-26
+
+- [x] README rule with screenshots and at least three badges.
+- [x] Build and lint pipeline rule covering every language, including Markdown.
+- [x] Dependency rule uses the latest stable library and framework releases.
+- [x] Selectable license.
+- [x] Release outputs: artifacts, checksums, SBOM, and changelog, also for this project's own releases.
+
 The [original handoff](<vision(20261125-195509).md>) defines the F and C requirement
 IDs. The [baseline](docs/decisions.md) records the decisions that resolve its open
 choices and the counterexamples that guide implementation.

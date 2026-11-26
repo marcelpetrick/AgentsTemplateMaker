@@ -120,11 +120,11 @@ out of scope. Their behavior is covered by the integration and end-to-end
 tests, and DOM mutants there are mostly equivalent or only visible as layout.
 
 The run fails below an 85% mutation score (`thresholds.break`). The score at
-release 0.3.0 is 88.6%:
+release 0.4.0 is 89.8%:
 
 | File          | Score |
 | ------------- | ----- |
-| `catalog.ts`  | 99.5% |
+| `catalog.ts`  | 99.1% |
 | `draft.ts`    | 80.4% |
 | `editor.ts`   | 85.2% |
 | `messages.ts` | 100%  |

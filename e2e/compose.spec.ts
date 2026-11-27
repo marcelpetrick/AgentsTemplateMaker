@@ -8,11 +8,14 @@ const repository = (page: Page) => page.locator("#category-repository");
 
 const markdown = (page: Page) => page.locator("#editor .cm-content");
 
+/** The whole draft from the saved session, independent of rendered lines. */
 async function draftText(page: Page) {
-  const lines = await markdown(page).locator(".cm-line").allTextContents();
-  return lines.join("\n");
+  return page.evaluate(() => {
+    const saved = localStorage.getItem("agents-template-maker:session:v1");
+    return (JSON.parse(saved ?? "{}") as { draft: { text: string } }).draft
+      .text;
+  });
 }
-
 test("defaults, repository hover, edited rule removal and accurate Markdown download", async ({
   page,
 }) => {
@@ -21,7 +24,7 @@ test("defaults, repository hover, edited rule removal and accurate Markdown down
     errors.push(error.message);
   });
   await page.goto("./");
-  await expect(page).toHaveTitle("Agent Maker");
+  await expect(page).toHaveTitle("AgentsTemplateMaker");
   const licenses = await page.request.get("dependency-licenses.md");
   expect(licenses.ok()).toBe(true);
   expect(await licenses.text()).toContain("@codemirror/state");

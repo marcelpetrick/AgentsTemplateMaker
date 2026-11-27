@@ -17,7 +17,7 @@ const session: Session = {
   draft,
 };
 
-const key = "agent-maker:session:v1";
+const key = "agents-template-maker:session:v1";
 
 /** A storage that keeps values by key, like localStorage. */
 function memory(initial?: string) {
@@ -54,6 +54,20 @@ describe("session", () => {
     expect(JSON.parse(localStorage.getItem(key) ?? "")).toEqual(session);
     expect(loadSession(ids)).toEqual(session);
     localStorage.clear();
+  });
+
+  it("reads a draft saved under the earlier product name and prefers the current one", () => {
+    const legacy = JSON.stringify({ ...session, uiLanguage: "en" });
+    const values = new Map([["agent-maker:session:v1", legacy]]);
+    const storage = () => ({
+      getItem: (name: string) => values.get(name) ?? null,
+      setItem: (name: string, value: string) => {
+        values.set(name, value);
+      },
+    });
+    expect(loadSession(ids, storage)?.uiLanguage).toBe("en");
+    saveSession(session, storage);
+    expect(loadSession(ids, storage)).toEqual(session);
   });
 
   it("keeps the text of a rule the catalog no longer has as the user's own", () => {

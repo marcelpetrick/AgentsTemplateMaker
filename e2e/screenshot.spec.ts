@@ -3,7 +3,7 @@
 
 import { expect, test } from "@playwright/test";
 
-if (process.env.AGENT_MAKER_SCREENSHOT === "1") {
+if (process.env.AGENTS_TEMPLATE_MAKER_SCREENSHOT === "1") {
   test("README screenshot", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 960 });
     await page.goto("./");

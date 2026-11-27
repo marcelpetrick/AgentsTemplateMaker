@@ -4,13 +4,13 @@
 
 ```mermaid
 C4Context
-    title Agent Maker system context
+    title AgentsTemplateMaker system context
     Person(maintainer, "Project maintainer", "Composes a project's agent instructions.")
-    System(agentMaker, "Agent Maker", "Builds and exports AGENTS.md in the browser.")
+    System(agentsTemplateMaker, "AgentsTemplateMaker", "Builds and exports AGENTS.md in the browser.")
     System_Ext(pages, "GitHub Pages", "Publishes the static build.")
     System_Ext(repository, "Project repository", "Stores the maintainer's exported instructions.")
-    Rel(maintainer, agentMaker, "Chooses rules and edits Markdown")
-    Rel(pages, agentMaker, "Serves HTML, CSS and JavaScript over HTTPS")
+    Rel(maintainer, agentsTemplateMaker, "Chooses rules and edits Markdown")
+    Rel(pages, agentsTemplateMaker, "Serves HTML, CSS and JavaScript over HTTPS")
     Rel(maintainer, repository, "Adds the exported AGENTS.md")
 ```
 
@@ -18,9 +18,9 @@ C4Context
 
 ```mermaid
 C4Container
-    title Agent Maker containers
+    title AgentsTemplateMaker containers
     Person(maintainer, "Project maintainer")
-    System_Boundary(system, "Agent Maker") {
+    System_Boundary(system, "AgentsTemplateMaker") {
         Container(site, "Browser application", "TypeScript, CodeMirror, HTML, CSS", "Renders policies, tracks authorship and exports Markdown.")
     }
     System_Ext(actions, "GitHub Actions", "Runs the full pipeline, keeps the tested build, deploys it, and smoke-checks the live site.")

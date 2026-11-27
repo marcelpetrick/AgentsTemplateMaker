@@ -17,19 +17,19 @@ fi
 out=release
 rm -rf "$out"
 mkdir -p "$out"
-archive="agent-maker-$version.tar.gz"
+archive="agents-template-maker-$version.tar.gz"
 tar -czf "$out/$archive" -C dist .
-npm sbom --sbom-format cyclonedx --omit dev > "$out/agent-maker-$version.cdx.json"
+npm sbom --sbom-format cyclonedx --omit dev > "$out/agents-template-maker-$version.cdx.json"
 
 previous="$(git describe --tags --abbrev=0 "$tag^" 2>/dev/null || true)"
 range="${previous:+$previous..}$tag"
 {
-  echo "# Agent Maker $version"
+  echo "# AgentsTemplateMaker $version"
   echo
   echo "Changes since ${previous:-the first commit}:"
   echo
   git log --no-merges --format='- %s (%h)' "$range"
 } > "$out/CHANGELOG.md"
 
-(cd "$out" && sha256sum "$archive" "agent-maker-$version.cdx.json" > SHA256SUMS)
+(cd "$out" && sha256sum "$archive" "agents-template-maker-$version.cdx.json" > SHA256SUMS)
 ls -1 "$out"

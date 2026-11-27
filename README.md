@@ -1,4 +1,4 @@
-# Agent Maker
+# AgentsTemplateMaker
 
 [![CI](https://github.com/marcelpetrick/AgentsTemplateMaker/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/AgentsTemplateMaker/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/AgentsTemplateMaker/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/AgentsTemplateMaker/actions/workflows/pages.yml)
@@ -8,19 +8,19 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
 [![Coverage gate](https://img.shields.io/badge/line%20coverage%20gate-95%25-26704d)](#local-development)
 [![Playwright](https://img.shields.io/badge/tested_with-Playwright-2ead33)](#local-development)
-[![Languages](https://img.shields.io/badge/languages-English%20%7C%20Deutsch-6241c2)](#using-agent-maker)
+[![Languages](https://img.shields.io/badge/languages-English%20%7C%20Deutsch-6241c2)](#using-agentstemplatemaker)
 
 Compose an `AGENTS.md` for your repository. Choose project rules, edit the
 generated Markdown directly, and copy or download the draft with your own
 instructions intact. The draft lives in your open browser tab.
 
-**[Open Agent Maker on GitHub Pages](https://marcelpetrick.github.io/AgentsTemplateMaker/)**
+**[Open AgentsTemplateMaker on GitHub Pages](https://marcelpetrick.github.io/AgentsTemplateMaker/)**
 
 **Author** Marcel Petrick ([mail@marcelpetrick.it](mailto:mail@marcelpetrick.it)) · **Runtime library** [CodeMirror 6](https://codemirror.net/) (MIT) · **License** [GPL v3 or later](LICENSE) · Developed with AI assistance.
 
-![Agent Maker with repository rules on the left, the Markdown editor on the right, and a project-specific edit underlined in green](docs/interface.png)
+![AgentsTemplateMaker with repository rules on the left, the Markdown editor on the right, and a project-specific edit underlined in green](docs/interface.png)
 
-## Using Agent Maker
+## Using AgentsTemplateMaker
 
 1. Open a category by hovering over its heading, clicking, or pressing Enter.
    Use a rule’s **?** button to read its benefits and trade-offs.
@@ -49,7 +49,8 @@ instructions intact. The draft lives in your open browser tab.
 5. The footer below the editor shows the draft's word and character count.
    **About** names the author, the project, and the bundled libraries.
 6. **Copy** or **Download** the current Markdown, then place it in your project
-   as `AGENTS.md`.
+   as `AGENTS.md`. Its last line names AgentsTemplateMaker, the version, and
+   the project URL; edit or delete it like any generated text.
 7. The browser keeps your draft, its edit marks, the selected rules and
    settings, and both languages in its local storage, only on your device.
    Reloading the page or opening it in a new tab continues where you left off.

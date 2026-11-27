@@ -27,7 +27,10 @@ interface ParagraphUpdate {
   readonly text?: string;
 }
 
-const order = ["title", ...rules.map((rule) => rule.id)];
+const order = ["title", ...rules.map((rule) => rule.id), "footer"];
+const projectUrl = "https://github.com/marcelpetrick/AgentsTemplateMaker";
+const footer = (language: Language) =>
+  strings[language].footer(version, projectUrl);
 const defaultSelection = () =>
   rules.filter((rule) => rule.defaultSelected).map((rule) => rule.id);
 const defaultSettings = () =>
@@ -67,7 +70,7 @@ class Workspace {
   constructor() {
     this.editor = openEditor(
       element("editor"),
-      this.saved?.draft ?? this.initialDraft(),
+      this.restoredDraft() ?? this.initialDraft(),
       () => {
         this.renderRules();
       },
@@ -106,13 +109,25 @@ class Workspace {
   }
 
   private initialDraft() {
-    return createDraft(
-      strings[this.outputLanguage].documentTitle,
-      this.selectedRules().map((rule) => ({
+    return createDraft(strings[this.outputLanguage].documentTitle, [
+      ...this.selectedRules().map((rule) => ({
         id: rule.id,
         text: this.paragraph(rule),
       })),
-    );
+      { id: "footer", text: footer(this.outputLanguage) },
+    ]);
+  }
+
+  private hasFooter(draft = this.editor.draft) {
+    return draft.ranges.some(({ id }) => id === "footer");
+  }
+
+  /** The saved draft, with an untouched footer naming the current version. */
+  private restoredDraft() {
+    const draft = this.saved?.draft;
+    return draft && this.hasFooter(draft)
+      ? replaceRule(draft, "footer", footer(this.outputLanguage), order).draft
+      : draft;
   }
 
   private isEdited(id: string) {
@@ -346,6 +361,8 @@ class Workspace {
     );
     return [
       { id: "title", text: strings[language].documentTitle },
+      // A footer the user deleted stays deleted.
+      ...(this.hasFooter() ? [{ id: "footer", text: footer(language) }] : []),
       ...changed.map((rule) => ({
         id: rule.id,
         text: this.paragraph(rule, language),

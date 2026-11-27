@@ -5,4 +5,4 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 npm run build
-AGENT_MAKER_SCREENSHOT=1 npm exec -- playwright test --project=chromium --grep 'README screenshot'
+AGENTS_TEMPLATE_MAKER_SCREENSHOT=1 npm exec -- playwright test --project=chromium --grep 'README screenshot'

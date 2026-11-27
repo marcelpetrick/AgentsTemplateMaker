@@ -12,7 +12,9 @@ export interface Session {
   readonly draft: Draft;
 }
 
-const key = "agent-maker:session:v1";
+const key = "agents-template-maker:session:v1";
+// Releases 0.6.x saved under the earlier product name.
+const legacyKey = "agent-maker:session:v1";
 const languages = new Set<unknown>(["en", "de"]);
 
 type Shape = Record<string, unknown>;
@@ -91,7 +93,8 @@ function readStored(storage: () => Pick<Storage, "getItem">): unknown {
   try {
     // Reading localStorage itself throws when the browser blocks site data.
     // Stryker disable next-line StringLiteral: JSON.parse("") throws, which also reads as nothing saved.
-    return JSON.parse(storage().getItem(key) ?? "null");
+    const store = storage();
+    return JSON.parse(store.getItem(key) ?? store.getItem(legacyKey) ?? "null");
   } catch {
     return undefined;
   }

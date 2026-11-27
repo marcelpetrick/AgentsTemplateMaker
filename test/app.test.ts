@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { redo, undo } from "@codemirror/commands";
-import type { EditorView } from "@codemirror/view";
+import { EditorView } from "@codemirror/view";
 import shell from "../index.html?raw";
 import { mount } from "../src/app";
 import { rules, type Language, type Rule } from "../src/catalog";
 import { ruleValues } from "./ruleValues";
+import { strings } from "../src/strings";
+import { version } from "../src/version";
+
+const projectUrl = "https://github.com/marcelpetrick/AgentsTemplateMaker";
 
 const rule = (id: string) => rules.find((rule) => rule.id === id)!;
 const paragraph = (id: string, value = "") => rule(id).paragraph("en", value);
@@ -58,6 +62,19 @@ const authored = () =>
     (node) => node.textContent,
   );
 
+/** Authored text from the editor state, also outside the rendered viewport. */
+function markedText() {
+  let text = "";
+  for (const source of view.state.facet(EditorView.decorations)) {
+    const set = typeof source === "function" ? source(view) : source;
+    set.between(0, view.state.doc.length, (from, to, value) => {
+      if ((value.spec as { class?: string }).class === "authored-text")
+        text += view.state.sliceDoc(from, to);
+    });
+  }
+  return text.trim();
+}
+
 beforeEach(() => {
   localStorage.clear();
   load();
@@ -74,26 +91,28 @@ function exportVariant(
   clipboard: ReturnType<typeof vi.fn>,
 ) {
   const { rule, value, language, title } = variant;
+  const footer = strings[language].footer(version, projectUrl);
   const checkbox = element(`rule-${rule.id}`);
   checkbox.click();
   if (rule.setting) select(`setting-${rule.id}`, value);
   const expected = rule.paragraph(language, value);
-  expect(draft(), rule.id).toBe(`${title}\n\n${expected}`);
+  expect(draft(), rule.id).toBe(`${title}\n\n${expected}\n\n${footer}`);
 
   view.dispatch({
     changes: { from: view.state.doc.length, insert: `\n\n${expected}` },
   });
   element("copy").click();
   expect(clipboard).toHaveBeenLastCalledWith(
-    `${title}\n\n${expected}\n\n${expected}`,
+    `${title}\n\n${expected}\n\n${footer}\n\n${expected}`,
   );
   checkbox.click();
-  expect(draft(), rule.id).toBe(`${title}\n\n${expected}`);
-  expect(document.querySelector(".authored-text")?.textContent).toBe(expected);
+  const kept = `${title}\n\n${footer}`;
+  expect(draft(), rule.id).toBe(`${kept}\n\n${expected}`);
+  expect(markedText()).toBe(expected);
   view.dispatch({
-    changes: { from: title.length, to: view.state.doc.length },
+    changes: { from: kept.length, to: view.state.doc.length },
   });
-  expect(draft()).toBe(title);
+  expect(draft()).toBe(kept);
 }
 
 describe("workspace", () => {
@@ -453,7 +472,10 @@ describe("workspace", () => {
 
     for (const language of ["en", "de"] as const) {
       select("document-language", language);
-      const title = draft();
+      const title = strings[language].documentTitle;
+      expect(draft()).toBe(
+        `${title}\n\n${strings[language].footer(version, projectUrl)}`,
+      );
       for (const rule of rules) {
         for (const value of ruleValues(rule)) {
           exportVariant({ rule, value, language, title }, clipboard);
@@ -515,5 +537,36 @@ describe("workspace", () => {
     );
     reload();
     expect(draft()).toBe(initial);
+  });
+  it("ends the draft with a footer naming AgentsTemplateMaker, its version, and the project URL", async () => {
+    const url = projectUrl;
+    const footer = `Made with AgentsTemplateMaker v${version} from ${url}`;
+    expect(draft().endsWith(`\n\n${footer}`)).toBe(true);
+    element("rule-delegation").click();
+    expect(draft().endsWith(`\n\n${footer}`)).toBe(true);
+    select("document-language", "de");
+    expect(
+      draft().endsWith(
+        `\n\nErstellt mit AgentsTemplateMaker v${version} von ${url}`,
+      ),
+    ).toBe(true);
+    expect(authored()).toEqual([]);
+    select("document-language", "en");
+    element("select-none").click();
+    expect(draft()).toBe(`# Project instructions\n\n${footer}`);
+    await Promise.resolve();
+  });
+  it("names the current version in an untouched saved footer and keeps a deleted one deleted", () => {
+    const key = "agents-template-maker:session:v1";
+    const saved = localStorage.getItem(key) ?? "";
+    localStorage.setItem(key, saved.replace(`v${version} `, "v0.0.1 "));
+    reload();
+    expect(draft()).toContain(`AgentsTemplateMaker v${version} from`);
+    const end = draft().indexOf("\n\nMade with");
+    view.dispatch({ changes: { from: end, to: view.state.doc.length } });
+    reload();
+    select("document-language", "de");
+    element("apply-change").click();
+    expect(draft()).not.toContain("AgentsTemplateMaker");
   });
 });

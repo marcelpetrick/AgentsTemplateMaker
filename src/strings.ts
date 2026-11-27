@@ -54,6 +54,8 @@ export const strings = {
     textCount: (words: number, characters: number) =>
       `${words} ${words === 1 ? "word" : "words"} · ${characters} ${characters === 1 ? "character" : "characters"}`,
     documentTitle: "# Project instructions",
+    footer: (version: string, url: string) =>
+      `Made with AgentsTemplateMaker v${version} from ${url}`,
     changeWarning:
       "Applying the change keeps your edits as written. The new choice applies to untouched text and future insertions.",
     switchLight: "Light mode",
@@ -114,6 +116,8 @@ export const strings = {
     textCount: (words: number, characters: number) =>
       `${words} ${words === 1 ? "Wort" : "Wörter"} · ${characters} Zeichen`,
     documentTitle: "# Projektanweisungen",
+    footer: (version: string, url: string) =>
+      `Erstellt mit AgentsTemplateMaker v${version} von ${url}`,
     changeWarning:
       "Deine Änderungen bleiben erhalten. Die neue Auswahl gilt für unveränderten und künftig eingefügten Text.",
     switchLight: "Heller Modus",

@@ -120,13 +120,13 @@ out of scope. Their behavior is covered by the integration and end-to-end
 tests, and DOM mutants there are mostly equivalent or only visible as layout.
 
 The run fails below a 95% mutation score (`thresholds.break`). The score is
-97.3%, and every file is at least 95%:
+98.6% at release 0.5.2, and every file is at least 95%:
 
 | File          | Score |
 | ------------- | ----- |
 | `catalog.ts`  | 99.2% |
-| `draft.ts`    | 95.0% |
-| `editor.ts`   | 96.1% |
+| `draft.ts`    | 98.2% |
+| `editor.ts`   | 96.0% |
 | `messages.ts` | 100%  |
 | `stats.ts`    | 100%  |
 
@@ -154,10 +154,12 @@ it was redundant. A few equivalent mutants remain:
 - Comparisons that cannot differ for reachable drafts, such as `>` against
   `>=` on a catalog index of a rule that is not in the draft.
 - The initial array of `changeList`, whose extra entry every caller ignores.
-- `restoresPrior` and `matchReplacement` checks in undo. Their mutants
-  sometimes restore a separator or rule that the current code leaves
-  authored. That is a possible undo improvement to decide on, not a missing
-  test.
+- The undo model itself has no position-matching code left to survive
+  mutation. Undo returns the draft from before the undone edits, with any
+  form changes made since repeated on it (M10).
+  [`test/undoVisible.test.ts`](../test/undoVisible.test.ts) checks this for
+  every single and second edit of a three-rule draft, with and without a form
+  change between edit and undo.
 
 Investigate a new survivor before raising or lowering the threshold.
 

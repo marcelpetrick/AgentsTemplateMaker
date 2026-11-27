@@ -22,16 +22,12 @@ export interface Draft {
   readonly separators: readonly Span[];
 }
 
-interface ReplacedText {
-  readonly text: string;
-  readonly replacement: string;
-  readonly ranges: readonly (Span & { id: string })[];
-  readonly separators: readonly Span[];
-}
-
+/** What undo needs to return to the draft from before a user edit. */
 export interface AuthorshipUndo {
-  readonly ids: readonly string[];
-  readonly replacements: readonly ReplacedText[];
+  /** The draft before the edit. Undo returns to it, with later form changes repeated. */
+  readonly prior: Draft;
+  /** The draft the edit produced. A later form change replaces this object. */
+  readonly result: Draft;
 }
 
 /** One replaced span in old positions and its replacement in new positions. */
@@ -41,19 +37,11 @@ interface Change extends Span {
   readonly inserted: string;
 }
 
-interface Restored {
-  readonly ranges: Map<string, Span>;
-  readonly separators: Span[];
-  readonly changeStarts: Set<number>;
-}
-
 /** Everything needed to recompute rule ranges after a user edit. */
 interface Edit {
   readonly draft: Draft;
   readonly changes: ChangeSet;
   readonly text: string;
-  readonly restoreGenerated: ReadonlySet<string>;
-  readonly restored: Restored;
 }
 
 const separator = "\n\n";
@@ -167,132 +155,70 @@ function releaseSeparateParagraphs(
     : { id, from, to, edited: true, original };
 }
 
-// Only edited rules record generated text, so an untouched rule never matches.
-// A rule whose deleted body undo brings back is restored by
-// `restoredReplacements` before this check.
-function restoreGeneratedRule(
-  range: RuleRange,
-  before: RuleRange,
-  text: string,
-): RuleRange {
-  const { id, from, to } = range;
-  return text.slice(from, to) === before.generatedText
-    ? { id, from, to, edited: false }
-    : range;
-}
-
 const contains = (outer: Span, inner: Span) =>
   inner.from >= outer.from && inner.to <= outer.to;
-
-const relativeTo = (origin: number, span: Span) => ({
-  from: span.from - origin,
-  to: span.to - origin,
-});
-
-function replacedText(
-  before: Draft,
-  newlyEdited: readonly RuleRange[],
-  change: Change,
-): ReplacedText | undefined {
-  const ranges = newlyEdited
-    .filter((range) => contains(change, range))
-    .map((range) => ({ id: range.id, ...relativeTo(change.from, range) }));
-  if (ranges.length === 0) return undefined;
-  return {
-    text: before.text.slice(change.from, change.to),
-    replacement: change.inserted,
-    ranges,
-    separators: before.separators
-      .filter((span) => contains(change, span))
-      .map((span) => relativeTo(change.from, span)),
-  };
-}
 
 export function captureAuthorshipUndo(
   before: Draft,
   after: Draft,
   changes: ChangeSet,
 ): AuthorshipUndo | undefined {
-  const authored = new Set(
-    after.ranges.filter(({ edited }) => edited).map(({ id }) => id),
-  );
-  const newlyEdited = before.ranges.filter(
-    ({ id, edited }) => !edited && authored.has(id),
-  );
-  if (newlyEdited.length === 0) return undefined;
-
-  const replacements = changeList(changes)
-    .filter((change) => change.from !== change.to)
-    .map((change) => replacedText(before, newlyEdited, change))
-    .filter((replacement) => replacement !== undefined);
-  return { ids: newlyEdited.map(({ id }) => id), replacements };
+  return changes.empty ? undefined : { prior: before, result: after };
 }
 
-/** Whether undo restores this rule's generated text at the changed span. */
-function restoresPrior(
-  draft: Draft,
-  change: Change,
-  prior: ReplacedText["ranges"][number],
-) {
-  const range = draft.ranges.find(({ id }) => id === prior.id);
-  if (!range) return false;
-  const matchesPosition =
-    range.from === range.to
-      ? range.from === change.from || range.from === change.to
-      : range.from === change.from && range.to === change.to;
-  return (
-    matchesPosition &&
-    range.generatedText === change.inserted.slice(prior.from, prior.to)
-  );
+/** A form change: the draft it started from and how to repeat it. */
+interface FormStep {
+  readonly base: Draft;
+  readonly id: string;
+  readonly text: string | undefined;
+  readonly order: readonly string[];
 }
 
-function matchReplacement(
-  draft: Draft,
-  change: Change,
-  replacements: readonly ReplacedText[],
-) {
-  const removed = draft.text.slice(change.from, change.to);
-  for (const replacement of replacements) {
-    if (
-      replacement.text !== change.inserted ||
-      replacement.replacement !== removed
-    )
-      continue;
-    const candidates = replacement.ranges.filter((prior) =>
-      restoresPrior(draft, change, prior),
-    );
-    if (candidates.length > 0) return { replacement, candidates };
+// Keyed by the draft a form change produced, so undo can repeat the form
+// changes made since an edit on the draft from before that edit.
+const formSteps = new WeakMap<Draft, FormStep>();
+
+/** The form changes from `origin` to `draft`, oldest first, if it is one. */
+function formChangesSince(origin: Draft, draft: Draft): FormStep[] | undefined {
+  const steps: FormStep[] = [];
+  for (let current = draft; current !== origin;) {
+    const step = formSteps.get(current);
+    if (!step) return undefined;
+    steps.unshift(step);
+    current = step.base;
   }
-  return undefined;
+  return steps;
 }
 
-function restoredReplacements(
-  draft: Draft,
-  changes: ChangeSet,
-  replacements: readonly ReplacedText[],
-): Restored {
-  const restored: Restored = {
-    ranges: new Map(),
-    separators: [],
-    changeStarts: new Set(),
-  };
-  if (replacements.length === 0) return restored;
+function repeatFormChanges(draft: Draft, steps: readonly FormStep[]) {
+  let current = draft;
+  for (const { id, text, order } of steps)
+    current = replaceRule(current, id, text, order).draft;
+  return current;
+}
 
-  for (const change of changeList(changes)) {
-    const match = matchReplacement(draft, change, replacements);
-    if (!match) continue;
-    const offset = (span: Span) => ({
-      from: change.newFrom + span.from,
-      to: change.newFrom + span.to,
-    });
-    for (const prior of match.candidates)
-      restored.ranges.set(prior.id, offset(prior));
-    restored.separators.push(
-      ...match.replacement.separators.map((span) => offset(span)),
-    );
-    restored.changeStarts.add(change.from);
+/**
+ * The draft an undo returns to when only history and form changes touched
+ * the draft since the undone edits: the draft from before them, with the
+ * same form changes repeated. Grouped edits are followed back as a chain.
+ */
+function restoredSnapshot(
+  draft: Draft,
+  text: string,
+  undos: readonly AuthorshipUndo[],
+): Draft | undefined {
+  const latest = undos.find(({ result }) => formChangesSince(result, draft));
+  if (!latest) return undefined;
+  const steps = formChangesSince(latest.result, draft) ?? [];
+  let snapshot: Draft | undefined;
+  let step: AuthorshipUndo | undefined = latest;
+  for (let hops = 0; step && hops < undos.length; hops++) {
+    const prior: Draft = step.prior;
+    const candidate = repeatFormChanges(prior, steps);
+    if (candidate.text === text) snapshot = candidate;
+    step = undos.find(({ result }) => result === prior);
   }
-  return restored;
+  return snapshot;
 }
 
 // If deleting a separator made two rules touch, assign the insertion once.
@@ -366,18 +292,12 @@ function resolveRange(
   before: RuleRange,
   original: Span | undefined,
 ): RuleRange {
-  const restoredSpan = edit.restored.ranges.get(range.id);
-  if (restoredSpan) return { id: range.id, ...restoredSpan, edited: false };
-
   const { changes, text } = edit;
-  const separated = releaseSeparateParagraphs(
+  const resolved = releaseSeparateParagraphs(
     range,
     original && mapSpan(original, changes),
     text,
   );
-  const resolved = edit.restoreGenerated.has(range.id)
-    ? restoreGeneratedRule(separated, before, text)
-    : separated;
   if (!resolved.edited) return resolved;
   return {
     ...resolved,
@@ -394,7 +314,6 @@ function manualRanges(edit: Edit): RuleRange[] {
   );
 
   for (const change of changeList(changes)) {
-    if (edit.restored.changeStarts.has(change.from)) continue;
     forgetTouched(originals, change);
     if (change.from === change.to) applyInsertion(edit, mapped, change);
     else applyReplacement(edit, mapped, change);
@@ -411,25 +330,14 @@ export function editDraft(
   authorshipUndo: readonly AuthorshipUndo[] = [],
 ): Draft {
   if (changes.empty) return draft;
-  const restored = restoredReplacements(
-    draft,
-    changes,
-    authorshipUndo.flatMap(({ replacements }) => replacements),
-  );
-  const edit: Edit = {
-    draft,
-    changes,
-    text: applyText(draft, changes),
-    restoreGenerated: new Set(authorshipUndo.flatMap(({ ids }) => ids)),
-    restored,
-  };
+  const text = applyText(draft, changes);
+  const snapshot = restoredSnapshot(draft, text, authorshipUndo);
+  if (snapshot) return snapshot;
+  const edit: Edit = { draft, changes, text };
   return {
-    text: edit.text,
+    text,
     ranges: manualRanges(edit),
-    separators: [
-      ...mapSeparators(draft, changes),
-      ...restored.separators,
-    ].toSorted(byStart),
+    separators: mapSeparators(draft, changes),
   };
 }
 
@@ -563,9 +471,12 @@ export function replaceRule(
 ): Replacement {
   const existing = draft.ranges.find((range) => range.id === id);
   const keepsText = existing ? existing.edited : text === undefined;
-  return keepsText
+  const replacement = keepsText
     ? keepAuthoredText(draft, existing, text)
     : regenerateRule(draft, existing, { id, text }, order);
+  if (replacement.draft !== draft)
+    formSteps.set(replacement.draft, { base: draft, id, text, order });
+  return replacement;
 }
 
 export function authoredRanges(draft: Draft): readonly Span[] {

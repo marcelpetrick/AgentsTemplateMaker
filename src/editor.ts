@@ -24,7 +24,7 @@ import {
 } from "./draft";
 
 const replaceDraft = StateEffect.define<Draft>();
-const restoreGenerated = StateEffect.define<AuthorshipUndo>();
+const undoAuthorship = StateEffect.define<AuthorshipUndo>();
 const draftField = StateField.define<Draft>({
   create() {
     throw new Error("Initialize the editor with a draft");
@@ -35,7 +35,8 @@ const draftField = StateField.define<Draft>({
     );
     if (replacement) return replacement.value;
     const restored = transaction.effects.flatMap((effect) =>
-      effect.is(restoreGenerated) ? [effect.value] : [],
+      // Stryker disable next-line ArrayDeclaration: undo only follows entries whose result is the current draft, so a stray entry is ignored.
+      effect.is(undoAuthorship) ? [effect.value] : [],
     );
     return editDraft(draft, transaction.changes, restored);
   },
@@ -82,7 +83,7 @@ const authorshipHistory = invertedEffects.of((transaction) => {
     transaction.state.field(draftField),
     transaction.changes,
   );
-  return restore ? [restoreGenerated.of(restore)] : [];
+  return restore ? [undoAuthorship.of(restore)] : [];
 });
 
 // Report typing, undo, and redo. Form changes replace the draft and render

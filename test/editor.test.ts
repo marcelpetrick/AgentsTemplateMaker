@@ -51,6 +51,29 @@ describe("undo restores generated rule authorship", () => {
     expect(unchecked.draft.text).toBe("# Guide\n\n" + second);
   });
 
+  it("restores an exact separator after grouped typing and deletion are undone", () => {
+    const { initial, editor } = fixture();
+    const gap = initial.ranges[1].to;
+    editor.view.dispatch({
+      changes: { from: gap, to: gap + 1 },
+      userEvent: "delete.backward",
+    });
+    editor.view.dispatch({
+      changes: { from: 0, insert: "x" },
+      userEvent: "input.type",
+    });
+    editor.view.dispatch({
+      changes: { from: 1, insert: "y" },
+      userEvent: "input.type",
+    });
+    while (undo(editor.view));
+    expect(editor.draft).toEqual(initial);
+    expect(redo(editor.view)).toBe(true);
+    expect(editor.draft.text).not.toBe(initial.text);
+    while (undo(editor.view));
+    expect(authoredRanges(editor.draft)).toEqual([]);
+  });
+
   it("restores a deleted whole rule after an unrelated form change shifts it", () => {
     const { initial, editor } = fixture();
     const { from, to } = initial.ranges[1];

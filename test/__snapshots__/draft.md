@@ -24,7 +24,7 @@ uncheck b: "# Tx\n\nAa b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a@6-11 c@13-18 | 
 change b: "# Tx\n\nAa b.\n\nNew b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a@6-11 b@13-19 c@21-26 | sep 4-6 11-13 19-21 | authored ["# Tx"]
 ## insert "x" at 4
 edit: "# T\nx\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@6-11 b@13-18 c@20-25 | sep 3-4 5-6 11-13 18-20 | authored ["x"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 4-5 10-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\nx\nAa b.\n\nCc d." | title@0-3 a@6-11 c@13-18 | sep 3-4 5-6 11-13 | authored ["x"]
 change b: "# T\nx\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@6-11 b@13-19 c@21-26 | sep 3-4 5-6 11-13 19-21 | authored ["x"]
@@ -66,7 +66,7 @@ uncheck b: "# T\n\nAa b.x\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." c@13-18
 change b: "# T\n\nAa b.x\n\nNew b.\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." b@13-19 c@21-26 | sep 3-5 11-13 19-21 | authored ["Aa b.x"]
 ## insert "x" at 11
 edit: "# T\n\nAa b.\nx\nBb c.\n\nCc d." | title@0-3 a@5-10 b@13-18 c@20-25 | sep 3-5 10-11 12-13 18-20 | authored ["x"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 11-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nx\n\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-11 12-14 | authored ["x"]
 change b: "# T\n\nAa b.\nx\nNew b.\n\nCc d." | title@0-3 a@5-10 b@13-19 c@21-26 | sep 3-5 10-11 12-13 19-21 | authored ["x"]
@@ -108,7 +108,7 @@ uncheck b: "# T\n\nAa b.\n\nBb c.x\n\nCc d." | title@0-3 a@5-10 c@20-25 | sep 3-
 change b: "# T\n\nAa b.\n\nBb c.x\n\nCc d." | title@0-3 a@5-10 b*@12-18 g="New b." c@20-25 | sep 3-5 10-12 18-20 | authored ["Bb c.x"]
 ## insert "x" at 18
 edit: "# T\n\nAa b.\n\nBb c.\nx\nCc d." | title@0-3 a@5-10 b@12-17 c@20-25 | sep 3-5 10-12 17-18 19-20 | authored ["x"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 18-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nx\nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 10-11 12-13 | authored ["x"]
 change b: "# T\n\nAa b.\n\nNew b.\nx\nCc d." | title@0-3 a@5-10 b@12-18 c@21-26 | sep 3-5 10-12 18-19 20-21 | authored ["x"]
@@ -174,7 +174,7 @@ uncheck b: "# T \n\nAa b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a@6-11 c@13-18 | 
 change b: "# T \n\nAa b.\n\nNew b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a@6-11 b@13-19 c@21-26 | sep 4-6 11-13 19-21 | authored ["# T "]
 ## insert " " at 4
 edit: "# T\n \nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@6-11 b@13-18 c@20-25 | sep 3-4 5-6 11-13 18-20 | authored [" "]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 4-5 10-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n \nAa b.\n\nCc d." | title@0-3 a@6-11 c@13-18 | sep 3-4 5-6 11-13 | authored [" "]
 change b: "# T\n \nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@6-11 b@13-19 c@21-26 | sep 3-4 5-6 11-13 19-21 | authored [" "]
@@ -216,7 +216,7 @@ uncheck b: "# T\n\nAa b. \n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." c@13-18
 change b: "# T\n\nAa b. \n\nNew b.\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." b@13-19 c@21-26 | sep 3-5 11-13 19-21 | authored ["Aa b. "]
 ## insert " " at 11
 edit: "# T\n\nAa b.\n \nBb c.\n\nCc d." | title@0-3 a@5-10 b@13-18 c@20-25 | sep 3-5 10-11 12-13 18-20 | authored [" "]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 11-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n \n\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-11 12-14 | authored [" "]
 change b: "# T\n\nAa b.\n \nNew b.\n\nCc d." | title@0-3 a@5-10 b@13-19 c@21-26 | sep 3-5 10-11 12-13 19-21 | authored [" "]
@@ -258,7 +258,7 @@ uncheck b: "# T\n\nAa b.\n\nBb c. \n\nCc d." | title@0-3 a@5-10 c@20-25 | sep 3-
 change b: "# T\n\nAa b.\n\nBb c. \n\nCc d." | title@0-3 a@5-10 b*@12-18 g="New b." c@20-25 | sep 3-5 10-12 18-20 | authored ["Bb c. "]
 ## insert " " at 18
 edit: "# T\n\nAa b.\n\nBb c.\n \nCc d." | title@0-3 a@5-10 b@12-17 c@20-25 | sep 3-5 10-12 17-18 19-20 | authored [" "]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 18-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n \nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 10-11 12-13 | authored [" "]
 change b: "# T\n\nAa b.\n\nNew b.\n \nCc d." | title@0-3 a@5-10 b@12-18 c@21-26 | sep 3-5 10-12 18-19 20-21 | authored [" "]
@@ -324,7 +324,7 @@ uncheck b: "# T\n\n\nAa b.\n\nCc d." | title@0-3 a@6-11 c@13-18 | sep 4-6 11-13 
 change b: "# T\n\n\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@6-11 b@13-19 c@21-26 | sep 4-6 11-13 19-21 | authored ["\n"]
 ## insert "\n" at 4
 edit: "# T\n\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@6-11 b@13-18 c@20-25 | sep 3-4 5-6 11-13 18-20 | authored ["\n"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 4-5 10-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\n\nAa b.\n\nCc d." | title@0-3 a@6-11 c@13-18 | sep 3-4 5-6 11-13 | authored ["\n"]
 change b: "# T\n\n\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@6-11 b@13-19 c@21-26 | sep 3-4 5-6 11-13 19-21 | authored ["\n"]
@@ -366,7 +366,7 @@ uncheck b: "# T\n\nAa b.\n\n\nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 11-13 
 change b: "# T\n\nAa b.\n\n\nNew b.\n\nCc d." | title@0-3 a@5-10 b@13-19 c@21-26 | sep 3-5 11-13 19-21 | authored ["\n"]
 ## insert "\n" at 11
 edit: "# T\n\nAa b.\n\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@13-18 c@20-25 | sep 3-5 10-11 12-13 18-20 | authored ["\n"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 11-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\n\n\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-11 12-14 | authored ["\n"]
 change b: "# T\n\nAa b.\n\n\nNew b.\n\nCc d." | title@0-3 a@5-10 b@13-19 c@21-26 | sep 3-5 10-11 12-13 19-21 | authored ["\n"]
@@ -408,7 +408,7 @@ uncheck b: "# T\n\nAa b.\n\n\nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 11-13 
 change b: "# T\n\nAa b.\n\nNew b.\n\n\nCc d." | title@0-3 a@5-10 b@12-18 c@21-26 | sep 3-5 10-12 19-21 | authored ["\n"]
 ## insert "\n" at 18
 edit: "# T\n\nAa b.\n\nBb c.\n\n\nCc d." | title@0-3 a@5-10 b@12-17 c@20-25 | sep 3-5 10-12 17-18 19-20 | authored ["\n"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 18-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\n\nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 10-11 12-13 | authored ["\n"]
 change b: "# T\n\nAa b.\n\nNew b.\n\n\nCc d." | title@0-3 a@5-10 b@12-18 c@21-26 | sep 3-5 10-12 18-19 20-21 | authored ["\n"]
@@ -474,7 +474,7 @@ uncheck b: "# T\n\n\n\nAa b.\n\nCc d." | title@0-3 a@7-12 c@14-19 | sep 5-7 12-1
 change b: "# T\n\n\n\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@7-12 b@14-20 c@22-27 | sep 5-7 12-14 20-22 | authored ["\n\n"]
 ## insert "\n\n" at 4
 edit: "# T\n\n\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@7-12 b@14-19 c@21-26 | sep 3-4 6-7 12-14 19-21 | authored ["\n\n"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 4-5 10-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\n\n\nAa b.\n\nCc d." | title@0-3 a@7-12 c@14-19 | sep 3-4 6-7 12-14 | authored ["\n\n"]
 change b: "# T\n\n\n\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@7-12 b@14-20 c@22-27 | sep 3-4 6-7 12-14 20-22 | authored ["\n\n"]
@@ -516,7 +516,7 @@ uncheck b: "# T\n\nAa b.\n\n\n\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 12-1
 change b: "# T\n\nAa b.\n\n\n\nNew b.\n\nCc d." | title@0-3 a@5-10 b@14-20 c@22-27 | sep 3-5 12-14 20-22 | authored ["\n\n"]
 ## insert "\n\n" at 11
 edit: "# T\n\nAa b.\n\n\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@14-19 c@21-26 | sep 3-5 10-11 13-14 19-21 | authored ["\n\n"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 11-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\n\n\n\nCc d." | title@0-3 a@5-10 c@15-20 | sep 3-5 10-11 13-15 | authored ["\n\n"]
 change b: "# T\n\nAa b.\n\n\n\nNew b.\n\nCc d." | title@0-3 a@5-10 b@14-20 c@22-27 | sep 3-5 10-11 13-14 20-22 | authored ["\n\n"]
@@ -558,7 +558,7 @@ uncheck b: "# T\n\nAa b.\n\n\n\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 12-1
 change b: "# T\n\nAa b.\n\nNew b.\n\n\n\nCc d." | title@0-3 a@5-10 b@12-18 c@22-27 | sep 3-5 10-12 20-22 | authored ["\n\n"]
 ## insert "\n\n" at 18
 edit: "# T\n\nAa b.\n\nBb c.\n\n\n\nCc d." | title@0-3 a@5-10 b@12-17 c@21-26 | sep 3-5 10-12 17-18 20-21 | authored ["\n\n"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 18-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\n\n\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-11 13-14 | authored ["\n\n"]
 change b: "# T\n\nAa b.\n\nNew b.\n\n\n\nCc d." | title@0-3 a@5-10 b@12-18 c@22-27 | sep 3-5 10-12 18-19 21-22 | authored ["\n\n"]
@@ -624,7 +624,7 @@ uncheck b: "# Tx\n\ny\n\nAa b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a@9-14 c@16-
 change b: "# Tx\n\ny\n\nAa b.\n\nNew b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a@9-14 b@16-22 c@24-29 | sep 7-9 14-16 22-24 | authored ["# Tx\n\ny"]
 ## insert "x\n\ny" at 4
 edit: "# T\nx\n\ny\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@9-14 b@16-21 c@23-28 | sep 3-4 8-9 14-16 21-23 | authored ["x\n\ny"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 4-5 10-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\nx\n\ny\nAa b.\n\nCc d." | title@0-3 a@9-14 c@16-21 | sep 3-4 8-9 14-16 | authored ["x\n\ny"]
 change b: "# T\nx\n\ny\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@9-14 b@16-22 c@24-29 | sep 3-4 8-9 14-16 22-24 | authored ["x\n\ny"]
@@ -666,7 +666,7 @@ uncheck b: "# T\n\nAa b.x\n\ny\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." c@
 change b: "# T\n\nAa b.x\n\ny\n\nNew b.\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." b@16-22 c@24-29 | sep 3-5 14-16 22-24 | authored ["Aa b.x\n\ny"]
 ## insert "x\n\ny" at 11
 edit: "# T\n\nAa b.\nx\n\ny\nBb c.\n\nCc d." | title@0-3 a@5-10 b@16-21 c@23-28 | sep 3-5 10-11 15-16 21-23 | authored ["x\n\ny"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 11-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nx\n\ny\n\nCc d." | title@0-3 a@5-10 c@17-22 | sep 3-5 10-11 15-17 | authored ["x\n\ny"]
 change b: "# T\n\nAa b.\nx\n\ny\nNew b.\n\nCc d." | title@0-3 a@5-10 b@16-22 c@24-29 | sep 3-5 10-11 15-16 22-24 | authored ["x\n\ny"]
@@ -708,7 +708,7 @@ uncheck b: "# T\n\nAa b.\n\nBb c.x\n\ny\n\nCc d." | title@0-3 a@5-10 c@23-28 | s
 change b: "# T\n\nAa b.\n\nBb c.x\n\ny\n\nCc d." | title@0-3 a@5-10 b*@12-18 g="New b." c@23-28 | sep 3-5 10-12 21-23 | authored ["Bb c.x\n\ny"]
 ## insert "x\n\ny" at 18
 edit: "# T\n\nAa b.\n\nBb c.\nx\n\ny\nCc d." | title@0-3 a@5-10 b@12-17 c@23-28 | sep 3-5 10-12 17-18 22-23 | authored ["x\n\ny"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 18-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nx\n\ny\nCc d." | title@0-3 a@5-10 c@16-21 | sep 3-5 10-11 15-16 | authored ["x\n\ny"]
 change b: "# T\n\nAa b.\n\nNew b.\nx\n\ny\nCc d." | title@0-3 a@5-10 b@12-18 c@24-29 | sep 3-5 10-12 18-19 23-24 | authored ["x\n\ny"]
@@ -774,7 +774,7 @@ uncheck b: "# Tx\n\n\ny\n\nAa b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a@10-15 c@
 change b: "# Tx\n\n\ny\n\nAa b.\n\nNew b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a@10-15 b@17-23 c@25-30 | sep 8-10 15-17 23-25 | authored ["# Tx\n\n\ny"]
 ## insert "x\n\n\ny" at 4
 edit: "# T\nx\n\n\ny\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@10-15 b@17-22 c@24-29 | sep 3-4 9-10 15-17 22-24 | authored ["x\n\n\ny"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 4-5 10-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\nx\n\n\ny\nAa b.\n\nCc d." | title@0-3 a@10-15 c@17-22 | sep 3-4 9-10 15-17 | authored ["x\n\n\ny"]
 change b: "# T\nx\n\n\ny\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@10-15 b@17-23 c@25-30 | sep 3-4 9-10 15-17 23-25 | authored ["x\n\n\ny"]
@@ -816,7 +816,7 @@ uncheck b: "# T\n\nAa b.x\n\n\ny\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." 
 change b: "# T\n\nAa b.x\n\n\ny\n\nNew b.\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." b@17-23 c@25-30 | sep 3-5 15-17 23-25 | authored ["Aa b.x\n\n\ny"]
 ## insert "x\n\n\ny" at 11
 edit: "# T\n\nAa b.\nx\n\n\ny\nBb c.\n\nCc d." | title@0-3 a@5-10 b@17-22 c@24-29 | sep 3-5 10-11 16-17 22-24 | authored ["x\n\n\ny"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 11-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nx\n\n\ny\n\nCc d." | title@0-3 a@5-10 c@18-23 | sep 3-5 10-11 16-18 | authored ["x\n\n\ny"]
 change b: "# T\n\nAa b.\nx\n\n\ny\nNew b.\n\nCc d." | title@0-3 a@5-10 b@17-23 c@25-30 | sep 3-5 10-11 16-17 23-25 | authored ["x\n\n\ny"]
@@ -858,7 +858,7 @@ uncheck b: "# T\n\nAa b.\n\nBb c.x\n\n\ny\n\nCc d." | title@0-3 a@5-10 c@24-29 |
 change b: "# T\n\nAa b.\n\nBb c.x\n\n\ny\n\nCc d." | title@0-3 a@5-10 b*@12-18 g="New b." c@24-29 | sep 3-5 10-12 22-24 | authored ["Bb c.x\n\n\ny"]
 ## insert "x\n\n\ny" at 18
 edit: "# T\n\nAa b.\n\nBb c.\nx\n\n\ny\nCc d." | title@0-3 a@5-10 b@12-17 c@24-29 | sep 3-5 10-12 17-18 23-24 | authored ["x\n\n\ny"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 18-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nx\n\n\ny\nCc d." | title@0-3 a@5-10 c@17-22 | sep 3-5 10-11 16-17 | authored ["x\n\n\ny"]
 change b: "# T\n\nAa b.\n\nNew b.\nx\n\n\ny\nCc d." | title@0-3 a@5-10 b@12-18 c@25-30 | sep 3-5 10-12 18-19 24-25 | authored ["x\n\n\ny"]
@@ -924,7 +924,7 @@ uncheck b: "# T\n x\n\nAa b.\n\nCc d." | title*@0-6 o=0-3 g="# T" a@8-13 c@15-20
 change b: "# T\n x\n\nAa b.\n\nNew b.\n\nCc d." | title*@0-6 o=0-3 g="# T" a@8-13 b@15-21 c@23-28 | sep 6-8 13-15 21-23 | authored ["# T\n x"]
 ## insert "\n x" at 4
 edit: "# T\n\n x\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@8-13 b@15-20 c@22-27 | sep 3-4 7-8 13-15 20-22 | authored ["\n x"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 4-5 10-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\n x\nAa b.\n\nCc d." | title@0-3 a@8-13 c@15-20 | sep 3-4 7-8 13-15 | authored ["\n x"]
 change b: "# T\n\n x\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@8-13 b@15-21 c@23-28 | sep 3-4 7-8 13-15 21-23 | authored ["\n x"]
@@ -966,7 +966,7 @@ uncheck b: "# T\n\nAa b.\n x\n\nCc d." | title@0-3 a*@5-13 o=5-10 g="Aa b." c@15
 change b: "# T\n\nAa b.\n x\n\nNew b.\n\nCc d." | title@0-3 a*@5-13 o=5-10 g="Aa b." b@15-21 c@23-28 | sep 3-5 13-15 21-23 | authored ["Aa b.\n x"]
 ## insert "\n x" at 11
 edit: "# T\n\nAa b.\n\n x\nBb c.\n\nCc d." | title@0-3 a@5-10 b@15-20 c@22-27 | sep 3-5 10-11 14-15 20-22 | authored ["\n x"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 11-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\n x\n\nCc d." | title@0-3 a@5-10 c@16-21 | sep 3-5 10-11 14-16 | authored ["\n x"]
 change b: "# T\n\nAa b.\n\n x\nNew b.\n\nCc d." | title@0-3 a@5-10 b@15-21 c@23-28 | sep 3-5 10-11 14-15 21-23 | authored ["\n x"]
@@ -1008,7 +1008,7 @@ uncheck b: "# T\n\nAa b.\n\nBb c.\n x\n\nCc d." | title@0-3 a@5-10 c@22-27 | sep
 change b: "# T\n\nAa b.\n\nBb c.\n x\n\nCc d." | title@0-3 a@5-10 b*@12-20 g="New b." c@22-27 | sep 3-5 10-12 20-22 | authored ["Bb c.\n x"]
 ## insert "\n x" at 18
 edit: "# T\n\nAa b.\n\nBb c.\n\n x\nCc d." | title@0-3 a@5-10 b@12-17 c@22-27 | sep 3-5 10-12 17-18 21-22 | authored ["\n x"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 18-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\n x\nCc d." | title@0-3 a@5-10 c@15-20 | sep 3-5 10-11 14-15 | authored ["\n x"]
 change b: "# T\n\nAa b.\n\nNew b.\n\n x\nCc d." | title@0-3 a@5-10 b@12-18 c@23-28 | sep 3-5 10-12 18-19 22-23 | authored ["\n x"]
@@ -1068,13 +1068,13 @@ uncheck b: "# x\n\nAa b.\n\nCc d." | title*@0-3 g="# T" a@5-10 c@12-17 | sep 3-5
 change b: "# x\n\nAa b.\n\nNew b.\n\nCc d." | title*@0-3 g="# T" a@5-10 b@12-18 c@20-25 | sep 3-5 10-12 18-20 | authored ["# x"]
 ## delete 3-4 and insert at 4
 edit: "# Tx\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["x"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["\n"]
-redo: "# Tx\nAa b.\n\nBb c.\n\nCc d." | title*@0-4 o=0-3 g="# T" a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["# Tx"]
+undo: original
+redo: edit
 uncheck b: "# Tx\nAa b.\n\nCc d." | title@0-3 a@5-10 c@12-17 | sep 4-5 10-12 | authored ["x"]
 change b: "# Tx\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@5-10 b@12-18 c@20-25 | sep 4-5 10-12 18-20 | authored ["x"]
 ## delete 4-5 and insert at 5
 edit: "# T\nxAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@4-10 o=5-10 g="Aa b." b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["xAa b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\nxAa b.\n\nCc d." | title@0-3 a*@4-10 o=5-10 g="Aa b." c@12-17 | sep 3-4 10-12 | authored ["xAa b."]
 change b: "# T\nxAa b.\n\nNew b.\n\nCc d." | title@0-3 a*@4-10 o=5-10 g="Aa b." b@12-18 c@20-25 | sep 3-4 10-12 18-20 | authored ["xAa b."]
@@ -1110,13 +1110,13 @@ uncheck b: "# T\n\nAa bx\n\nCc d." | title@0-3 a*@5-10 g="Aa b." c@12-17 | sep 3
 change b: "# T\n\nAa bx\n\nNew b.\n\nCc d." | title@0-3 a*@5-10 g="Aa b." b@12-18 c@20-25 | sep 3-5 10-12 18-20 | authored ["Aa bx"]
 ## delete 10-11 and insert at 11
 edit: "# T\n\nAa b.x\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["x"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["\n"]
-redo: "# T\n\nAa b.x\nBb c.\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["Aa b.x"]
+undo: original
+redo: edit
 uncheck b: "# T\n\nAa b.x\n\nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 11-13 | authored ["x"]
 change b: "# T\n\nAa b.x\nNew b.\n\nCc d." | title@0-3 a@5-10 b@12-18 c@20-25 | sep 3-5 11-12 18-20 | authored ["x"]
 ## delete 11-12 and insert at 12
 edit: "# T\n\nAa b.\nxBb c.\n\nCc d." | title@0-3 a@5-10 b*@11-17 o=12-17 g="Bb c." c@19-24 | sep 3-5 10-11 17-19 | authored ["xBb c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nxBb c.\n\nCc d." | title@0-3 a@5-10 c@19-24 | sep 3-5 10-11 17-19 | authored ["xBb c."]
 change b: "# T\n\nAa b.\nxBb c.\n\nCc d." | title@0-3 a@5-10 b*@11-17 g="New b." c@19-24 | sep 3-5 10-11 17-19 | authored ["xBb c."]
@@ -1152,13 +1152,13 @@ uncheck b: "# T\n\nAa b.\n\nBb cx\n\nCc d." | title@0-3 a@5-10 c@19-24 | sep 3-5
 change b: "# T\n\nAa b.\n\nBb cx\n\nCc d." | title@0-3 a@5-10 b*@12-17 g="New b." c@19-24 | sep 3-5 10-12 17-19 | authored ["Bb cx"]
 ## delete 17-18 and insert at 18
 edit: "# T\n\nAa b.\n\nBb c.x\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 18-19 | authored ["x"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 18-19 | authored ["\n"]
-redo: "# T\n\nAa b.\n\nBb c.x\nCc d." | title@0-3 a@5-10 b*@12-18 o=12-17 g="Bb c." c@19-24 | sep 3-5 10-12 18-19 | authored ["Bb c.x"]
+undo: original
+redo: edit
 uncheck b: "# T\n\nAa b.\n\nx\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-12 13-14 | authored ["x"]
 change b: "# T\n\nAa b.\n\nNew b.x\nCc d." | title@0-3 a@5-10 b@12-18 c@20-25 | sep 3-5 10-12 19-20 | authored ["x"]
 ## delete 18-19 and insert at 19
 edit: "# T\n\nAa b.\n\nBb c.\nxCc d." | title@0-3 a@5-10 b@12-17 c*@18-24 o=19-24 g="Cc d." | sep 3-5 10-12 17-18 | authored ["xCc d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nxCc d." | title@0-3 a@5-10 c*@11-17 o=12-17 g="Cc d." | sep 3-5 10-11 | authored ["xCc d."]
 change b: "# T\n\nAa b.\n\nNew b.\nxCc d." | title@0-3 a@5-10 b@12-18 c*@19-25 o=20-25 g="Cc d." | sep 3-5 10-12 18-19 | authored ["xCc d."]
@@ -1224,25 +1224,25 @@ uncheck b: "# z\n\nAa b.\n\nCc d." | title*@0-3 g="# T" a@5-10 c@12-17 | sep 3-5
 change b: "# z\n\nAa b.\n\nNew b.\n\nCc d." | title*@0-3 g="# T" a@5-10 b@12-18 c@20-25 | sep 3-5 10-12 18-20 | authored ["# z"]
 ## delete 3-4
 edit: "# T\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@4-9 b@11-16 c@18-23 | sep 3-4 9-11 16-18 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\nAa b.\n\nCc d." | title@0-3 a@4-9 c@11-16 | sep 3-4 9-11 | authored []
 change b: "# T\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@4-9 b@11-17 c@19-24 | sep 3-4 9-11 17-19 | authored []
 ## replace 3-4
 edit: "# Tz\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# Tz\nAa b.\n\nCc d." | title@0-3 a@5-10 c@12-17 | sep 4-5 10-12 | authored ["z"]
 change b: "# Tz\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@5-10 b@12-18 c@20-25 | sep 4-5 10-12 18-20 | authored ["z"]
 ## delete 4-5
 edit: "# T\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@4-9 b@11-16 c@18-23 | sep 3-4 9-11 16-18 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\nAa b.\n\nCc d." | title@0-3 a@4-9 c@11-16 | sep 3-4 9-11 | authored []
 change b: "# T\nAa b.\n\nNew b.\n\nCc d." | title@0-3 a@4-9 b@11-17 c@19-24 | sep 3-4 9-11 17-19 | authored []
 ## replace 4-5
 edit: "# T\nzAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\nzAa b.\n\nCc d." | title@0-3 a@5-10 c@12-17 | sep 3-4 10-12 | authored ["z"]
 change b: "# T\nzAa b.\n\nNew b.\n\nCc d." | title@0-3 a@5-10 b@12-18 c@20-25 | sep 3-4 10-12 18-20 | authored ["z"]
@@ -1308,25 +1308,25 @@ uncheck b: "# T\n\nAa bz\n\nCc d." | title@0-3 a*@5-10 g="Aa b." c@12-17 | sep 3
 change b: "# T\n\nAa bz\n\nNew b.\n\nCc d." | title@0-3 a*@5-10 g="Aa b." b@12-18 c@20-25 | sep 3-5 10-12 18-20 | authored ["Aa bz"]
 ## delete 10-11
 edit: "# T\n\nAa b.\nBb c.\n\nCc d." | title@0-3 a@5-10 b@11-16 c@18-23 | sep 3-5 10-11 16-18 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nCc d." | title@0-3 a@5-10 c@12-17 | sep 3-5 10-12 | authored []
 change b: "# T\n\nAa b.\nNew b.\n\nCc d." | title@0-3 a@5-10 b@11-17 c@19-24 | sep 3-5 10-11 17-19 | authored []
 ## replace 10-11
 edit: "# T\n\nAa b.z\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.z\n\nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 11-13 | authored ["z"]
 change b: "# T\n\nAa b.z\nNew b.\n\nCc d." | title@0-3 a@5-10 b@12-18 c@20-25 | sep 3-5 11-12 18-20 | authored ["z"]
 ## delete 11-12
 edit: "# T\n\nAa b.\nBb c.\n\nCc d." | title@0-3 a@5-10 b@11-16 c@18-23 | sep 3-5 10-11 16-18 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nCc d." | title@0-3 a@5-10 c@12-17 | sep 3-5 10-12 | authored []
 change b: "# T\n\nAa b.\nNew b.\n\nCc d." | title@0-3 a@5-10 b@11-17 c@19-24 | sep 3-5 10-11 17-19 | authored []
 ## replace 11-12
 edit: "# T\n\nAa b.\nzBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 17-19 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 17-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nz\n\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-11 12-14 | authored ["z"]
 change b: "# T\n\nAa b.\nzNew b.\n\nCc d." | title@0-3 a@5-10 b@12-18 c@20-25 | sep 3-5 10-11 18-20 | authored ["z"]
@@ -1392,25 +1392,25 @@ uncheck b: "# T\n\nAa b.\n\nBb cz\n\nCc d." | title@0-3 a@5-10 c@19-24 | sep 3-5
 change b: "# T\n\nAa b.\n\nBb cz\n\nCc d." | title@0-3 a@5-10 b*@12-17 g="New b." c@19-24 | sep 3-5 10-12 17-19 | authored ["Bb cz"]
 ## delete 17-18
 edit: "# T\n\nAa b.\n\nBb c.\nCc d." | title@0-3 a@5-10 b@12-17 c@18-23 | sep 3-5 10-12 17-18 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 18-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nCc d." | title@0-3 a@5-10 c@11-16 | sep 3-5 10-11 | authored []
 change b: "# T\n\nAa b.\n\nNew b.\nCc d." | title@0-3 a@5-10 b@12-18 c@19-24 | sep 3-5 10-12 18-19 | authored []
 ## replace 17-18
 edit: "# T\n\nAa b.\n\nBb c.z\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 18-19 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 18-19 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nz\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-12 13-14 | authored ["z"]
 change b: "# T\n\nAa b.\n\nNew b.z\nCc d." | title@0-3 a@5-10 b@12-18 c@20-25 | sep 3-5 10-12 19-20 | authored ["z"]
 ## delete 18-19
 edit: "# T\n\nAa b.\n\nBb c.\nCc d." | title@0-3 a@5-10 b@12-17 c@18-23 | sep 3-5 10-12 17-18 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nCc d." | title@0-3 a@5-10 c@11-16 | sep 3-5 10-11 | authored []
 change b: "# T\n\nAa b.\n\nNew b.\nCc d." | title@0-3 a@5-10 b@12-18 c@19-24 | sep 3-5 10-12 18-19 | authored []
 ## replace 18-19
 edit: "# T\n\nAa b.\n\nBb c.\nzCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 | authored ["\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nzCc d." | title@0-3 a@5-10 c@12-17 | sep 3-5 10-11 | authored ["z"]
 change b: "# T\n\nAa b.\n\nNew b.\nzCc d." | title@0-3 a@5-10 b@12-18 c@20-25 | sep 3-5 10-12 18-19 | authored ["z"]
@@ -1500,37 +1500,37 @@ uncheck b: "#z\n\nAa b.\n\nCc d." | title*@0-2 g="# T" a@4-9 c@11-16 | sep 2-4 9
 change b: "#z\n\nAa b.\n\nNew b.\n\nCc d." | title*@0-2 g="# T" a@4-9 b@11-17 c@19-24 | sep 2-4 9-11 17-19 | authored ["#z"]
 ## delete 2-4
 edit: "# \nAa b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a@3-8 b@10-15 c@17-22 | sep 2-3 8-10 15-17 | authored ["# "]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title*@0-4 g="# T" a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["# T\n"]
+undo: original
 redo: edit
 uncheck b: "# \nAa b.\n\nCc d." | title*@0-2 g="# T" a@3-8 c@10-15 | sep 2-3 8-10 | authored ["# "]
 change b: "# \nAa b.\n\nNew b.\n\nCc d." | title*@0-2 g="# T" a@3-8 b@10-16 c@18-23 | sep 2-3 8-10 16-18 | authored ["# "]
 ## replace 2-4
 edit: "# z\nAa b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a@4-9 b@11-16 c@18-23 | sep 3-4 9-11 16-18 | authored ["# z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["# T\n"]
+undo: original
 redo: edit
 uncheck b: "# z\nAa b.\n\nCc d." | title*@0-2 g="# T" a@4-9 c@11-16 | sep 3-4 9-11 | authored ["# z"]
 change b: "# z\nAa b.\n\nNew b.\n\nCc d." | title*@0-2 g="# T" a@4-9 b@11-17 c@19-24 | sep 3-4 9-11 17-19 | authored ["# z"]
 ## delete 3-5
 edit: "# TAa b.\n\nBb c.\n\nCc d." | title@0-3 a@3-8 b@10-15 c@17-22 | sep 8-10 15-17 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# TAa b.\n\nCc d." | title@0-3 a@3-8 c@10-15 | sep 8-10 | authored []
 change b: "# TAa b.\n\nNew b.\n\nCc d." | title@0-3 a@3-8 b@10-16 c@18-23 | sep 8-10 16-18 | authored []
 ## replace 3-5
 edit: "# TzAa b.\n\nBb c.\n\nCc d." | title@0-3 a@4-9 b@11-16 c@18-23 | sep 9-11 16-18 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# TzAa b.\n\nCc d." | title@0-3 a@4-9 c@11-16 | sep 9-11 | authored ["z"]
 change b: "# TzAa b.\n\nNew b.\n\nCc d." | title@0-3 a@4-9 b@11-17 c@19-24 | sep 9-11 17-19 | authored ["z"]
 ## delete 4-6
 edit: "# T\na b.\n\nBb c.\n\nCc d." | title@0-3 a*@4-8 g="Aa b." b@10-15 c@17-22 | sep 3-4 8-10 15-17 | authored ["a b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@4-10 g="Aa b." b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# T\na b.\n\nCc d." | title@0-3 a*@4-8 g="Aa b." c@10-15 | sep 3-4 8-10 | authored ["a b."]
 change b: "# T\na b.\n\nNew b.\n\nCc d." | title@0-3 a*@4-8 g="Aa b." b@10-16 c@18-23 | sep 3-4 8-10 16-18 | authored ["a b."]
 ## replace 4-6
 edit: "# T\nza b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@11-16 c@18-23 | sep 3-4 9-11 16-18 | authored ["za b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@6-10 g="Aa b." b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# T\nza b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@11-16 | sep 3-4 9-11 | authored ["za b."]
 change b: "# T\nza b.\n\nNew b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@11-17 c@19-24 | sep 3-4 9-11 17-19 | authored ["za b."]
@@ -1584,37 +1584,37 @@ uncheck b: "# T\n\nAa z\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@11-16 | sep 3-5
 change b: "# T\n\nAa z\n\nNew b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@11-17 c@19-24 | sep 3-5 9-11 17-19 | authored ["Aa z"]
 ## delete 9-11
 edit: "# T\n\nAa b\nBb c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@10-15 c@17-22 | sep 3-5 9-10 15-17 | authored ["Aa b"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-11 g="Aa b." b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["Aa b.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@11-16 | sep 3-5 9-11 | authored ["Aa b"]
 change b: "# T\n\nAa b\nNew b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@10-16 c@18-23 | sep 3-5 9-10 16-18 | authored ["Aa b"]
 ## replace 9-11
 edit: "# T\n\nAa bz\nBb c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@11-16 c@18-23 | sep 3-5 10-11 16-18 | authored ["Aa bz"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["Aa b.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa bz\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@12-17 | sep 3-5 10-12 | authored ["Aa bz"]
 change b: "# T\n\nAa bz\nNew b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@11-17 c@19-24 | sep 3-5 10-11 17-19 | authored ["Aa bz"]
 ## delete 10-12
 edit: "# T\n\nAa b.Bb c.\n\nCc d." | title@0-3 a@5-10 b@10-15 c@17-22 | sep 3-5 15-17 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 17-19 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nCc d." | title@0-3 a@5-10 c@12-17 | sep 3-5 10-12 | authored []
 change b: "# T\n\nAa b.New b.\n\nCc d." | title@0-3 a@5-10 b@10-16 c@18-23 | sep 3-5 16-18 | authored []
 ## replace 10-12
 edit: "# T\n\nAa b.zBb c.\n\nCc d." | title@0-3 a@5-10 b@11-16 c@18-23 | sep 3-5 16-18 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 17-19 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.z\n\nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 11-13 | authored ["z"]
 change b: "# T\n\nAa b.zNew b.\n\nCc d." | title@0-3 a@5-10 b@11-17 c@19-24 | sep 3-5 17-19 | authored ["z"]
 ## delete 11-13
 edit: "# T\n\nAa b.\nb c.\n\nCc d." | title@0-3 a@5-10 b*@11-15 g="Bb c." c@17-22 | sep 3-5 10-11 15-17 | authored ["b c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@11-17 g="Bb c." c@19-24 | sep 3-5 10-11 17-19 | authored ["\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nb c.\n\nCc d." | title@0-3 a@5-10 c@17-22 | sep 3-5 10-11 15-17 | authored ["b c."]
 change b: "# T\n\nAa b.\nb c.\n\nCc d." | title@0-3 a@5-10 b*@11-15 g="New b." c@17-22 | sep 3-5 10-11 15-17 | authored ["b c."]
 ## replace 11-13
 edit: "# T\n\nAa b.\nzb c.\n\nCc d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c@18-23 | sep 3-5 10-11 16-18 | authored ["zb c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@13-17 g="Bb c." c@19-24 | sep 3-5 10-11 17-19 | authored ["\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nzb c.\n\nCc d." | title@0-3 a@5-10 c@18-23 | sep 3-5 10-11 16-18 | authored ["zb c."]
 change b: "# T\n\nAa b.\nzb c.\n\nCc d." | title@0-3 a@5-10 b*@12-16 g="New b." c@18-23 | sep 3-5 10-11 16-18 | authored ["zb c."]
@@ -1668,37 +1668,37 @@ uncheck b: "# T\n\nAa b.\n\nBb z\n\nCc d." | title@0-3 a@5-10 c@18-23 | sep 3-5 
 change b: "# T\n\nAa b.\n\nBb z\n\nCc d." | title@0-3 a@5-10 b*@12-16 g="New b." c@18-23 | sep 3-5 10-12 16-18 | authored ["Bb z"]
 ## delete 16-18
 edit: "# T\n\nAa b.\n\nBb c\nCc d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c@17-22 | sep 3-5 10-12 16-17 | authored ["Bb c"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-18 g="Bb c." c@19-24 | sep 3-5 10-12 18-19 | authored ["Bb c.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb c\nCc d." | title@0-3 a@5-10 c@17-22 | sep 3-5 10-12 16-17 | authored ["Bb c"]
 change b: "# T\n\nAa b.\n\nBb c\nCc d." | title@0-3 a@5-10 b*@12-16 g="New b." c@17-22 | sep 3-5 10-12 16-17 | authored ["Bb c"]
 ## replace 16-18
 edit: "# T\n\nAa b.\n\nBb cz\nCc d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c@18-23 | sep 3-5 10-12 17-18 | authored ["Bb cz"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c@19-24 | sep 3-5 10-12 18-19 | authored ["Bb c.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb cz\nCc d." | title@0-3 a@5-10 c@18-23 | sep 3-5 10-12 17-18 | authored ["Bb cz"]
 change b: "# T\n\nAa b.\n\nBb cz\nCc d." | title@0-3 a@5-10 b*@12-16 g="New b." c@18-23 | sep 3-5 10-12 17-18 | authored ["Bb cz"]
 ## delete 17-19
 edit: "# T\n\nAa b.\n\nBb c.Cc d." | title@0-3 a@5-10 b@12-17 c@17-22 | sep 3-5 10-12 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nCc d." | title@0-3 a@5-10 c@12-17 | sep 3-5 10-12 | authored []
 change b: "# T\n\nAa b.\n\nNew b.Cc d." | title@0-3 a@5-10 b@12-18 c@18-23 | sep 3-5 10-12 | authored []
 ## replace 17-19
 edit: "# T\n\nAa b.\n\nBb c.zCc d." | title@0-3 a@5-10 b@12-17 c@18-23 | sep 3-5 10-12 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nzCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 10-12 | authored ["z"]
 change b: "# T\n\nAa b.\n\nNew b.zCc d." | title@0-3 a@5-10 b@12-18 c@19-24 | sep 3-5 10-12 | authored ["z"]
 ## delete 18-20
 edit: "# T\n\nAa b.\n\nBb c.\nc d." | title@0-3 a@5-10 b@12-17 c*@18-22 g="Cc d." | sep 3-5 10-12 17-18 | authored ["c d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@18-24 g="Cc d." | sep 3-5 10-12 17-18 | authored ["\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nc d." | title@0-3 a@5-10 c*@11-15 g="Cc d." | sep 3-5 10-11 | authored ["c d."]
 change b: "# T\n\nAa b.\n\nNew b.\nc d." | title@0-3 a@5-10 b@12-18 c*@19-23 g="Cc d." | sep 3-5 10-12 18-19 | authored ["c d."]
 ## replace 18-20
 edit: "# T\n\nAa b.\n\nBb c.\nzc d." | title@0-3 a@5-10 b@12-17 c*@19-23 g="Cc d." | sep 3-5 10-12 17-18 | authored ["zc d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@20-24 g="Cc d." | sep 3-5 10-12 17-18 | authored ["\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nzc d." | title@0-3 a@5-10 c*@12-16 g="Cc d." | sep 3-5 10-11 | authored ["zc d."]
 change b: "# T\n\nAa b.\n\nNew b.\nzc d." | title@0-3 a@5-10 b@12-18 c*@20-24 g="Cc d." | sep 3-5 10-12 18-19 | authored ["zc d."]
@@ -1764,49 +1764,49 @@ uncheck b: "z\n\nAa b.\n\nCc d." | title*@0-1 g="# T" a@3-8 c@10-15 | sep 1-3 8-
 change b: "z\n\nAa b.\n\nNew b.\n\nCc d." | title*@0-1 g="# T" a@3-8 b@10-16 c@18-23 | sep 1-3 8-10 16-18 | authored ["z"]
 ## delete 1-4
 edit: "#\nAa b.\n\nBb c.\n\nCc d." | title*@0-1 g="# T" a@2-7 b@9-14 c@16-21 | sep 1-2 7-9 14-16 | authored ["#"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title*@0-4 g="# T" a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["# T\n"]
+undo: original
 redo: edit
 uncheck b: "#\nAa b.\n\nCc d." | title*@0-1 g="# T" a@2-7 c@9-14 | sep 1-2 7-9 | authored ["#"]
 change b: "#\nAa b.\n\nNew b.\n\nCc d." | title*@0-1 g="# T" a@2-7 b@9-15 c@17-22 | sep 1-2 7-9 15-17 | authored ["#"]
 ## replace 1-4
 edit: "#z\nAa b.\n\nBb c.\n\nCc d." | title*@0-1 g="# T" a@3-8 b@10-15 c@17-22 | sep 2-3 8-10 15-17 | authored ["#z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title*@0-1 g="# T" a@5-10 b@12-17 c@19-24 | sep 4-5 10-12 17-19 | authored ["# T\n"]
+undo: original
 redo: edit
 uncheck b: "#z\nAa b.\n\nCc d." | title*@0-1 g="# T" a@3-8 c@10-15 | sep 2-3 8-10 | authored ["#z"]
 change b: "#z\nAa b.\n\nNew b.\n\nCc d." | title*@0-1 g="# T" a@3-8 b@10-16 c@18-23 | sep 2-3 8-10 16-18 | authored ["#z"]
 ## delete 2-5
 edit: "# Aa b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a@2-7 b@9-14 c@16-21 | sep 7-9 14-16 | authored ["# "]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# Aa b.\n\nCc d." | title*@0-2 g="# T" a@2-7 c@9-14 | sep 7-9 | authored ["# "]
 change b: "# Aa b.\n\nNew b.\n\nCc d." | title*@0-2 g="# T" a@2-7 b@9-15 c@17-22 | sep 7-9 15-17 | authored ["# "]
 ## replace 2-5
 edit: "# zAa b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a@3-8 b@10-15 c@17-22 | sep 8-10 15-17 | authored ["# z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a@5-10 b@12-17 c@19-24 | sep 10-12 17-19 | authored ["# T\n\n"]
+undo: original
 redo: edit
 uncheck b: "# zAa b.\n\nCc d." | title*@0-2 g="# T" a@3-8 c@10-15 | sep 8-10 | authored ["# z"]
 change b: "# zAa b.\n\nNew b.\n\nCc d." | title*@0-2 g="# T" a@3-8 b@10-16 c@18-23 | sep 8-10 16-18 | authored ["# z"]
 ## delete 3-6
 edit: "# Ta b.\n\nBb c.\n\nCc d." | title@0-3 a*@3-7 g="Aa b." b@9-14 c@16-21 | sep 7-9 14-16 | authored ["a b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@6-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# Ta b.\n\nCc d." | title@0-3 a*@3-7 g="Aa b." c@9-14 | sep 7-9 | authored ["a b."]
 change b: "# Ta b.\n\nNew b.\n\nCc d." | title@0-3 a*@3-7 g="Aa b." b@9-15 c@17-22 | sep 7-9 15-17 | authored ["a b."]
 ## replace 3-6
 edit: "# Tza b.\n\nBb c.\n\nCc d." | title@0-3 a*@4-8 g="Aa b." b@10-15 c@17-22 | sep 8-10 15-17 | authored ["za b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@6-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# Tza b.\n\nCc d." | title@0-3 a*@4-8 g="Aa b." c@10-15 | sep 8-10 | authored ["za b."]
 change b: "# Tza b.\n\nNew b.\n\nCc d." | title@0-3 a*@4-8 g="Aa b." b@10-16 c@18-23 | sep 8-10 16-18 | authored ["za b."]
 ## delete 4-7
 edit: "# T\n b.\n\nBb c.\n\nCc d." | title@0-3 a*@4-7 g="Aa b." b@9-14 c@16-21 | sep 3-4 7-9 14-16 | authored [" b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@4-10 g="Aa b." b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# T\n b.\n\nCc d." | title@0-3 a*@4-7 g="Aa b." c@9-14 | sep 3-4 7-9 | authored [" b."]
 change b: "# T\n b.\n\nNew b.\n\nCc d." | title@0-3 a*@4-7 g="Aa b." b@9-15 c@17-22 | sep 3-4 7-9 15-17 | authored [" b."]
 ## replace 4-7
 edit: "# T\nz b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b@10-15 c@17-22 | sep 3-4 8-10 15-17 | authored ["z b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@7-10 g="Aa b." b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# T\nz b.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." c@10-15 | sep 3-4 8-10 | authored ["z b."]
 change b: "# T\nz b.\n\nNew b.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b@10-16 c@18-23 | sep 3-4 8-10 16-18 | authored ["z b."]
@@ -1848,49 +1848,49 @@ uncheck b: "# T\n\nAaz\n\nCc d." | title@0-3 a*@5-8 g="Aa b." c@10-15 | sep 3-5 
 change b: "# T\n\nAaz\n\nNew b.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b@10-16 c@18-23 | sep 3-5 8-10 16-18 | authored ["Aaz"]
 ## delete 8-11
 edit: "# T\n\nAa \nBb c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b@9-14 c@16-21 | sep 3-5 8-9 14-16 | authored ["Aa "]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-11 g="Aa b." b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["Aa b.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa \n\nCc d." | title@0-3 a*@5-8 g="Aa b." c@10-15 | sep 3-5 8-10 | authored ["Aa "]
 change b: "# T\n\nAa \nNew b.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b@9-15 c@17-22 | sep 3-5 8-9 15-17 | authored ["Aa "]
 ## replace 8-11
 edit: "# T\n\nAa z\nBb c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b@10-15 c@17-22 | sep 3-5 9-10 15-17 | authored ["Aa z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["Aa b.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa z\n\nCc d." | title@0-3 a*@5-8 g="Aa b." c@11-16 | sep 3-5 9-11 | authored ["Aa z"]
 change b: "# T\n\nAa z\nNew b.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b@10-16 c@18-23 | sep 3-5 9-10 16-18 | authored ["Aa z"]
 ## delete 9-12
 edit: "# T\n\nAa bBb c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@9-14 c@16-21 | sep 3-5 14-16 | authored ["Aa b"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 17-19 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@11-16 | sep 3-5 9-11 | authored ["Aa b"]
 change b: "# T\n\nAa bNew b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@9-15 c@17-22 | sep 3-5 15-17 | authored ["Aa b"]
 ## replace 9-12
 edit: "# T\n\nAa bzBb c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@10-15 c@17-22 | sep 3-5 15-17 | authored ["Aa bz"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@12-17 c@19-24 | sep 3-5 17-19 | authored ["Aa b.\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa bz\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@12-17 | sep 3-5 10-12 | authored ["Aa bz"]
 change b: "# T\n\nAa bzNew b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b@10-16 c@18-23 | sep 3-5 16-18 | authored ["Aa bz"]
 ## delete 10-13
 edit: "# T\n\nAa b.b c.\n\nCc d." | title@0-3 a@5-10 b*@10-14 g="Bb c." c@16-21 | sep 3-5 14-16 | authored ["b c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@13-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.b c.\n\nCc d." | title@0-3 a@5-10 c@16-21 | sep 3-5 14-16 | authored ["b c."]
 change b: "# T\n\nAa b.b c.\n\nCc d." | title@0-3 a@5-10 b*@10-14 g="New b." c@16-21 | sep 3-5 14-16 | authored ["b c."]
 ## replace 10-13
 edit: "# T\n\nAa b.zb c.\n\nCc d." | title@0-3 a@5-10 b*@11-15 g="Bb c." c@17-22 | sep 3-5 15-17 | authored ["zb c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@13-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.zb c.\n\nCc d." | title@0-3 a@5-10 c@17-22 | sep 3-5 15-17 | authored ["zb c."]
 change b: "# T\n\nAa b.zb c.\n\nCc d." | title@0-3 a@5-10 b*@11-15 g="New b." c@17-22 | sep 3-5 15-17 | authored ["zb c."]
 ## delete 11-14
 edit: "# T\n\nAa b.\n c.\n\nCc d." | title@0-3 a@5-10 b*@11-14 g="Bb c." c@16-21 | sep 3-5 10-11 14-16 | authored [" c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@11-17 g="Bb c." c@19-24 | sep 3-5 10-11 17-19 | authored ["\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n c.\n\nCc d." | title@0-3 a@5-10 c@16-21 | sep 3-5 10-11 14-16 | authored [" c."]
 change b: "# T\n\nAa b.\n c.\n\nCc d." | title@0-3 a@5-10 b*@11-14 g="New b." c@16-21 | sep 3-5 10-11 14-16 | authored [" c."]
 ## replace 11-14
 edit: "# T\n\nAa b.\nz c.\n\nCc d." | title@0-3 a@5-10 b*@12-15 g="Bb c." c@17-22 | sep 3-5 10-11 15-17 | authored ["z c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@14-17 g="Bb c." c@19-24 | sep 3-5 10-11 17-19 | authored ["\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nz c.\n\nCc d." | title@0-3 a@5-10 c@17-22 | sep 3-5 10-11 15-17 | authored ["z c."]
 change b: "# T\n\nAa b.\nz c.\n\nCc d." | title@0-3 a@5-10 b*@12-15 g="New b." c@17-22 | sep 3-5 10-11 15-17 | authored ["z c."]
@@ -1932,49 +1932,49 @@ uncheck b: "# T\n\nAa b.\n\nBbz\n\nCc d." | title@0-3 a@5-10 c@17-22 | sep 3-5 1
 change b: "# T\n\nAa b.\n\nBbz\n\nCc d." | title@0-3 a@5-10 b*@12-15 g="New b." c@17-22 | sep 3-5 10-12 15-17 | authored ["Bbz"]
 ## delete 15-18
 edit: "# T\n\nAa b.\n\nBb \nCc d." | title@0-3 a@5-10 b*@12-15 g="Bb c." c@16-21 | sep 3-5 10-12 15-16 | authored ["Bb "]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-18 g="Bb c." c@19-24 | sep 3-5 10-12 18-19 | authored ["Bb c.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb \nCc d." | title@0-3 a@5-10 c@16-21 | sep 3-5 10-12 15-16 | authored ["Bb "]
 change b: "# T\n\nAa b.\n\nBb \nCc d." | title@0-3 a@5-10 b*@12-15 g="New b." c@16-21 | sep 3-5 10-12 15-16 | authored ["Bb "]
 ## replace 15-18
 edit: "# T\n\nAa b.\n\nBb z\nCc d." | title@0-3 a@5-10 b*@12-15 g="Bb c." c@17-22 | sep 3-5 10-12 16-17 | authored ["Bb z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-15 g="Bb c." c@19-24 | sep 3-5 10-12 18-19 | authored ["Bb c.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb z\nCc d." | title@0-3 a@5-10 c@17-22 | sep 3-5 10-12 16-17 | authored ["Bb z"]
 change b: "# T\n\nAa b.\n\nBb z\nCc d." | title@0-3 a@5-10 b*@12-15 g="New b." c@17-22 | sep 3-5 10-12 16-17 | authored ["Bb z"]
 ## delete 16-19
 edit: "# T\n\nAa b.\n\nBb cCc d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c@16-21 | sep 3-5 10-12 | authored ["Bb c"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb cCc d." | title@0-3 a@5-10 c@16-21 | sep 3-5 10-12 | authored ["Bb c"]
 change b: "# T\n\nAa b.\n\nBb cCc d." | title@0-3 a@5-10 b*@12-16 g="New b." c@16-21 | sep 3-5 10-12 | authored ["Bb c"]
 ## replace 16-19
 edit: "# T\n\nAa b.\n\nBb czCc d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c@17-22 | sep 3-5 10-12 | authored ["Bb cz"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c@19-24 | sep 3-5 10-12 | authored ["Bb c.\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb czCc d." | title@0-3 a@5-10 c@17-22 | sep 3-5 10-12 | authored ["Bb cz"]
 change b: "# T\n\nAa b.\n\nBb czCc d." | title@0-3 a@5-10 b*@12-16 g="New b." c@17-22 | sep 3-5 10-12 | authored ["Bb cz"]
 ## delete 17-20
 edit: "# T\n\nAa b.\n\nBb c.c d." | title@0-3 a@5-10 b@12-17 c*@17-21 g="Cc d." | sep 3-5 10-12 | authored ["c d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@20-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nc d." | title@0-3 a@5-10 c*@12-16 g="Cc d." | sep 3-5 10-12 | authored ["c d."]
 change b: "# T\n\nAa b.\n\nNew b.c d." | title@0-3 a@5-10 b@12-18 c*@18-22 g="Cc d." | sep 3-5 10-12 | authored ["c d."]
 ## replace 17-20
 edit: "# T\n\nAa b.\n\nBb c.zc d." | title@0-3 a@5-10 b@12-17 c*@18-22 g="Cc d." | sep 3-5 10-12 | authored ["zc d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@20-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nzc d." | title@0-3 a@5-10 c*@13-17 g="Cc d." | sep 3-5 10-12 | authored ["zc d."]
 change b: "# T\n\nAa b.\n\nNew b.zc d." | title@0-3 a@5-10 b@12-18 c*@19-23 g="Cc d." | sep 3-5 10-12 | authored ["zc d."]
 ## delete 18-21
 edit: "# T\n\nAa b.\n\nBb c.\n d." | title@0-3 a@5-10 b@12-17 c*@18-21 g="Cc d." | sep 3-5 10-12 17-18 | authored [" d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@18-24 g="Cc d." | sep 3-5 10-12 17-18 | authored ["\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n d." | title@0-3 a@5-10 c*@11-14 g="Cc d." | sep 3-5 10-11 | authored [" d."]
 change b: "# T\n\nAa b.\n\nNew b.\n d." | title@0-3 a@5-10 b@12-18 c*@19-22 g="Cc d." | sep 3-5 10-12 18-19 | authored [" d."]
 ## replace 18-21
 edit: "# T\n\nAa b.\n\nBb c.\nz d." | title@0-3 a@5-10 b@12-17 c*@19-22 g="Cc d." | sep 3-5 10-12 17-18 | authored ["z d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@21-24 g="Cc d." | sep 3-5 10-12 17-18 | authored ["\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nz d." | title@0-3 a@5-10 c*@12-15 g="Cc d." | sep 3-5 10-11 | authored ["z d."]
 change b: "# T\n\nAa b.\n\nNew b.\nz d." | title@0-3 a@5-10 b@12-18 c*@20-23 g="Cc d." | sep 3-5 10-12 18-19 | authored ["z d."]
@@ -2028,49 +2028,49 @@ uncheck b: "zAa b.\n\nCc d." | title*@0-0 g="# T" a@1-6 c@8-13 | sep 6-8 | autho
 change b: "zAa b.\n\nNew b.\n\nCc d." | title*@0-0 g="# T" a@1-6 b@8-14 c@16-21 | sep 6-8 14-16 | authored ["z"]
 ## delete 1-6
 edit: "#a b.\n\nBb c.\n\nCc d." | title*@0-1 g="# T" a*@1-5 g="Aa b." b@7-12 c@14-19 | sep 5-7 12-14 | authored ["#a b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@6-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "#a b.\n\nCc d." | title*@0-1 g="# T" a*@1-5 g="Aa b." c@7-12 | sep 5-7 | authored ["#a b."]
 change b: "#a b.\n\nNew b.\n\nCc d." | title*@0-1 g="# T" a*@1-5 g="Aa b." b@7-13 c@15-20 | sep 5-7 13-15 | authored ["#a b."]
 ## replace 1-6
 edit: "#za b.\n\nBb c.\n\nCc d." | title*@0-1 g="# T" a*@2-6 g="Aa b." b@8-13 c@15-20 | sep 6-8 13-15 | authored ["#za b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title*@0-1 g="# T" a*@6-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["# T\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "#za b.\n\nCc d." | title*@0-1 g="# T" a*@2-6 g="Aa b." c@8-13 | sep 6-8 | authored ["#za b."]
 change b: "#za b.\n\nNew b.\n\nCc d." | title*@0-1 g="# T" a*@2-6 g="Aa b." b@8-14 c@16-21 | sep 6-8 14-16 | authored ["#za b."]
 ## delete 2-7
 edit: "#  b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a*@2-5 g="Aa b." b@7-12 c@14-19 | sep 5-7 12-14 | authored ["#  b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@7-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "#  b.\n\nCc d." | title*@0-2 g="# T" a*@2-5 g="Aa b." c@7-12 | sep 5-7 | authored ["#  b."]
 change b: "#  b.\n\nNew b.\n\nCc d." | title*@0-2 g="# T" a*@2-5 g="Aa b." b@7-13 c@15-20 | sep 5-7 13-15 | authored ["#  b."]
 ## replace 2-7
 edit: "# z b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a*@3-6 g="Aa b." b@8-13 c@15-20 | sep 6-8 13-15 | authored ["# z b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a*@7-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["# T\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# z b.\n\nCc d." | title*@0-2 g="# T" a*@3-6 g="Aa b." c@8-13 | sep 6-8 | authored ["# z b."]
 change b: "# z b.\n\nNew b.\n\nCc d." | title*@0-2 g="# T" a*@3-6 g="Aa b." b@8-14 c@16-21 | sep 6-8 14-16 | authored ["# z b."]
 ## delete 3-8
 edit: "# Tb.\n\nBb c.\n\nCc d." | title@0-3 a*@3-5 g="Aa b." b@7-12 c@14-19 | sep 5-7 12-14 | authored ["b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@8-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# Tb.\n\nCc d." | title@0-3 a*@3-5 g="Aa b." c@7-12 | sep 5-7 | authored ["b."]
 change b: "# Tb.\n\nNew b.\n\nCc d." | title@0-3 a*@3-5 g="Aa b." b@7-13 c@15-20 | sep 5-7 13-15 | authored ["b."]
 ## replace 3-8
 edit: "# Tzb.\n\nBb c.\n\nCc d." | title@0-3 a*@4-6 g="Aa b." b@8-13 c@15-20 | sep 6-8 13-15 | authored ["zb."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@8-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# Tzb.\n\nCc d." | title@0-3 a*@4-6 g="Aa b." c@8-13 | sep 6-8 | authored ["zb."]
 change b: "# Tzb.\n\nNew b.\n\nCc d." | title@0-3 a*@4-6 g="Aa b." b@8-14 c@16-21 | sep 6-8 14-16 | authored ["zb."]
 ## delete 4-9
 edit: "# T\n.\n\nBb c.\n\nCc d." | title@0-3 a*@4-5 g="Aa b." b@7-12 c@14-19 | sep 3-4 5-7 12-14 | authored ["."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@4-10 g="Aa b." b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# T\n.\n\nCc d." | title@0-3 a*@4-5 g="Aa b." c@7-12 | sep 3-4 5-7 | authored ["."]
 change b: "# T\n.\n\nNew b.\n\nCc d." | title@0-3 a*@4-5 g="Aa b." b@7-13 c@15-20 | sep 3-4 5-7 13-15 | authored ["."]
 ## replace 4-9
 edit: "# T\nz.\n\nBb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b@8-13 c@15-20 | sep 3-4 6-8 13-15 | authored ["z."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@9-10 g="Aa b." b@12-17 c@19-24 | sep 3-4 10-12 17-19 | authored ["\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# T\nz.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." c@8-13 | sep 3-4 6-8 | authored ["z."]
 change b: "# T\nz.\n\nNew b.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b@8-14 c@16-21 | sep 3-4 6-8 14-16 | authored ["z."]
@@ -2088,73 +2088,73 @@ uncheck b: "# T\n\nz\n\nCc d." | title@0-3 a*@5-6 g="Aa b." c@8-13 | sep 3-5 6-8
 change b: "# T\n\nz\n\nNew b.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b@8-14 c@16-21 | sep 3-5 6-8 14-16 | authored ["z"]
 ## delete 6-11
 edit: "# T\n\nA\nBb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b@7-12 c@14-19 | sep 3-5 6-7 12-14 | authored ["A"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-11 g="Aa b." b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["Aa b.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nA\n\nCc d." | title@0-3 a*@5-6 g="Aa b." c@8-13 | sep 3-5 6-8 | authored ["A"]
 change b: "# T\n\nA\nNew b.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b@7-13 c@15-20 | sep 3-5 6-7 13-15 | authored ["A"]
 ## replace 6-11
 edit: "# T\n\nAz\nBb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b@8-13 c@15-20 | sep 3-5 7-8 13-15 | authored ["Az"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b@12-17 c@19-24 | sep 3-5 11-12 17-19 | authored ["Aa b.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAz\n\nCc d." | title@0-3 a*@5-6 g="Aa b." c@9-14 | sep 3-5 7-9 | authored ["Az"]
 change b: "# T\n\nAz\nNew b.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b@8-14 c@16-21 | sep 3-5 7-8 14-16 | authored ["Az"]
 ## delete 7-12
 edit: "# T\n\nAaBb c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b@7-12 c@14-19 | sep 3-5 12-14 | authored ["Aa"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 17-19 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa\n\nCc d." | title@0-3 a*@5-7 g="Aa b." c@9-14 | sep 3-5 7-9 | authored ["Aa"]
 change b: "# T\n\nAaNew b.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b@7-13 c@15-20 | sep 3-5 13-15 | authored ["Aa"]
 ## replace 7-12
 edit: "# T\n\nAazBb c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b@8-13 c@15-20 | sep 3-5 13-15 | authored ["Aaz"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b@12-17 c@19-24 | sep 3-5 17-19 | authored ["Aa b.\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAaz\n\nCc d." | title@0-3 a*@5-7 g="Aa b." c@10-15 | sep 3-5 8-10 | authored ["Aaz"]
 change b: "# T\n\nAazNew b.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b@8-14 c@16-21 | sep 3-5 14-16 | authored ["Aaz"]
 ## delete 8-13
 edit: "# T\n\nAa b c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@8-12 g="Bb c." c@14-19 | sep 3-5 12-14 | authored ["Aa b c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@13-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." c@14-19 | sep 3-5 12-14 | authored ["Aa b c."]
 change b: "# T\n\nAa b c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@8-12 g="New b." c@14-19 | sep 3-5 12-14 | authored ["Aa b c."]
 ## replace 8-13
 edit: "# T\n\nAa zb c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@9-13 g="Bb c." c@15-20 | sep 3-5 13-15 | authored ["Aa zb c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@13-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["Aa b.\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa zb c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." c@15-20 | sep 3-5 13-15 | authored ["Aa zb c."]
 change b: "# T\n\nAa zb c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@9-13 g="New b." c@15-20 | sep 3-5 13-15 | authored ["Aa zb c."]
 ## delete 9-14
 edit: "# T\n\nAa b c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@9-12 g="Bb c." c@14-19 | sep 3-5 12-14 | authored ["Aa b c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@14-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@14-19 | sep 3-5 12-14 | authored ["Aa b c."]
 change b: "# T\n\nAa b c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@9-12 g="New b." c@14-19 | sep 3-5 12-14 | authored ["Aa b c."]
 ## replace 9-14
 edit: "# T\n\nAa bz c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@10-13 g="Bb c." c@15-20 | sep 3-5 13-15 | authored ["Aa bz c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@14-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["Aa b.\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa bz c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@15-20 | sep 3-5 13-15 | authored ["Aa bz c."]
 change b: "# T\n\nAa bz c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@10-13 g="New b." c@15-20 | sep 3-5 13-15 | authored ["Aa bz c."]
 ## delete 10-15
 edit: "# T\n\nAa b.c.\n\nCc d." | title@0-3 a@5-10 b*@10-12 g="Bb c." c@14-19 | sep 3-5 12-14 | authored ["c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@15-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.c.\n\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 12-14 | authored ["c."]
 change b: "# T\n\nAa b.c.\n\nCc d." | title@0-3 a@5-10 b*@10-12 g="New b." c@14-19 | sep 3-5 12-14 | authored ["c."]
 ## replace 10-15
 edit: "# T\n\nAa b.zc.\n\nCc d." | title@0-3 a@5-10 b*@11-13 g="Bb c." c@15-20 | sep 3-5 13-15 | authored ["zc."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@15-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.zc.\n\nCc d." | title@0-3 a@5-10 c@15-20 | sep 3-5 13-15 | authored ["zc."]
 change b: "# T\n\nAa b.zc.\n\nCc d." | title@0-3 a@5-10 b*@11-13 g="New b." c@15-20 | sep 3-5 13-15 | authored ["zc."]
 ## delete 11-16
 edit: "# T\n\nAa b.\n.\n\nCc d." | title@0-3 a@5-10 b*@11-12 g="Bb c." c@14-19 | sep 3-5 10-11 12-14 | authored ["."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@11-17 g="Bb c." c@19-24 | sep 3-5 10-11 17-19 | authored ["\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n.\n\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-11 12-14 | authored ["."]
 change b: "# T\n\nAa b.\n.\n\nCc d." | title@0-3 a@5-10 b*@11-12 g="New b." c@14-19 | sep 3-5 10-11 12-14 | authored ["."]
 ## replace 11-16
 edit: "# T\n\nAa b.\nz.\n\nCc d." | title@0-3 a@5-10 b*@12-13 g="Bb c." c@15-20 | sep 3-5 10-11 13-15 | authored ["z."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@16-17 g="Bb c." c@19-24 | sep 3-5 10-11 17-19 | authored ["\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nz.\n\nCc d." | title@0-3 a@5-10 c@15-20 | sep 3-5 10-11 13-15 | authored ["z."]
 change b: "# T\n\nAa b.\nz.\n\nCc d." | title@0-3 a@5-10 b*@12-13 g="New b." c@15-20 | sep 3-5 10-11 13-15 | authored ["z."]
@@ -2172,73 +2172,73 @@ uncheck b: "# T\n\nAa b.\n\nz\n\nCc d." | title@0-3 a@5-10 c@15-20 | sep 3-5 10-
 change b: "# T\n\nAa b.\n\nz\n\nCc d." | title@0-3 a@5-10 b*@12-13 g="New b." c@15-20 | sep 3-5 10-12 13-15 | authored ["z"]
 ## delete 13-18
 edit: "# T\n\nAa b.\n\nB\nCc d." | title@0-3 a@5-10 b*@12-13 g="Bb c." c@14-19 | sep 3-5 10-12 13-14 | authored ["B"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-18 g="Bb c." c@19-24 | sep 3-5 10-12 18-19 | authored ["Bb c.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nB\nCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-12 13-14 | authored ["B"]
 change b: "# T\n\nAa b.\n\nB\nCc d." | title@0-3 a@5-10 b*@12-13 g="New b." c@14-19 | sep 3-5 10-12 13-14 | authored ["B"]
 ## replace 13-18
 edit: "# T\n\nAa b.\n\nBz\nCc d." | title@0-3 a@5-10 b*@12-13 g="Bb c." c@15-20 | sep 3-5 10-12 14-15 | authored ["Bz"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-13 g="Bb c." c@19-24 | sep 3-5 10-12 18-19 | authored ["Bb c.\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBz\nCc d." | title@0-3 a@5-10 c@15-20 | sep 3-5 10-12 14-15 | authored ["Bz"]
 change b: "# T\n\nAa b.\n\nBz\nCc d." | title@0-3 a@5-10 b*@12-13 g="New b." c@15-20 | sep 3-5 10-12 14-15 | authored ["Bz"]
 ## delete 14-19
 edit: "# T\n\nAa b.\n\nBbCc d." | title@0-3 a@5-10 b*@12-14 g="Bb c." c@14-19 | sep 3-5 10-12 | authored ["Bb"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 | authored ["\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBbCc d." | title@0-3 a@5-10 c@14-19 | sep 3-5 10-12 | authored ["Bb"]
 change b: "# T\n\nAa b.\n\nBbCc d." | title@0-3 a@5-10 b*@12-14 g="New b." c@14-19 | sep 3-5 10-12 | authored ["Bb"]
 ## replace 14-19
 edit: "# T\n\nAa b.\n\nBbzCc d." | title@0-3 a@5-10 b*@12-14 g="Bb c." c@15-20 | sep 3-5 10-12 | authored ["Bbz"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-14 g="Bb c." c@19-24 | sep 3-5 10-12 | authored ["Bb c.\n\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBbzCc d." | title@0-3 a@5-10 c@15-20 | sep 3-5 10-12 | authored ["Bbz"]
 change b: "# T\n\nAa b.\n\nBbzCc d." | title@0-3 a@5-10 b*@12-14 g="New b." c@15-20 | sep 3-5 10-12 | authored ["Bbz"]
 ## delete 15-20
 edit: "# T\n\nAa b.\n\nBb c d." | title@0-3 a@5-10 b*@12-15 g="Bb c." c*@15-19 g="Cc d." | sep 3-5 10-12 | authored ["Bb c d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@20-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb c d." | title@0-3 a@5-10 c*@15-19 g="Cc d." | sep 3-5 10-12 | authored ["Bb c d."]
 change b: "# T\n\nAa b.\n\nBb c d." | title@0-3 a@5-10 b*@12-15 g="New b." c*@15-19 g="Cc d." | sep 3-5 10-12 | authored ["Bb c d."]
 ## replace 15-20
 edit: "# T\n\nAa b.\n\nBb zc d." | title@0-3 a@5-10 b*@12-15 g="Bb c." c*@16-20 g="Cc d." | sep 3-5 10-12 | authored ["Bb zc d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-15 g="Bb c." c*@20-24 g="Cc d." | sep 3-5 10-12 | authored ["Bb c.\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb zc d." | title@0-3 a@5-10 c*@16-20 g="Cc d." | sep 3-5 10-12 | authored ["Bb zc d."]
 change b: "# T\n\nAa b.\n\nBb zc d." | title@0-3 a@5-10 b*@12-15 g="New b." c*@16-20 g="Cc d." | sep 3-5 10-12 | authored ["Bb zc d."]
 ## delete 16-21
 edit: "# T\n\nAa b.\n\nBb c d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c*@16-19 g="Cc d." | sep 3-5 10-12 | authored ["Bb c d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@21-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb c d." | title@0-3 a@5-10 c*@16-19 g="Cc d." | sep 3-5 10-12 | authored ["Bb c d."]
 change b: "# T\n\nAa b.\n\nBb c d." | title@0-3 a@5-10 b*@12-16 g="New b." c*@16-19 g="Cc d." | sep 3-5 10-12 | authored ["Bb c d."]
 ## replace 16-21
 edit: "# T\n\nAa b.\n\nBb cz d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c*@17-20 g="Cc d." | sep 3-5 10-12 | authored ["Bb cz d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c*@21-24 g="Cc d." | sep 3-5 10-12 | authored ["Bb c.\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb cz d." | title@0-3 a@5-10 c*@17-20 g="Cc d." | sep 3-5 10-12 | authored ["Bb cz d."]
 change b: "# T\n\nAa b.\n\nBb cz d." | title@0-3 a@5-10 b*@12-16 g="New b." c*@17-20 g="Cc d." | sep 3-5 10-12 | authored ["Bb cz d."]
 ## delete 17-22
 edit: "# T\n\nAa b.\n\nBb c.d." | title@0-3 a@5-10 b@12-17 c*@17-19 g="Cc d." | sep 3-5 10-12 | authored ["d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@22-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nd." | title@0-3 a@5-10 c*@12-14 g="Cc d." | sep 3-5 10-12 | authored ["d."]
 change b: "# T\n\nAa b.\n\nNew b.d." | title@0-3 a@5-10 b@12-18 c*@18-20 g="Cc d." | sep 3-5 10-12 | authored ["d."]
 ## replace 17-22
 edit: "# T\n\nAa b.\n\nBb c.zd." | title@0-3 a@5-10 b@12-17 c*@18-20 g="Cc d." | sep 3-5 10-12 | authored ["zd."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@22-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nzd." | title@0-3 a@5-10 c*@13-15 g="Cc d." | sep 3-5 10-12 | authored ["zd."]
 change b: "# T\n\nAa b.\n\nNew b.zd." | title@0-3 a@5-10 b@12-18 c*@19-21 g="Cc d." | sep 3-5 10-12 | authored ["zd."]
 ## delete 18-23
 edit: "# T\n\nAa b.\n\nBb c.\n." | title@0-3 a@5-10 b@12-17 c*@18-19 g="Cc d." | sep 3-5 10-12 17-18 | authored ["."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@18-24 g="Cc d." | sep 3-5 10-12 17-18 | authored ["\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n." | title@0-3 a@5-10 c*@11-12 g="Cc d." | sep 3-5 10-11 | authored ["."]
 change b: "# T\n\nAa b.\n\nNew b.\n." | title@0-3 a@5-10 b@12-18 c*@19-20 g="Cc d." | sep 3-5 10-12 18-19 | authored ["."]
 ## replace 18-23
 edit: "# T\n\nAa b.\n\nBb c.\nz." | title@0-3 a@5-10 b@12-17 c*@19-20 g="Cc d." | sep 3-5 10-12 17-18 | authored ["z."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@23-24 g="Cc d." | sep 3-5 10-12 17-18 | authored ["\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nz." | title@0-3 a@5-10 c*@12-13 g="Cc d." | sep 3-5 10-11 | authored ["z."]
 change b: "# T\n\nAa b.\n\nNew b.\nz." | title@0-3 a@5-10 b@12-18 c*@20-21 g="Cc d." | sep 3-5 10-12 18-19 | authored ["z."]
@@ -2256,37 +2256,37 @@ uncheck b: "# T\n\nAa b.\n\nz" | title@0-3 a@5-10 c*@12-13 g="Cc d." | sep 3-5 1
 change b: "# T\n\nAa b.\n\nNew b.\n\nz" | title@0-3 a@5-10 b@12-18 c*@20-21 g="Cc d." | sep 3-5 10-12 18-20 | authored ["z"]
 ## delete 0-7
 edit: " b.\n\nBb c.\n\nCc d." | title*@0-0 g="# T" a*@0-3 g="Aa b." b@5-10 c@12-17 | sep 3-5 10-12 | authored [" b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@7-10 g="Aa b." b@12-17 c@19-24 | sep 3-5 10-12 17-19 | authored ["Aa b."]
+undo: original
 redo: edit
 uncheck b: " b.\n\nCc d." | title*@0-0 g="# T" a*@0-3 g="Aa b." c@5-10 | sep 3-5 | authored [" b."]
 change b: " b.\n\nNew b.\n\nCc d." | title*@0-0 g="# T" a*@0-3 g="Aa b." b@5-11 c@13-18 | sep 3-5 11-13 | authored [" b."]
 ## replace 0-7
 edit: "z b.\n\nBb c.\n\nCc d." | title*@0-0 g="# T" a*@1-4 g="Aa b." b@6-11 c@13-18 | sep 4-6 11-13 | authored ["z b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@7-10 g="Aa b." b@12-17 c@19-24 | sep 3-5 10-12 17-19 | authored ["Aa b."]
+undo: original
 redo: edit
 uncheck b: "z b.\n\nCc d." | title*@0-0 g="# T" a*@1-4 g="Aa b." c@6-11 | sep 4-6 | authored ["z b."]
 change b: "z b.\n\nNew b.\n\nCc d." | title*@0-0 g="# T" a*@1-4 g="Aa b." b@6-12 c@14-19 | sep 4-6 12-14 | authored ["z b."]
 ## delete 1-8
 edit: "#b.\n\nBb c.\n\nCc d." | title*@0-1 g="# T" a*@1-3 g="Aa b." b@5-10 c@12-17 | sep 3-5 10-12 | authored ["#b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@8-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "#b.\n\nCc d." | title*@0-1 g="# T" a*@1-3 g="Aa b." c@5-10 | sep 3-5 | authored ["#b."]
 change b: "#b.\n\nNew b.\n\nCc d." | title*@0-1 g="# T" a*@1-3 g="Aa b." b@5-11 c@13-18 | sep 3-5 11-13 | authored ["#b."]
 ## replace 1-8
 edit: "#zb.\n\nBb c.\n\nCc d." | title*@0-1 g="# T" a*@2-4 g="Aa b." b@6-11 c@13-18 | sep 4-6 11-13 | authored ["#zb."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title*@0-1 g="# T" a*@8-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["# T\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "#zb.\n\nCc d." | title*@0-1 g="# T" a*@2-4 g="Aa b." c@6-11 | sep 4-6 | authored ["#zb."]
 change b: "#zb.\n\nNew b.\n\nCc d." | title*@0-1 g="# T" a*@2-4 g="Aa b." b@6-12 c@14-19 | sep 4-6 12-14 | authored ["#zb."]
 ## delete 2-9
 edit: "# .\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a*@2-3 g="Aa b." b@5-10 c@12-17 | sep 3-5 10-12 | authored ["# ."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@9-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# .\n\nCc d." | title*@0-2 g="# T" a*@2-3 g="Aa b." c@5-10 | sep 3-5 | authored ["# ."]
 change b: "# .\n\nNew b.\n\nCc d." | title*@0-2 g="# T" a*@2-3 g="Aa b." b@5-11 c@13-18 | sep 3-5 11-13 | authored ["# ."]
 ## replace 2-9
 edit: "# z.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a*@3-4 g="Aa b." b@6-11 c@13-18 | sep 4-6 11-13 | authored ["# z."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title*@0-2 g="# T" a*@9-10 g="Aa b." b@12-17 c@19-24 | sep 10-12 17-19 | authored ["# T\n\nAa b."]
+undo: original
 redo: edit
 uncheck b: "# z.\n\nCc d." | title*@0-2 g="# T" a*@3-4 g="Aa b." c@6-11 | sep 4-6 | authored ["# z."]
 change b: "# z.\n\nNew b.\n\nCc d." | title*@0-2 g="# T" a*@3-4 g="Aa b." b@6-12 c@14-19 | sep 4-6 12-14 | authored ["# z."]
@@ -2304,13 +2304,13 @@ uncheck b: "# Tz\n\nCc d." | title@0-3 a*@4-4 g="Aa b." c@6-11 | sep 4-6 | autho
 change b: "# Tz\n\nNew b.\n\nCc d." | title@0-3 a*@4-4 g="Aa b." b@6-12 c@14-19 | sep 4-6 12-14 | authored ["z"]
 ## delete 4-11
 edit: "# T\n\nBb c.\n\nCc d." | title@0-3 a*@4-4 g="Aa b." b@5-10 c@12-17 | sep 3-4 4-5 10-12 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 11-12 17-19 | authored ["\n","\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\n\nCc d." | title@0-3 a*@4-4 g="Aa b." c@6-11 | sep 3-4 4-6 | authored []
 change b: "# T\n\nNew b.\n\nCc d." | title@0-3 a*@4-4 g="Aa b." b@5-11 c@13-18 | sep 3-4 4-5 11-13 | authored []
 ## replace 4-11
 edit: "# T\nz\nBb c.\n\nCc d." | title@0-3 a*@5-5 g="Aa b." b@6-11 c@13-18 | sep 3-4 5-6 11-13 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 11-12 17-19 | authored ["\n","\n"]
+undo: original
 redo: edit
 uncheck b: "# T\nz\n\nCc d." | title@0-3 a*@5-5 g="Aa b." c@7-12 | sep 3-4 5-7 | authored ["z"]
 change b: "# T\nz\nNew b.\n\nCc d." | title@0-3 a*@5-5 g="Aa b." b@6-12 c@14-19 | sep 3-4 5-6 12-14 | authored ["z"]
@@ -2328,49 +2328,49 @@ uncheck b: "# T\n\nz\n\nCc d." | title@0-3 a*@5-5 g="Aa b." c@8-13 | sep 3-5 6-8
 change b: "# T\n\nzNew b.\n\nCc d." | title@0-3 a*@5-5 g="Aa b." b@6-12 c@14-19 | sep 3-5 12-14 | authored ["z"]
 ## delete 6-13
 edit: "# T\n\nAb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b*@6-10 g="Bb c." c@12-17 | sep 3-5 10-12 | authored ["Ab c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@13-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." c@12-17 | sep 3-5 10-12 | authored ["Ab c."]
 change b: "# T\n\nAb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b*@6-10 g="New b." c@12-17 | sep 3-5 10-12 | authored ["Ab c."]
 ## replace 6-13
 edit: "# T\n\nAzb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b*@7-11 g="Bb c." c@13-18 | sep 3-5 11-13 | authored ["Azb c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b*@13-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["Aa b.\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAzb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." c@13-18 | sep 3-5 11-13 | authored ["Azb c."]
 change b: "# T\n\nAzb c.\n\nCc d." | title@0-3 a*@5-6 g="Aa b." b*@7-11 g="New b." c@13-18 | sep 3-5 11-13 | authored ["Azb c."]
 ## delete 7-14
 edit: "# T\n\nAa c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b*@7-10 g="Bb c." c@12-17 | sep 3-5 10-12 | authored ["Aa c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@14-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." c@12-17 | sep 3-5 10-12 | authored ["Aa c."]
 change b: "# T\n\nAa c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b*@7-10 g="New b." c@12-17 | sep 3-5 10-12 | authored ["Aa c."]
 ## replace 7-14
 edit: "# T\n\nAaz c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b*@8-11 g="Bb c." c@13-18 | sep 3-5 11-13 | authored ["Aaz c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b*@14-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["Aa b.\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAaz c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." c@13-18 | sep 3-5 11-13 | authored ["Aaz c."]
 change b: "# T\n\nAaz c.\n\nCc d." | title@0-3 a*@5-7 g="Aa b." b*@8-11 g="New b." c@13-18 | sep 3-5 11-13 | authored ["Aaz c."]
 ## delete 8-15
 edit: "# T\n\nAa c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@8-10 g="Bb c." c@12-17 | sep 3-5 10-12 | authored ["Aa c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@15-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." c@12-17 | sep 3-5 10-12 | authored ["Aa c."]
 change b: "# T\n\nAa c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@8-10 g="New b." c@12-17 | sep 3-5 10-12 | authored ["Aa c."]
 ## replace 8-15
 edit: "# T\n\nAa zc.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@9-11 g="Bb c." c@13-18 | sep 3-5 11-13 | authored ["Aa zc."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@15-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["Aa b.\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa zc.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." c@13-18 | sep 3-5 11-13 | authored ["Aa zc."]
 change b: "# T\n\nAa zc.\n\nCc d." | title@0-3 a*@5-8 g="Aa b." b*@9-11 g="New b." c@13-18 | sep 3-5 11-13 | authored ["Aa zc."]
 ## delete 9-16
 edit: "# T\n\nAa b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@9-10 g="Bb c." c@12-17 | sep 3-5 10-12 | authored ["Aa b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@16-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@12-17 | sep 3-5 10-12 | authored ["Aa b."]
 change b: "# T\n\nAa b.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@9-10 g="New b." c@12-17 | sep 3-5 10-12 | authored ["Aa b."]
 ## replace 9-16
 edit: "# T\n\nAa bz.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@10-11 g="Bb c." c@13-18 | sep 3-5 11-13 | authored ["Aa bz."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@16-17 g="Bb c." c@19-24 | sep 3-5 17-19 | authored ["Aa b.\n\nBb c."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa bz.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." c@13-18 | sep 3-5 11-13 | authored ["Aa bz."]
 change b: "# T\n\nAa bz.\n\nCc d." | title@0-3 a*@5-9 g="Aa b." b*@10-11 g="New b." c@13-18 | sep 3-5 11-13 | authored ["Aa bz."]
@@ -2388,13 +2388,13 @@ uncheck b: "# T\n\nAa b.z\n\nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 11-13 |
 change b: "# T\n\nAa b.z\n\nCc d." | title@0-3 a@5-10 b*@11-11 g="New b." c@13-18 | sep 3-5 11-13 | authored ["z"]
 ## delete 11-18
 edit: "# T\n\nAa b.\n\nCc d." | title@0-3 a@5-10 b*@11-11 g="Bb c." c@12-17 | sep 3-5 10-11 11-12 | authored []
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 18-19 | authored ["\n","\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nCc d." | title@0-3 a@5-10 c@12-17 | sep 3-5 10-11 11-12 | authored []
 change b: "# T\n\nAa b.\n\nCc d." | title@0-3 a@5-10 b*@11-11 g="New b." c@12-17 | sep 3-5 10-11 11-12 | authored []
 ## replace 11-18
 edit: "# T\n\nAa b.\nz\nCc d." | title@0-3 a@5-10 b*@12-12 g="Bb c." c@13-18 | sep 3-5 10-11 12-13 | authored ["z"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 18-19 | authored ["\n","\n"]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nz\nCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 10-11 12-13 | authored ["z"]
 change b: "# T\n\nAa b.\nz\nCc d." | title@0-3 a@5-10 b*@12-12 g="New b." c@13-18 | sep 3-5 10-11 12-13 | authored ["z"]
@@ -2412,49 +2412,49 @@ uncheck b: "# T\n\nAa b.\n\nzCc d." | title@0-3 a@5-10 c@13-18 | sep 3-5 10-12 |
 change b: "# T\n\nAa b.\n\nzCc d." | title@0-3 a@5-10 b*@12-12 g="New b." c@13-18 | sep 3-5 10-12 | authored ["z"]
 ## delete 13-20
 edit: "# T\n\nAa b.\n\nBc d." | title@0-3 a@5-10 b*@12-13 g="Bb c." c*@13-17 g="Cc d." | sep 3-5 10-12 | authored ["Bc d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@20-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBc d." | title@0-3 a@5-10 c*@13-17 g="Cc d." | sep 3-5 10-12 | authored ["Bc d."]
 change b: "# T\n\nAa b.\n\nBc d." | title@0-3 a@5-10 b*@12-13 g="New b." c*@13-17 g="Cc d." | sep 3-5 10-12 | authored ["Bc d."]
 ## replace 13-20
 edit: "# T\n\nAa b.\n\nBzc d." | title@0-3 a@5-10 b*@12-13 g="Bb c." c*@14-18 g="Cc d." | sep 3-5 10-12 | authored ["Bzc d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-13 g="Bb c." c*@20-24 g="Cc d." | sep 3-5 10-12 | authored ["Bb c.\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBzc d." | title@0-3 a@5-10 c*@14-18 g="Cc d." | sep 3-5 10-12 | authored ["Bzc d."]
 change b: "# T\n\nAa b.\n\nBzc d." | title@0-3 a@5-10 b*@12-13 g="New b." c*@14-18 g="Cc d." | sep 3-5 10-12 | authored ["Bzc d."]
 ## delete 14-21
 edit: "# T\n\nAa b.\n\nBb d." | title@0-3 a@5-10 b*@12-14 g="Bb c." c*@14-17 g="Cc d." | sep 3-5 10-12 | authored ["Bb d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@21-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb d." | title@0-3 a@5-10 c*@14-17 g="Cc d." | sep 3-5 10-12 | authored ["Bb d."]
 change b: "# T\n\nAa b.\n\nBb d." | title@0-3 a@5-10 b*@12-14 g="New b." c*@14-17 g="Cc d." | sep 3-5 10-12 | authored ["Bb d."]
 ## replace 14-21
 edit: "# T\n\nAa b.\n\nBbz d." | title@0-3 a@5-10 b*@12-14 g="Bb c." c*@15-18 g="Cc d." | sep 3-5 10-12 | authored ["Bbz d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-14 g="Bb c." c*@21-24 g="Cc d." | sep 3-5 10-12 | authored ["Bb c.\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBbz d." | title@0-3 a@5-10 c*@15-18 g="Cc d." | sep 3-5 10-12 | authored ["Bbz d."]
 change b: "# T\n\nAa b.\n\nBbz d." | title@0-3 a@5-10 b*@12-14 g="New b." c*@15-18 g="Cc d." | sep 3-5 10-12 | authored ["Bbz d."]
 ## delete 15-22
 edit: "# T\n\nAa b.\n\nBb d." | title@0-3 a@5-10 b*@12-15 g="Bb c." c*@15-17 g="Cc d." | sep 3-5 10-12 | authored ["Bb d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@22-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb d." | title@0-3 a@5-10 c*@15-17 g="Cc d." | sep 3-5 10-12 | authored ["Bb d."]
 change b: "# T\n\nAa b.\n\nBb d." | title@0-3 a@5-10 b*@12-15 g="New b." c*@15-17 g="Cc d." | sep 3-5 10-12 | authored ["Bb d."]
 ## replace 15-22
 edit: "# T\n\nAa b.\n\nBb zd." | title@0-3 a@5-10 b*@12-15 g="Bb c." c*@16-18 g="Cc d." | sep 3-5 10-12 | authored ["Bb zd."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-15 g="Bb c." c*@22-24 g="Cc d." | sep 3-5 10-12 | authored ["Bb c.\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb zd." | title@0-3 a@5-10 c*@16-18 g="Cc d." | sep 3-5 10-12 | authored ["Bb zd."]
 change b: "# T\n\nAa b.\n\nBb zd." | title@0-3 a@5-10 b*@12-15 g="New b." c*@16-18 g="Cc d." | sep 3-5 10-12 | authored ["Bb zd."]
 ## delete 16-23
 edit: "# T\n\nAa b.\n\nBb c." | title@0-3 a@5-10 b*@12-16 g="Bb c." c*@16-17 g="Cc d." | sep 3-5 10-12 | authored ["Bb c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c*@23-24 g="Cc d." | sep 3-5 10-12 | authored ["\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb c." | title@0-3 a@5-10 c*@16-17 g="Cc d." | sep 3-5 10-12 | authored ["Bb c."]
 change b: "# T\n\nAa b.\n\nBb c." | title@0-3 a@5-10 b*@12-16 g="New b." c*@16-17 g="Cc d." | sep 3-5 10-12 | authored ["Bb c."]
 ## replace 16-23
 edit: "# T\n\nAa b.\n\nBb cz." | title@0-3 a@5-10 b*@12-16 g="Bb c." c*@17-18 g="Cc d." | sep 3-5 10-12 | authored ["Bb cz."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b*@12-16 g="Bb c." c*@23-24 g="Cc d." | sep 3-5 10-12 | authored ["Bb c.\n\nCc d."]
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb cz." | title@0-3 a@5-10 c*@17-18 g="Cc d." | sep 3-5 10-12 | authored ["Bb cz."]
 change b: "# T\n\nAa b.\n\nBb cz." | title@0-3 a@5-10 b*@12-16 g="New b." c*@17-18 g="Cc d." | sep 3-5 10-12 | authored ["Bb cz."]
@@ -2478,7 +2478,7 @@ uncheck b: "x# Ty\n\nAa b.\n\nCc d." | title*@0-5 o=1-4 g="# T" a@7-12 c@14-19 |
 change b: "x# Ty\n\nAa b.\n\nNew b.\n\nCc d." | title*@0-5 o=1-4 g="# T" a@7-12 b@14-20 c@22-27 | sep 5-7 12-14 20-22 | authored ["x# Ty"]
 ## insert around 1-4
 edit: "#x T\ny\nAa b.\n\nBb c.\n\nCc d." | title*@0-4 g="# T" a@7-12 b@14-19 c@21-26 | sep 4-5 6-7 12-14 19-21 | authored ["#x T","y"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 4-5 10-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "#x T\ny\nAa b.\n\nCc d." | title*@0-4 g="# T" a@7-12 c@14-19 | sep 4-5 6-7 12-14 | authored ["#x T","y"]
 change b: "#x T\ny\nAa b.\n\nNew b.\n\nCc d." | title*@0-4 g="# T" a@7-12 b@14-20 c@22-27 | sep 4-5 6-7 12-14 20-22 | authored ["#x T","y"]
@@ -2496,7 +2496,7 @@ uncheck b: "# Tx\n\nAya b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a*@6-12 g="Aa b.
 change b: "# Tx\n\nAya b.\n\nNew b.\n\nCc d." | title*@0-4 o=0-3 g="# T" a*@6-12 g="Aa b." b@14-20 c@22-27 | sep 4-6 12-14 20-22 | authored ["# Tx","Aya b."]
 ## insert around 4-7
 edit: "# T\nx\nAay b.\n\nBb c.\n\nCc d." | title@0-3 a*@6-12 g="Aa b." b@14-19 c@21-26 | sep 3-4 5-6 12-14 19-21 | authored ["x","Aay b."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-4 4-5 10-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\nx\nAay b.\n\nCc d." | title@0-3 a*@6-12 g="Aa b." c@14-19 | sep 3-4 5-6 12-14 | authored ["x","Aay b."]
 change b: "# T\nx\nAay b.\n\nNew b.\n\nCc d." | title@0-3 a*@6-12 g="Aa b." b@14-20 c@22-27 | sep 3-4 5-6 12-14 20-22 | authored ["x","Aay b."]
@@ -2520,7 +2520,7 @@ uncheck b: "# T\n\nAax b.y\n\nCc d." | title@0-3 a*@5-12 g="Aa b." c@14-19 | sep
 change b: "# T\n\nAax b.y\n\nNew b.\n\nCc d." | title@0-3 a*@5-12 g="Aa b." b@14-20 c@22-27 | sep 3-5 12-14 20-22 | authored ["Aax b.y"]
 ## insert around 8-11
 edit: "# T\n\nAa xb.\ny\nBb c.\n\nCc d." | title@0-3 a*@5-11 g="Aa b." b@14-19 c@21-26 | sep 3-5 11-12 13-14 19-21 | authored ["Aa xb.","y"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 11-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa xb.\ny\n\nCc d." | title@0-3 a*@5-11 g="Aa b." c@15-20 | sep 3-5 11-12 13-15 | authored ["Aa xb.","y"]
 change b: "# T\n\nAa xb.\ny\nNew b.\n\nCc d." | title@0-3 a*@5-11 g="Aa b." b@14-20 c@22-27 | sep 3-5 11-12 13-14 20-22 | authored ["Aa xb.","y"]
@@ -2538,7 +2538,7 @@ uncheck b: "# T\n\nAa b.x\n\nByb c.\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b
 change b: "# T\n\nAa b.x\n\nByb c.\n\nCc d." | title@0-3 a*@5-11 o=5-10 g="Aa b." b*@13-19 g="New b." c@21-26 | sep 3-5 11-13 19-21 | authored ["Aa b.x","Byb c."]
 ## insert around 11-14
 edit: "# T\n\nAa b.\nx\nBby c.\n\nCc d." | title@0-3 a@5-10 b*@13-19 g="Bb c." c@21-26 | sep 3-5 10-11 12-13 19-21 | authored ["x","Bby c."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-11 11-12 17-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nx\nBby c.\n\nCc d." | title@0-3 a@5-10 c@21-26 | sep 3-5 10-11 12-13 19-21 | authored ["x","Bby c."]
 change b: "# T\n\nAa b.\nx\nBby c.\n\nCc d." | title@0-3 a@5-10 b*@13-19 g="New b." c@21-26 | sep 3-5 10-11 12-13 19-21 | authored ["x","Bby c."]
@@ -2562,7 +2562,7 @@ uncheck b: "# T\n\nAa b.\n\nBbx c.y\n\nCc d." | title@0-3 a@5-10 c@21-26 | sep 3
 change b: "# T\n\nAa b.\n\nBbx c.y\n\nCc d." | title@0-3 a@5-10 b*@12-19 g="New b." c@21-26 | sep 3-5 10-12 19-21 | authored ["Bbx c.y"]
 ## insert around 15-18
 edit: "# T\n\nAa b.\n\nBb xc.\ny\nCc d." | title@0-3 a@5-10 b*@12-18 g="Bb c." c@21-26 | sep 3-5 10-12 18-19 20-21 | authored ["Bb xc.","y"]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 18-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\n\nBb xc.\ny\nCc d." | title@0-3 a@5-10 c@21-26 | sep 3-5 10-12 18-19 20-21 | authored ["Bb xc.","y"]
 change b: "# T\n\nAa b.\n\nBb xc.\ny\nCc d." | title@0-3 a@5-10 b*@12-18 g="New b." c@21-26 | sep 3-5 10-12 18-19 20-21 | authored ["Bb xc.","y"]
@@ -2580,7 +2580,7 @@ uncheck b: "# T\n\nAa b.\n\nBb c.x\n\nCyc d." | title@0-3 a@5-10 c*@20-26 g="Cc 
 change b: "# T\n\nAa b.\n\nBb c.x\n\nCyc d." | title@0-3 a@5-10 b*@12-18 g="New b." c*@20-26 g="Cc d." | sep 3-5 10-12 18-20 | authored ["Bb c.x","Cyc d."]
 ## insert around 18-21
 edit: "# T\n\nAa b.\n\nBb c.\nx\nCcy d." | title@0-3 a@5-10 b@12-17 c*@20-26 g="Cc d." | sep 3-5 10-12 17-18 19-20 | authored ["x","Ccy d."]
-undo: "# T\n\nAa b.\n\nBb c.\n\nCc d." | title@0-3 a@5-10 b@12-17 c@19-24 | sep 3-5 10-12 17-18 18-19 | authored []
+undo: original
 redo: edit
 uncheck b: "# T\n\nAa b.\nx\nCcy d." | title@0-3 a@5-10 c*@13-19 g="Cc d." | sep 3-5 10-11 12-13 | authored ["x","Ccy d."]
 change b: "# T\n\nAa b.\n\nNew b.\nx\nCcy d." | title@0-3 a@5-10 b@12-18 c*@21-27 g="Cc d." | sep 3-5 10-12 18-19 20-21 | authored ["x","Ccy d."]

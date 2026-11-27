@@ -32,7 +32,8 @@ C4Container
     Rel(site, browser, "Copies or downloads the current draft")
 ```
 
-The browser app holds the draft in memory. It has no API server or database. GitHub
+The browser app holds the draft in memory and keeps a copy in the browser's local
+storage. It has no API server or database. GitHub
 renders the Mermaid source in this file.
 
 ## C4 components of the browser application

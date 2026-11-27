@@ -16,6 +16,7 @@ import {
   type CategoryGroup,
   type RuleControl,
 } from "./ruleControls";
+import { loadSession, saveSession } from "./session";
 import { isInvalidSetting } from "./settingControls";
 import { countText } from "./stats";
 import { strings } from "./strings";
@@ -27,18 +28,24 @@ interface ParagraphUpdate {
 }
 
 const order = ["title", ...rules.map((rule) => rule.id)];
+const defaultSelection = () =>
+  rules.filter((rule) => rule.defaultSelected).map((rule) => rule.id);
+const defaultSettings = () =>
+  rules.map((rule): [string, string] => [rule.id, rule.setting?.initial ?? ""]);
 
 /** The rule form, the editor, and the state they share. */
 class Workspace {
-  private uiLanguage: Language = "en";
-  private outputLanguage: Language = "en";
+  private readonly saved = loadSession(new Set(order));
+  private uiLanguage: Language = this.saved?.uiLanguage ?? "en";
+  private outputLanguage: Language = this.saved?.outputLanguage ?? "en";
   private message: Message | undefined;
   private readonly selected = new Set(
-    rules.filter((rule) => rule.defaultSelected).map((rule) => rule.id),
+    this.saved?.selected ?? defaultSelection(),
   );
-  private readonly settings = new Map(
-    rules.map((rule) => [rule.id, rule.setting?.initial ?? ""]),
-  );
+  private readonly settings = new Map([
+    ...defaultSettings(),
+    ...Object.entries(this.saved?.settings ?? {}),
+  ]);
   private readonly groups: readonly CategoryGroup[] = categoryGroups(
     element("rules"),
   );
@@ -47,6 +54,10 @@ class Workspace {
     byId("confirm-change", HTMLDialogElement),
     element("confirm-rules"),
   );
+  private readonly resetDialog = new ConfirmDialog(
+    byId("confirm-reset", HTMLDialogElement),
+    element("reset-rules"),
+  );
   private readonly uiSelect = byId("ui-language", HTMLSelectElement);
   private readonly outputSelect = byId("document-language", HTMLSelectElement);
   private readonly theme = element("theme-toggle");
@@ -54,9 +65,15 @@ class Workspace {
   readonly editor: Editor;
 
   constructor() {
-    this.editor = openEditor(element("editor"), this.initialDraft(), () => {
-      this.renderRules();
-    });
+    this.editor = openEditor(
+      element("editor"),
+      this.saved?.draft ?? this.initialDraft(),
+      () => {
+        this.renderRules();
+      },
+    );
+    this.uiSelect.value = this.uiLanguage;
+    this.outputSelect.value = this.outputLanguage;
     for (const control of this.controls) this.bindRule(control);
     new HelpTooltips().bind(this.controls, element("workspace"));
     this.bindBulkSelection();
@@ -109,7 +126,20 @@ class Workspace {
     element("status").textContent = messageText(this.uiLanguage, next);
   }
 
+  /** Keep the session for the next page load. */
+  private save() {
+    const { text, ranges, separators } = this.editor.draft;
+    saveSession({
+      uiLanguage: this.uiLanguage,
+      outputLanguage: this.outputLanguage,
+      selected: [...this.selected],
+      settings: Object.fromEntries(this.settings),
+      draft: { text, ranges, separators },
+    });
+  }
+
   private renderRules() {
+    this.save();
     const { words, characters } = countText(this.editor.draft.text);
     element("draft-stats").textContent = this.words().textCount(
       words,
@@ -195,13 +225,31 @@ class Workspace {
       entry.option.textContent = entry.label[language];
   }
 
-  private confirm(ids: readonly string[], apply: () => void) {
-    const labels = ids.map(
+  private labels(ids: readonly string[]) {
+    return ids.map(
       (id) =>
         rules.find((rule) => rule.id === id)?.label[this.uiLanguage] ??
         "AGENTS.md",
     );
-    this.dialog.ask(labels, apply);
+  }
+
+  private confirm(ids: readonly string[], apply: () => void) {
+    this.dialog.ask(this.labels(ids), apply);
+  }
+
+  /** Return to the default rules and settings in the current languages. */
+  private startOver() {
+    const edited = order.filter((id) => this.isEdited(id));
+    const authored = authoredRanges(this.editor.draft).length > 0;
+    const affected = !authored || edited.length > 0 ? edited : ["custom"];
+    this.resetDialog.ask(this.labels(affected), () => {
+      this.selected.clear();
+      for (const id of defaultSelection()) this.selected.add(id);
+      for (const [id, value] of defaultSettings()) this.settings.set(id, value);
+      this.editor.reset(this.initialDraft());
+      this.renderRules();
+      this.setMessage();
+    });
   }
 
   private updateParagraphs(updates: readonly ParagraphUpdate[]) {
@@ -352,6 +400,9 @@ class Workspace {
       const html = document.documentElement;
       html.dataset.theme = html.dataset.theme === "dark" ? "light" : "dark";
       this.renderLanguage();
+    });
+    element("start-over").addEventListener("click", () => {
+      this.startOver();
     });
     element("copy").addEventListener("click", () => {
       void copyText(this.editor.draft.text).then((copied) => {

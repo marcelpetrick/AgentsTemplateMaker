@@ -49,7 +49,12 @@ instructions intact. The draft lives in your open browser tab.
 5. The footer below the editor shows the draft's word and character count.
    **About** names the author, the project, and the bundled libraries.
 6. **Copy** or **Download** the current Markdown, then place it in your project
-   as `AGENTS.md`. Export before closing the tab to keep a copy.
+   as `AGENTS.md`.
+7. The browser keeps your draft, its edit marks, the selected rules and
+   settings, and both languages in its local storage, only on your device.
+   Reloading the page or opening it in a new tab continues where you left off.
+   **Start over** returns to the default rules and asks first when that would
+   discard your edits. Undo history starts empty after a reload.
 
 ## Local development
 

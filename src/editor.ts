@@ -7,6 +7,7 @@ import {
   StateField,
   Transaction,
   type ChangeSet,
+  type Extension,
 } from "@codemirror/state";
 import {
   defaultKeymap,
@@ -99,26 +100,22 @@ function userEdits(onDraftChange: () => void) {
   });
 }
 
-function createView(
-  parent: HTMLElement,
+function createState(
   initial: Draft,
-  accessibility: Compartment,
+  accessibility: Extension,
   onDraftChange: () => void,
 ) {
-  return new EditorView({
-    parent,
-    state: EditorState.create({
-      doc: initial.text,
-      extensions: [
-        draftField.init(() => initial),
-        accessibility.of([]),
-        EditorView.lineWrapping,
-        keymap.of([...defaultKeymap, ...historyKeymap]),
-        history(),
-        authorshipHistory,
-        userEdits(onDraftChange),
-      ],
-    }),
+  return EditorState.create({
+    doc: initial.text,
+    extensions: [
+      draftField.init(() => initial),
+      accessibility,
+      EditorView.lineWrapping,
+      keymap.of([...defaultKeymap, ...historyKeymap]),
+      history(),
+      authorshipHistory,
+      userEdits(onDraftChange),
+    ],
   });
 }
 
@@ -130,7 +127,10 @@ export function openEditor(
   onDraftChange: () => void,
 ) {
   const accessibility = new Compartment();
-  const view = createView(parent, initial, accessibility, onDraftChange);
+  let description: Extension = [];
+  const state = (draft: Draft) =>
+    createState(draft, accessibility.of(description), onDraftChange);
+  const view = new EditorView({ parent, state: state(initial) });
 
   return {
     view,
@@ -144,16 +144,17 @@ export function openEditor(
         annotations: Transaction.addToHistory.of(false),
       });
     },
+    /** Start a new document with an empty undo history. */
+    reset(draft: Draft) {
+      view.setState(state(draft));
+    },
     describe(label: string, language: string) {
-      view.dispatch({
-        effects: accessibility.reconfigure(
-          EditorView.contentAttributes.of({
-            "aria-label": label,
-            "aria-describedby": "editor-help edit-warning",
-            lang: language,
-          }),
-        ),
+      description = EditorView.contentAttributes.of({
+        "aria-label": label,
+        "aria-describedby": "editor-help edit-warning",
+        lang: language,
       });
+      view.dispatch({ effects: accessibility.reconfigure(description) });
     },
   };
 }

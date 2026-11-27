@@ -40,11 +40,27 @@ function draft() {
   return view.state.doc.toString();
 }
 
-beforeEach(() => {
+/** Load the page shell and mount the app, as a page load does. */
+function load() {
   const template = new DOMParser().parseFromString(shell, "text/html");
   document.body.innerHTML = template.body.getHTML();
   document.documentElement.dataset.theme = "light";
   view = mount();
+}
+
+function reload() {
+  view.destroy();
+  load();
+}
+
+const authored = () =>
+  [...document.querySelectorAll(".authored-text")].map(
+    (node) => node.textContent,
+  );
+
+beforeEach(() => {
+  localStorage.clear();
+  load();
 });
 
 afterEach(() => {
@@ -445,5 +461,59 @@ describe("workspace", () => {
       }
       await Promise.resolve();
     }
+  });
+  it("restores the draft, its authorship, rules, settings and languages after a reload", async () => {
+    edit(paragraph("commits"), " Mine.");
+    element("rule-delegation").click();
+    select("setting-delegation", "review");
+    select("ui-language", "de");
+    select("document-language", "de");
+    await vi.waitFor(() =>
+      expect(element<HTMLDialogElement>("confirm-change").open).toBe(true),
+    );
+    element("apply-change").click();
+    const before = { text: draft(), marks: authored() };
+    expect(before.marks).toEqual([expect.stringContaining(" Mine.")]);
+
+    reload();
+    expect({ text: draft(), marks: authored() }).toEqual(before);
+    expect(element<HTMLInputElement>("rule-delegation").checked).toBe(true);
+    expect(element<HTMLSelectElement>("setting-delegation").value).toBe(
+      "review",
+    );
+    expect(element<HTMLSelectElement>("ui-language").value).toBe("de");
+    expect(element<HTMLSelectElement>("document-language").value).toBe("de");
+    expect(element("rules-heading").textContent).toBe("Projektregeln");
+    expect(element("edited-commits").hidden).toBe(false);
+    expect(undo(view)).toBe(false);
+  });
+
+  it("starts over from the default rules only after confirming that edits are discarded", () => {
+    const initial = draft();
+    element("start-over").click();
+    expect(element<HTMLDialogElement>("confirm-reset").open).toBe(false);
+    expect(draft()).toBe(initial);
+
+    view.dispatch({ changes: { from: initial.length, insert: "\n\nMine." } });
+    element("rule-delegation").click();
+    element("start-over").click();
+    expect(element<HTMLDialogElement>("confirm-reset").open).toBe(true);
+    expect(element("reset-rules").textContent).toBe("AGENTS.md");
+    element("cancel-reset").click();
+    expect(draft()).toContain("Mine.");
+
+    edit(paragraph("commits"), " Mine.");
+    element("start-over").click();
+    expect(element("reset-rules").textContent).toBe(rule("commits").label.en);
+    element("apply-reset").click();
+    expect(draft()).toBe(initial);
+    expect(authored()).toEqual([]);
+    expect(element<HTMLInputElement>("rule-delegation").checked).toBe(false);
+    expect(undo(view)).toBe(false);
+    expect(view.contentDOM.getAttribute("aria-label")).toBe(
+      "AGENTS.md Markdown editor",
+    );
+    reload();
+    expect(draft()).toBe(initial);
   });
 });

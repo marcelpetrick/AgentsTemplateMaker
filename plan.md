@@ -29,6 +29,7 @@
 - [x] Requirements engineering rule; automated acceptance checks; coverage as a floor.
 - [x] Raise the mutation score and gate to at least 95%.
 - [x] Undo restores the exact prior authorship and separators.
+- [x] Keep the draft across reloads and new tabs; Start over returns to the defaults (F11).
 
 The [original handoff](<vision(20261125-195509).md>) defines the F and C requirement
 IDs. The [baseline](docs/decisions.md) records the decisions that resolve its open

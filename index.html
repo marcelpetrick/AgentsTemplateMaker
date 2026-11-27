@@ -74,6 +74,14 @@
             <h2 id="document-heading">AGENTS.md</h2>
             <div class="document-actions">
               <button
+                id="start-over"
+                class="secondary-button"
+                type="button"
+                data-copy="startOver"
+              >
+                Start over
+              </button>
+              <button
                 id="copy"
                 class="secondary-button"
                 type="button"
@@ -190,6 +198,42 @@
             data-copy="apply"
           >
             Apply change
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog
+      id="confirm-reset"
+      aria-labelledby="reset-heading"
+      aria-describedby="reset-detail"
+    >
+      <form method="dialog">
+        <h2 id="reset-heading" data-copy="resetHeading">
+          Discard your edited text?
+        </h2>
+        <p id="reset-detail" data-copy="resetDetail">
+          Starting over restores the default rules and removes your edits in:
+        </p>
+        <ul id="reset-rules"></ul>
+        <div class="document-actions">
+          <button
+            id="cancel-reset"
+            class="secondary-button"
+            type="submit"
+            value="cancel"
+            autofocus
+            data-copy="cancel"
+          >
+            Cancel
+          </button>
+          <button
+            id="apply-reset"
+            class="primary-button"
+            type="submit"
+            value="apply"
+            data-copy="resetApply"
+          >
+            Start over
           </button>
         </div>
       </form>

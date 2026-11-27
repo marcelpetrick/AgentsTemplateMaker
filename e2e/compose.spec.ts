@@ -183,3 +183,34 @@ test("keyboard and touch can reveal rule explanations and toggle untouched text"
     await context.close();
   }
 });
+
+test("the draft and its authorship survive a reload and a new tab until the user starts over", async ({
+  page,
+  context,
+}) => {
+  await page.goto("./");
+  const initial = await draftText(page);
+  await markdown(page).locator(".cm-line").first().click();
+  await page.keyboard.press("End");
+  await page.keyboard.insertText(" für mich");
+  const edited = await draftText(page);
+  expect(edited).toContain("für mich");
+  const marks = page.locator(".authored-text");
+  await expect(marks).toHaveText(["# Project instructions für mich"]);
+
+  await page.reload();
+  expect(await draftText(page)).toBe(edited);
+  await expect(marks).toHaveText(["# Project instructions für mich"]);
+
+  const other = await context.newPage();
+  await other.goto("./");
+  expect(await draftText(other)).toBe(edited);
+  await other.close();
+
+  await page.locator("#start-over").click();
+  await page.locator("#apply-reset").click();
+  expect(await draftText(page)).toBe(initial);
+  await page.reload();
+  expect(await draftText(page)).toBe(initial);
+  await expect(page.locator(".authored-text")).toHaveCount(0);
+});

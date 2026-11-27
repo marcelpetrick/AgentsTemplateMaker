@@ -16,6 +16,11 @@ export const strings = {
       sourceLicense: "Source code · GPLv3 or later",
       copy: "Copy",
       download: "Download",
+      startOver: "Start over",
+      resetHeading: "Discard your edited text?",
+      resetDetail:
+        "Starting over restores the default rules and removes your edits in:",
+      resetApply: "Start over",
       documentLanguage: "Document language",
       recommendation: "English recommended",
       editorHelp: "Type anywhere. Your edits are underlined.",
@@ -69,6 +74,11 @@ export const strings = {
       sourceLicense: "Quellcode · GPLv3 oder neuer",
       copy: "Kopieren",
       download: "Herunterladen",
+      startOver: "Neu beginnen",
+      resetHeading: "Bearbeiteten Text verwerfen?",
+      resetDetail:
+        "Neu beginnen stellt die Standardregeln wieder her und entfernt deine Änderungen in:",
+      resetApply: "Neu beginnen",
       documentLanguage: "Dokumentsprache",
       recommendation: "Englisch empfohlen",
       editorHelp:

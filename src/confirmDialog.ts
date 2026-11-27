@@ -18,7 +18,8 @@ export class ConfirmDialog {
       const apply = this.pending;
       this.pending = undefined;
       dialog.close();
-      if (event.submitter?.id === "apply-change") apply?.();
+      if ((event.submitter as HTMLButtonElement | null)?.value === "apply")
+        apply?.();
     });
     dialog.addEventListener("cancel", () => {
       this.pending = undefined;

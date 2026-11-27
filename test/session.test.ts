@@ -17,13 +17,16 @@ const session: Session = {
   draft,
 };
 
-/** A storage that keeps one saved value, like localStorage. */
+const key = "agent-maker:session:v1";
+
+/** A storage that keeps values by key, like localStorage. */
 function memory(initial?: string) {
-  let value = initial ?? null;
+  const values = new Map<string, string>();
+  if (initial !== undefined) values.set(key, initial);
   return () => ({
-    getItem: () => value,
-    setItem: (_key: string, next: string) => {
-      value = next;
+    getItem: (name: string) => values.get(name) ?? null,
+    setItem: (name: string, value: string) => {
+      values.set(name, value);
     },
   });
 }
@@ -43,6 +46,14 @@ describe("session", () => {
     const storage = memory();
     expect(saveSession(session, storage)).toBe(true);
     expect(loadSession(ids, storage)).toEqual(session);
+  });
+
+  it("uses the browser's local storage under a versioned key", () => {
+    localStorage.clear();
+    saveSession(session);
+    expect(JSON.parse(localStorage.getItem(key) ?? "")).toEqual(session);
+    expect(loadSession(ids)).toEqual(session);
+    localStorage.clear();
   });
 
   it("keeps the text of a rule the catalog no longer has as the user's own", () => {
@@ -78,6 +89,26 @@ describe("session", () => {
     ["blocked storage", blocked],
     ["damaged JSON", memory("{")],
     ["a value that is not an object", memory("3")],
+    ["a saved null", memory("null")],
+    [
+      "a selection with one entry that is not text",
+      saved({ selected: ["a", 1] }),
+    ],
+    [
+      "a draft whose text is not text",
+      savedDraft({ text: 3, ranges: [], separators: [] }),
+    ],
+    [
+      "one damaged range among valid ones",
+      savedDraft({
+        ranges: [...draft.ranges, { id: "a", from: 0, to: 99, edited: false }],
+      }),
+    ],
+    [
+      "one damaged separator among valid ones",
+      savedDraft({ separators: [...draft.separators, null] }),
+    ],
+    ["a separator that is null", savedDraft({ separators: [null] })],
     ["an unknown interface language", saved({ uiLanguage: "fr" })],
     ["an unknown document language", saved({ outputLanguage: "fr" })],
     ["a selection that is not text", saved({ selected: [1] })],

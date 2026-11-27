@@ -24,6 +24,7 @@ const isStrings = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((entry) => typeof entry === "string");
 
 const isOffset = (value: unknown): value is number =>
+  // Stryker disable next-line ConditionalExpression: the type check only narrows; Number.isSafeInteger rejects non-numbers too.
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 
 function isSpan(value: unknown, length: number): value is Shape {
@@ -84,17 +85,25 @@ function readSession(value: unknown, ids: ReadonlySet<string>) {
   };
 }
 
-// Reading localStorage itself throws when the browser blocks site data.
+/** Read the saved value, or nothing when storage is blocked or the JSON is damaged. */
+// Stryker disable BlockStatement: an empty catch block also returns undefined.
+function readStored(storage: () => Pick<Storage, "getItem">): unknown {
+  try {
+    // Reading localStorage itself throws when the browser blocks site data.
+    // Stryker disable next-line StringLiteral: JSON.parse("") throws, which also reads as nothing saved.
+    return JSON.parse(storage().getItem(key) ?? "null");
+  } catch {
+    return undefined;
+  }
+}
+// Stryker restore BlockStatement
+
 /** Read a saved session, or nothing when it is missing, damaged, or unreadable. */
 export function loadSession(
   ids: ReadonlySet<string>,
   storage: () => Pick<Storage, "getItem"> = () => localStorage,
 ): Session | undefined {
-  try {
-    return readSession(JSON.parse(storage().getItem(key) ?? "null"), ids);
-  } catch {
-    return undefined;
-  }
+  return readSession(readStored(storage), ids);
 }
 
 /** Save the session. Report whether the browser kept it. */

@@ -115,12 +115,12 @@ Stryker Vitest runner supports browser mode at the pinned versions, so the
 project needs no separate Node or DOM-emulation test setup.
 
 Scope: the logic modules `src/draft.ts`, `src/catalog.ts`, `src/stats.ts`,
-`src/editor.ts`, and `src/messages.ts`. The form and DOM wiring modules stay
+`src/editor.ts`, `src/messages.ts`, and `src/session.ts`. The form and DOM wiring modules stay
 out of scope. Their behavior is covered by the integration and end-to-end
 tests, and DOM mutants there are mostly equivalent or only visible as layout.
 
 The run fails below a 95% mutation score (`thresholds.break`). The score is
-98.6% at release 0.5.2, and every file is at least 95%:
+98.4% at release 0.6.1 (runs vary by a few tenths), and every file is at least 95%:
 
 | File          | Score |
 | ------------- | ----- |
@@ -128,6 +128,7 @@ The run fails below a 95% mutation score (`thresholds.break`). The score is
 | `draft.ts`    | 98.2% |
 | `editor.ts`   | 96.0% |
 | `messages.ts` | 100%  |
+| `session.ts`  | 100%  |
 | `stats.ts`    | 100%  |
 
 Three reviewed file snapshots turn behavior changes into text diffs instead of

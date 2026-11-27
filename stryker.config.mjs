@@ -12,6 +12,7 @@ export default {
     "src/stats.ts",
     "src/editor.ts",
     "src/messages.ts",
+    "src/session.ts",
   ],
   coverageAnalysis: "perTest",
   reporters: ["clear-text", "progress-append-only", "html", "json"],
